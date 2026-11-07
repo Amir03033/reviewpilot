@@ -3,6 +3,7 @@
 namespace Tests\Feature\ReviewPilot;
 
 use App\Enums\ConnectionStatus;
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Jobs\SyncLocationReviews;
 use App\Models\GbpLocationLink;
 use App\Models\GoogleConnection;
@@ -147,5 +148,36 @@ class GoogleIntegrationTest extends TestCase
         }
 
         $this->assertSame(ConnectionStatus::NeedsReauth, $connection->fresh()->status);
+    }
+
+    /** The browser clicks the button through Inertia (X-Inertia header): must redirect, not 500. */
+    public function test_connect_button_works_for_inertia_requests(): void
+    {
+        [$owner] = $this->makeOrganization();
+        $version = app(HandleInertiaRequests::class)->version(request());
+
+        $response = $this->actingAs($owner)
+            ->withHeaders(['X-Inertia' => 'true', 'X-Inertia-Version' => (string) $version])
+            ->post(route('integrations.google.connect'));
+
+        $response->assertStatus(409);
+        $this->assertStringStartsWith('https://accounts.google.com/o/oauth2/v2/auth?', $response->headers->get('X-Inertia-Location'));
+    }
+
+    public function test_unapproved_api_access_keeps_the_connection_and_explains(): void
+    {
+        Http::fake([
+            'oauth2.googleapis.com/token' => Http::response(['access_token' => 'ya29.x', 'refresh_token' => '1//r', 'expires_in' => 3599, 'scope' => 'openid email https://www.googleapis.com/auth/business.manage']),
+            'openidconnect.googleapis.com/*' => Http::response(['sub' => 'sub-q', 'email' => 'me@x.nl']),
+            'mybusinessaccountmanagement.googleapis.com/*' => Http::response(['error' => ['code' => 429, 'status' => 'RESOURCE_EXHAUSTED', 'message' => 'Quota exceeded']], 429),
+        ]);
+
+        [$owner, $org] = $this->makeOrganization();
+        $this->actingAs($owner)->withSession(['google_oauth' => ['state' => 's', 'verifier' => 'v', 'organization_id' => $org->id]])
+            ->get(route('integrations.google.callback', ['state' => 's', 'code' => 'c']))
+            ->assertRedirect(route('integrations.index'));
+
+        $this->assertSame(1, GoogleConnection::withoutGlobalScopes()->where('organization_id', $org->id)->count());
+        $this->assertStringContainsString('not approved', json_encode(session()->all()));
     }
 }

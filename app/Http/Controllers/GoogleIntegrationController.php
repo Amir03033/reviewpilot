@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
-use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class GoogleIntegrationController extends Controller
 {
@@ -52,7 +52,9 @@ class GoogleIntegrationController extends Controller
         ]);
     }
 
-    public function redirect(Request $request): SymfonyRedirect|RedirectResponse
+    // Inertia::location() answers Inertia requests with a 409 + X-Inertia-Location
+    // (a plain Response, not a redirect), so the return type must allow any Response.
+    public function redirect(Request $request): SymfonyResponse
     {
         $this->authorizeManage();
 
@@ -98,10 +100,23 @@ class GoogleIntegrationController extends Controller
             }
 
             $connection = $this->locations->storeConnection($this->organization(), $request->user(), $tokens);
-            $found = $this->locations->discover($connection);
         } catch (GoogleApiException $e) {
             report($e);
-            $this->toast('Google returned an error: '.$e->getMessage(), 'error');
+            $this->toast('Google sign-in failed: '.$e->getMessage(), 'error');
+
+            return redirect()->route('integrations.index');
+        }
+
+        // The login itself worked. Listing locations can still fail (most often: Business
+        // Profile API access not approved yet, quota 0). Keep the connection and explain.
+        try {
+            $found = $this->locations->discover($connection);
+        } catch (\Throwable $e) {
+            report($e);
+            $hint = $e instanceof GoogleApiException && in_array($e->status, [403, 429], true)
+                ? ' Google has probably not approved Business Profile API access for this project yet (quota 0). Use "Refresh list" once it is approved.'
+                : ' Try "Refresh list" in a minute.';
+            $this->toast('Google account connected, but locations could not be loaded: '.$e->getMessage().$hint, 'error');
 
             return redirect()->route('integrations.index');
         }
@@ -118,8 +133,10 @@ class GoogleIntegrationController extends Controller
 
         try {
             $count = $this->locations->discover($connection);
-        } catch (GoogleApiException $e) {
-            return $this->backWith($e->getMessage(), 'error');
+        } catch (\Throwable $e) {
+            report($e);
+
+            return $this->backWith('Locations could not be loaded: '.$e->getMessage(), 'error');
         }
 
         return $this->backWith("Found {$count} location(s).");
