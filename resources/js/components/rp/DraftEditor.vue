@@ -144,7 +144,7 @@ const quickHints = [
                     text = '';
                 "
             >
-                Write my own
+                {{ $t('Write my own') }}
             </button>
             <span
                 v-if="active?.language && !writingManually"
@@ -162,8 +162,10 @@ const quickHints = [
         <div
             class="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"
         >
-            <span class="tabular">{{ text.length }} characters</span>
-            <span v-if="edited" class="text-brass">Edited</span>
+            <span class="tabular">{{
+                $t(':count characters', { count: text.length })
+            }}</span>
+            <span v-if="edited" class="text-brass">{{ $t('Edited') }}</span>
         </div>
 
         <div
@@ -171,7 +173,7 @@ const quickHints = [
             class="rounded-md border border-critical/30 bg-critical/5 p-3 text-xs"
         >
             <p class="font-medium text-critical">
-                Guardrails flagged this draft
+                {{ $t('Guardrails flagged this draft') }}
             </p>
             <ul class="mt-1 list-disc space-y-0.5 pl-4 text-muted-foreground">
                 <li v-for="c in active.failed_checks" :key="c.name">
@@ -198,16 +200,16 @@ const quickHints = [
                 variant="ghost"
                 :disabled="busy"
                 @click="reject"
-                >No reply</Button
+                >{{ $t('No reply') }}</Button
             >
-            <span v-if="!canApprove" class="text-xs text-muted-foreground"
-                >You can view this review but not approve replies.</span
-            >
+            <span v-if="!canApprove" class="text-xs text-muted-foreground">{{
+                $t('You can view this review but not approve replies.')
+            }}</span>
         </div>
 
         <div v-if="canDraft" class="space-y-2 border-t border-border pt-3">
             <p class="text-xs text-muted-foreground">
-                Regenerate with guidance
+                {{ $t('Regenerate with guidance') }}
             </p>
             <div class="flex flex-wrap gap-1.5">
                 <button
@@ -218,13 +220,15 @@ const quickHints = [
                     :disabled="busy"
                     @click="regenerate(h)"
                 >
-                    {{ h }}
+                    {{ $t(h) }}
                 </button>
             </div>
             <form class="flex gap-2" @submit.prevent="regenerate()">
                 <Input
                     v-model="hint"
-                    placeholder="e.g. mention we fixed the air conditioning"
+                    :placeholder="
+                        $t('e.g. mention we fixed the air conditioning')
+                    "
                     class="h-8 text-sm"
                 />
                 <Button
@@ -232,7 +236,7 @@ const quickHints = [
                     size="sm"
                     :disabled="busy"
                     type="submit"
-                    >Regenerate</Button
+                    >{{ $t('Regenerate') }}</Button
                 >
             </form>
         </div>

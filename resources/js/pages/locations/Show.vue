@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/lib/i18n';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import InputError from '@/components/InputError.vue';
@@ -97,7 +98,9 @@ const resetVoice = () =>
 const remove = () => {
     if (
         confirm(
-            `Remove ${props.location.name}? Its reviews are deleted after the grace period.`,
+            t('Remove :name? Its reviews are deleted after the grace period.', {
+                name: props.location.name,
+            }),
         )
     ) {
         router.delete(`/locations/${props.location.id}`);
@@ -121,7 +124,11 @@ const remove = () => {
                 <span
                     v-if="location.google"
                     class="text-xs text-muted-foreground"
-                    >Synced {{ timeAgo(location.google.last_synced_at) }}</span
+                    >{{
+                        $t('Synced :time', {
+                            time: timeAgo(location.google.last_synced_at),
+                        })
+                    }}</span
                 >
                 <Button
                     v-if="canManage && location.google"
@@ -134,7 +141,7 @@ const remove = () => {
                             { preserveScroll: true },
                         )
                     "
-                    >Sync now</Button
+                    >{{ $t('Sync now') }}</Button
                 >
             </template>
         </PageHeader>
@@ -148,7 +155,7 @@ const remove = () => {
 
         <div class="grid gap-3 sm:grid-cols-3">
             <KpiCard
-                label="Average rating (30d)"
+                :label="$t('Average rating (30d)')"
                 :value="
                     stats.current.average_rating
                         ? `${num(stats.current.average_rating, 2)}★`
@@ -158,13 +165,13 @@ const remove = () => {
                 :previous="stats.previous.average_rating"
             />
             <KpiCard
-                label="Reviews (30d)"
+                :label="$t('Reviews (30d)')"
                 :value="String(stats.current.reviews)"
                 :current="stats.current.reviews"
                 :previous="stats.previous.reviews"
             />
             <KpiCard
-                label="Response rate"
+                :label="$t('Response rate')"
                 :value="pct(stats.current.response_rate)"
                 :current="stats.current.response_rate"
                 :previous="stats.previous.response_rate"
@@ -173,7 +180,7 @@ const remove = () => {
         </div>
 
         <div class="grid gap-5 lg:grid-cols-2">
-            <Panel title="General & automation mode">
+            <Panel :title="$t('General & automation mode')">
                 <form
                     class="space-y-4"
                     @submit.prevent="
@@ -184,12 +191,12 @@ const remove = () => {
                 >
                     <fieldset :disabled="!canManage" class="space-y-4">
                         <div class="grid gap-2">
-                            <Label>Name</Label>
+                            <Label>{{ $t('Name') }}</Label>
                             <Input v-model="general.name" />
                             <InputError :message="general.errors.name" />
                         </div>
                         <div class="grid gap-2">
-                            <Label>Mode</Label>
+                            <Label>{{ $t('Mode') }}</Label>
                             <div class="grid gap-2">
                                 <label
                                     v-for="m in allowedModes"
@@ -214,16 +221,16 @@ const remove = () => {
                                         <span class="font-medium capitalize">{{
                                             m.value === 'autopilot'
                                                 ? 'Auto-Pilot'
-                                                : m.value
+                                                : $t(m.value)
                                         }}</span>
                                         <span
                                             v-if="!m.allowed"
                                             class="ml-1 text-xs"
-                                            >(Pro plan)</span
+                                            >{{ $t('(Pro plan)') }}</span
                                         >
                                         <span
                                             class="block text-xs text-muted-foreground"
-                                            >{{ modeHelp[m.value] }}</span
+                                            >{{ $t(modeHelp[m.value]) }}</span
                                         >
                                     </span>
                                 </label>
@@ -234,15 +241,15 @@ const remove = () => {
                             v-if="canManage"
                             type="submit"
                             :disabled="general.processing"
-                            >Save</Button
+                            >{{ $t('Save') }}</Button
                         >
                     </fieldset>
                 </form>
             </Panel>
 
             <Panel
-                title="Automation safeguards"
-                description="Applies to Smart and Auto-Pilot."
+                :title="$t('Automation safeguards')"
+                :description="$t('Applies to Smart and Auto-Pilot.')"
             >
                 <form
                     class="space-y-4"
@@ -257,20 +264,20 @@ const remove = () => {
                         class="grid gap-4 sm:grid-cols-2"
                     >
                         <div class="grid gap-2">
-                            <Label>Minimum stars</Label>
+                            <Label>{{ $t('Minimum stars') }}</Label>
                             <select
                                 v-model.number="policy.min_rating"
                                 class="h-9 rounded-md border border-input bg-transparent px-2 text-sm dark:bg-input/30"
                             >
-                                <option :value="5">5 only</option>
-                                <option :value="4">4 and 5</option>
+                                <option :value="5">{{ $t('5 only') }}</option>
+                                <option :value="4">{{ $t('4 and 5') }}</option>
                                 <option :value="3">
-                                    3 and up (Auto-Pilot)
+                                    {{ $t('3 and up (Auto-Pilot)') }}
                                 </option>
                             </select>
                         </div>
                         <div class="grid gap-2">
-                            <Label>Max risk score</Label>
+                            <Label>{{ $t('Max risk score') }}</Label>
                             <Input
                                 v-model.number="policy.max_risk_score"
                                 type="number"
@@ -279,7 +286,7 @@ const remove = () => {
                             />
                         </div>
                         <div class="grid gap-2">
-                            <Label>Hold window (minutes)</Label>
+                            <Label>{{ $t('Hold window (minutes)') }}</Label>
                             <Input
                                 v-model.number="policy.hold_minutes"
                                 type="number"
@@ -288,7 +295,7 @@ const remove = () => {
                             <InputError :message="policy.errors.hold_minutes" />
                         </div>
                         <div class="grid gap-2">
-                            <Label>Daily limit</Label>
+                            <Label>{{ $t('Daily limit') }}</Label>
                             <Input
                                 v-model.number="policy.daily_cap"
                                 type="number"
@@ -303,7 +310,11 @@ const remove = () => {
                                 type="checkbox"
                                 class="accent-[var(--brass)]"
                             />
-                            Only publish between 08:00 and 22:00 (location time)
+                            {{
+                                $t(
+                                    'Only publish between 08:00 and 22:00 (location time)',
+                                )
+                            }}
                         </label>
                         <label
                             class="flex items-center gap-2 text-sm sm:col-span-2"
@@ -313,22 +324,26 @@ const remove = () => {
                                 type="checkbox"
                                 class="accent-[var(--brass)]"
                             />
-                            Pause automation for this location
+                            {{ $t('Pause automation for this location') }}
                         </label>
                         <Button
                             v-if="canManage"
                             type="submit"
                             class="w-fit"
                             :disabled="policy.processing"
-                            >Save safeguards</Button
+                            >{{ $t('Save safeguards') }}</Button
                         >
                     </fieldset>
                 </form>
             </Panel>
 
             <Panel
-                title="Facts the AI may use"
-                description="Replies never mention anything that is not listed here."
+                :title="$t('Facts the AI may use')"
+                :description="
+                    $t(
+                        'Replies never mention anything that is not listed here.',
+                    )
+                "
             >
                 <form
                     class="space-y-3"
@@ -345,13 +360,13 @@ const remove = () => {
                     >
                         <Input
                             v-model="f.key"
-                            placeholder="opening_hours"
+                            :placeholder="$t('opening_hours')"
                             class="w-40"
                             :disabled="!canManage"
                         />
                         <Input
                             v-model="f.value"
-                            placeholder="Mon–Sun 11:00–22:00"
+                            :placeholder="$t('Mon–Sun 11:00–22:00')"
                             :disabled="!canManage"
                         />
                         <Button
@@ -359,7 +374,7 @@ const remove = () => {
                             type="button"
                             variant="ghost"
                             size="icon-sm"
-                            aria-label="Remove fact"
+                            :aria-label="$t('Remove fact')"
                             @click="facts.facts.splice(i, 1)"
                             >×</Button
                         >
@@ -371,53 +386,59 @@ const remove = () => {
                             variant="outline"
                             size="sm"
                             @click="facts.facts.push({ key: '', value: '' })"
-                            >Add fact</Button
+                            >{{ $t('Add fact') }}</Button
                         >
                         <Button
                             type="submit"
                             size="sm"
                             :disabled="facts.processing"
-                            >Save facts</Button
+                            >{{ $t('Save facts') }}</Button
                         >
                     </div>
                 </form>
             </Panel>
 
             <Panel
-                title="Location voice"
-                description="Overrides the organisation voice for this location only."
+                :title="$t('Location voice')"
+                :description="
+                    $t(
+                        'Overrides the organisation voice for this location only.',
+                    )
+                "
             >
                 <div
                     v-if="!showVoice"
                     class="space-y-3 text-sm text-muted-foreground"
                 >
-                    <p>This location uses the organisation voice.</p>
+                    <p>
+                        {{ $t('This location uses the organisation voice.') }}
+                    </p>
                     <Button
                         v-if="canManage"
                         variant="outline"
                         size="sm"
                         @click="showVoice = true"
-                        >Customise for this location</Button
+                        >{{ $t('Customise for this location') }}</Button
                     >
                 </div>
                 <div v-else class="space-y-4">
                     <VoiceForm v-model="voice" :disabled="!canManage" />
                     <div v-if="canManage" class="flex gap-2">
-                        <Button size="sm" @click="saveVoice"
-                            >Save location voice</Button
-                        >
-                        <Button size="sm" variant="ghost" @click="resetVoice"
-                            >Use organisation voice</Button
-                        >
+                        <Button size="sm" @click="saveVoice">{{
+                            $t('Save location voice')
+                        }}</Button>
+                        <Button size="sm" variant="ghost" @click="resetVoice">{{
+                            $t('Use organisation voice')
+                        }}</Button>
                     </div>
                 </div>
             </Panel>
         </div>
 
         <div v-if="canManage" class="border-t border-border pt-5">
-            <Button variant="destructive" size="sm" @click="remove"
-                >Remove location</Button
-            >
+            <Button variant="destructive" size="sm" @click="remove">{{
+                $t('Remove location')
+            }}</Button>
         </div>
     </div>
 </template>

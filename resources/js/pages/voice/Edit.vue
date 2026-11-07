@@ -34,17 +34,19 @@ const save = () =>
 </script>
 
 <template>
-    <Head title="Brand voice" />
+    <Head :title="$t('Brand voice')" />
 
     <div class="space-y-6">
         <PageHeader
-            title="Brand voice"
-            description="How every reply should sound. Locations can override this."
+            :title="$t('Brand voice')"
+            :description="
+                $t('How every reply should sound. Locations can override this.')
+            "
         >
             <template #actions>
-                <Button v-if="canManage" :disabled="saving" @click="save"
-                    >Save voice</Button
-                >
+                <Button v-if="canManage" :disabled="saving" @click="save">{{
+                    $t('Save voice')
+                }}</Button>
             </template>
         </PageHeader>
 
@@ -53,8 +55,12 @@ const save = () =>
                 <VoiceForm v-model="data" :disabled="!canManage" />
             </Panel>
             <Panel
-                title="Versions"
-                description="Every change is kept, so you can see which voice wrote each reply."
+                :title="$t('Versions')"
+                :description="
+                    $t(
+                        'Every change is kept, so you can see which voice wrote each reply.',
+                    )
+                "
             >
                 <ol class="space-y-2 text-xs">
                     <li
@@ -68,7 +74,7 @@ const save = () =>
                             >v{{ h.version }}</span
                         >
                         <span class="text-right text-muted-foreground"
-                            >{{ h.author ?? 'System' }}<br />{{
+                            >{{ h.author ?? $t('System') }}<br />{{
                                 dateTime(h.created_at)
                             }}</span
                         >

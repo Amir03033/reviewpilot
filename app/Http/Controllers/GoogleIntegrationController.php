@@ -102,7 +102,7 @@ class GoogleIntegrationController extends Controller
             $connection = $this->locations->storeConnection($this->organization(), $request->user(), $tokens);
         } catch (GoogleApiException $e) {
             report($e);
-            $this->toast('Google sign-in failed: '.$e->getMessage(), 'error');
+            $this->toast('Google sign-in failed: :error', 'error', ['error' => $e->getMessage()]);
 
             return redirect()->route('integrations.index');
         }
@@ -114,14 +114,14 @@ class GoogleIntegrationController extends Controller
         } catch (\Throwable $e) {
             report($e);
             $hint = $e instanceof GoogleApiException && in_array($e->status, [403, 429], true)
-                ? ' Google has probably not approved Business Profile API access for this project yet (quota 0). Use "Refresh list" once it is approved.'
-                : ' Try "Refresh list" in a minute.';
-            $this->toast('Google account connected, but locations could not be loaded: '.$e->getMessage().$hint, 'error');
+                ? __('Google has probably not approved Business Profile API access for this project yet (quota 0). Use "Refresh list" once it is approved.')
+                : __('Try "Refresh list" in a minute.');
+            $this->toast(__('Google account connected, but locations could not be loaded: :error', ['error' => $e->getMessage()]).' '.$hint, 'error');
 
             return redirect()->route('integrations.index');
         }
 
-        $this->toast($found ? "Connected. Found {$found} location(s) – choose which to import." : 'Connected, but no Business Profile locations were found for this Google account.');
+        $this->toast($found ? 'Connected. Found :count location(s) – choose which to import.' : 'Connected, but no Business Profile locations were found for this Google account.', replace: ['count' => $found]);
 
         return redirect()->route('integrations.index');
     }
@@ -136,10 +136,10 @@ class GoogleIntegrationController extends Controller
         } catch (\Throwable $e) {
             report($e);
 
-            return $this->backWith('Locations could not be loaded: '.$e->getMessage(), 'error');
+            return $this->backWith('Locations could not be loaded: :error', 'error', ['error' => $e->getMessage()]);
         }
 
-        return $this->backWith("Found {$count} location(s).");
+        return $this->backWith('Found :count location(s).', replace: ['count' => $count]);
     }
 
     public function import(Request $request): RedirectResponse
@@ -151,7 +151,7 @@ class GoogleIntegrationController extends Controller
         $skipped = [];
         foreach (GbpLocationLink::query()->whereIn('id', $data['links'])->with('account.connection')->get() as $link) {
             if (! $link->is_verified) {
-                $skipped[] = $link->title.' (not verified on Google)';
+                $skipped[] = $link->title.' ('.__('not verified on Google').')';
 
                 continue;
             }
@@ -160,13 +160,13 @@ class GoogleIntegrationController extends Controller
                 $this->locations->import($link);
                 $imported++;
             } catch (\InvalidArgumentException $e) {
-                $skipped[] = $link->title.' ('.$e->getMessage().')';
+                $skipped[] = $link->title.' ('.__($e->getMessage()).')';
             }
         }
 
-        $message = "Imported {$imported} location(s). Reviews are being synced.";
+        $message = __('Imported :count location(s). Reviews are being synced.', ['count' => $imported]);
         if ($skipped) {
-            $message .= ' Skipped: '.implode('; ', $skipped);
+            $message .= ' '.__('Skipped: :list', ['list' => implode('; ', $skipped)]);
         }
 
         return $this->backWith($message, $imported ? 'success' : 'error');

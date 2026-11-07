@@ -26,7 +26,7 @@ class EnsureActivePlan
                 return response()->json(['message' => 'An active subscription is required.'], 402);
             }
 
-            Inertia::flash('toast', ['type' => 'error', 'message' => 'Your trial or subscription has ended. Choose a plan to continue.']);
+            Inertia::flash('toast', ['type' => 'error', 'message' => __('Your trial or subscription has ended. Choose a plan to continue.')]);
 
             return redirect()->route('billing.index');
         }

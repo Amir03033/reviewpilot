@@ -53,7 +53,7 @@ const last = computed(() =>
             :viewBox="`0 0 ${W} ${H}`"
             class="w-full"
             role="img"
-            aria-label="Rating trend"
+            :aria-label="$t('Rating trend')"
         >
             <g v-for="r in [5, 4, 3, 2, 1]" :key="r">
                 <line
@@ -82,7 +82,14 @@ const last = computed(() =>
                 rx="1"
                 class="fill-muted-foreground/30"
             >
-                <title>{{ p.date }}: {{ p.count }} reviews</title>
+                <title>
+                    {{
+                        $t(':date: :count reviews', {
+                            date: p.date,
+                            count: p.count,
+                        })
+                    }}
+                </title>
             </rect>
             <path
                 :d="line"
@@ -97,7 +104,7 @@ const last = computed(() =>
             v-if="last"
             class="tabular absolute top-0 right-2 font-mono text-xs text-brass"
         >
-            {{ last.toFixed(2) }}★ (30-day)
+            {{ $t(':rating★ (30-day)', { rating: last.toFixed(2) }) }}
         </p>
     </div>
 </template>

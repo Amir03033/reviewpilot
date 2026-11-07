@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/lib/i18n';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -48,7 +49,9 @@ const importSelected = () =>
     );
 const disconnect = (id: string) => {
     if (
-        confirm('Disconnect this Google account? Its locations stop syncing.')
+        confirm(
+            t('Disconnect this Google account? Its locations stop syncing.'),
+        )
     ) {
         router.delete(`/integrations/google/${id}`, { preserveScroll: true });
     }
@@ -56,19 +59,23 @@ const disconnect = (id: string) => {
 </script>
 
 <template>
-    <Head title="Integrations" />
+    <Head :title="$t('Integrations')" />
 
     <div class="space-y-6">
         <PageHeader
-            title="Integrations"
-            description="Connect Google Business Profile to sync reviews and publish replies."
+            :title="$t('Integrations')"
+            :description="
+                $t(
+                    'Connect Google Business Profile to sync reviews and publish replies.',
+                )
+            "
         >
             <template #actions>
                 <Button
                     v-if="canManage"
                     :disabled="!configured"
                     @click="connect"
-                    >Connect Google account</Button
+                    >{{ $t('Connect Google account') }}</Button
                 >
             </template>
         </PageHeader>
@@ -77,13 +84,18 @@ const disconnect = (id: string) => {
             v-if="!configured"
             class="rounded-xl border border-brass/30 bg-brass/5 p-5 text-sm"
         >
-            <p class="font-medium text-brass">Google is not configured yet</p>
+            <p class="font-medium text-brass">
+                {{ $t('Google is not configured yet') }}
+            </p>
             <p class="mt-1 text-muted-foreground">
-                Add <code>GOOGLE_CLIENT_ID</code>,
-                <code>GOOGLE_CLIENT_SECRET</code> and (optionally)
-                <code>GOOGLE_PUBSUB_*</code> to <code>.env</code>. Register
-                <code>{APP_URL}/integrations/google/callback</code> as the OAuth
-                redirect URI. See the README.
+                {{ $t('Add') }} <code>{{ $t('GOOGLE_CLIENT_ID') }}</code
+                >, <code>{{ $t('GOOGLE_CLIENT_SECRET') }}</code>
+                {{ $t('and (optionally)') }}
+                <code>{{ $t('GOOGLE_PUBSUB_*') }}</code> {{ $t('to') }}
+                <code>{{ $t('.env') }}</code
+                >{{ $t('. Register') }}
+                <code>{{ $t('{APP_URL}/integrations/google/callback') }}</code>
+                {{ $t('as the OAuth redirect URI. See the README.') }}
             </p>
         </div>
 
@@ -91,14 +103,21 @@ const disconnect = (id: string) => {
             v-if="configured && !pubsubConfigured"
             class="text-xs text-muted-foreground"
         >
-            Real-time notifications are off (no Pub/Sub topic configured).
-            Reviews are polled every 15 minutes instead.
+            {{
+                $t(
+                    'Real-time notifications are off (no Pub/Sub topic configured). Reviews are polled every 15 minutes instead.',
+                )
+            }}
         </p>
 
         <EmptyState
             v-if="!connections.length"
-            title="No Google account connected"
-            description="Connect the Google account that owns or manages your Business Profile locations."
+            :title="$t('No Google account connected')"
+            :description="
+                $t(
+                    'Connect the Google account that owns or manages your Business Profile locations.',
+                )
+            "
         />
 
         <Panel
@@ -128,7 +147,7 @@ const disconnect = (id: string) => {
                         v-if="canManage && c.status === 'needs_reauth'"
                         size="sm"
                         @click="connect"
-                        >Reconnect</Button
+                        >{{ $t('Reconnect') }}</Button
                     >
                     <Button
                         v-if="canManage && c.status === 'active'"
@@ -141,14 +160,14 @@ const disconnect = (id: string) => {
                                 { preserveScroll: true },
                             )
                         "
-                        >Refresh list</Button
+                        >{{ $t('Refresh list') }}</Button
                     >
                     <Button
                         v-if="canManage && c.status !== 'revoked'"
                         size="sm"
                         variant="ghost"
                         @click="disconnect(c.id)"
-                        >Disconnect</Button
+                        >{{ $t('Disconnect') }}</Button
                     >
                 </div>
             </template>
@@ -159,9 +178,9 @@ const disconnect = (id: string) => {
             >
                 <p class="px-5 pt-4 text-xs text-muted-foreground">
                     {{ a.name }}
-                    <span v-if="a.notifications"
-                        >· real-time notifications on</span
-                    >
+                    <span v-if="a.notifications">{{
+                        $t('· real-time notifications on')
+                    }}</span>
                 </p>
                 <ul class="divide-y divide-border/60">
                     <li
@@ -186,12 +205,12 @@ const disconnect = (id: string) => {
                             </p>
                         </div>
                         <span v-if="l.imported" class="text-xs text-positive"
-                            >Imported · {{ l.sync_state }}</span
+                            >{{ $t('Imported') }} · {{ $t(l.sync_state) }}</span
                         >
                         <span
                             v-else-if="!l.verified"
                             class="text-xs text-muted-foreground"
-                            >Not verified on Google</span
+                            >{{ $t('Not verified on Google') }}</span
                         >
                     </li>
                 </ul>
@@ -202,10 +221,12 @@ const disconnect = (id: string) => {
             v-if="selected.length"
             class="sticky bottom-4 flex items-center justify-between rounded-xl border border-brass/40 bg-card p-4 shadow-lg"
         >
-            <span class="text-sm"
-                >{{ selected.length }} location(s) selected</span
-            >
-            <Button @click="importSelected">Import &amp; start syncing</Button>
+            <span class="text-sm">{{
+                $t(':count location(s) selected', { count: selected.length })
+            }}</span>
+            <Button @click="importSelected">{{
+                $t('Import & start syncing')
+            }}</Button>
         </div>
     </div>
 </template>

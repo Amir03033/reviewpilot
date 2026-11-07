@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/lib/i18n';
 import { AlertCircle } from '@lucide/vue';
 import { computed } from 'vue';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -9,7 +10,7 @@ type Props = {
 };
 
 const props = withDefaults(defineProps<Props>(), {
-    title: 'Something went wrong.',
+    title: t('Something went wrong.'),
 });
 
 const uniqueErrors = computed(() => Array.from(new Set(props.errors)));

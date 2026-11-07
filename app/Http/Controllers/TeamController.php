@@ -61,7 +61,7 @@ class TeamController extends Controller
 
         $maxUsers = $entitlements->planConfig($this->organization())['max_users'] ?? null;
         if ($maxUsers && OrganizationMembership::query()->count() >= $maxUsers) {
-            return $this->backWith("Your plan includes {$maxUsers} users. Upgrade to invite more.", 'error');
+            return $this->backWith('Your plan includes :count users. Upgrade to invite more.', 'error', ['count' => $maxUsers]);
         }
 
         $token = Str::random(48);
@@ -78,7 +78,7 @@ class TeamController extends Controller
         Notification::route('mail', $invitation->email)->notify(new InvitationSent($invitation, $token));
         $this->audit->log('member.invited', $invitation, ['email' => $invitation->email, 'role' => $data['role']]);
 
-        return $this->backWith("Invitation sent to {$invitation->email}.");
+        return $this->backWith('Invitation sent to :email.', replace: ['email' => $invitation->email]);
     }
 
     public function update(Request $request, string $membershipId): RedirectResponse

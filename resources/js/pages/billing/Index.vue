@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/lib/i18n';
 import { Head, router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/rp/PageHeader.vue';
@@ -59,52 +60,70 @@ defineOptions({
 
 const checkout = (plan: string) => router.post('/billing/checkout', { plan });
 const cancel = () =>
-    confirm('Cancel your subscription?') && router.post('/billing/cancel');
+    confirm(t('Cancel your subscription?')) && router.post('/billing/cancel');
 const modeLabel = (m: string) =>
-    m === 'autopilot' ? 'Auto-Pilot' : m.charAt(0).toUpperCase() + m.slice(1);
+    m === 'autopilot'
+        ? 'Auto-Pilot'
+        : t(m.charAt(0).toUpperCase() + m.slice(1));
 </script>
 
 <template>
-    <Head title="Billing" />
+    <Head :title="$t('Billing')" />
 
     <div class="space-y-6">
         <PageHeader
-            title="Billing"
-            description="Priced per location per month, excl. VAT. Pay with iDEAL, SEPA Direct Debit or card via Mollie."
+            :title="$t('Billing')"
+            :description="
+                $t(
+                    'Priced per location per month, excl. VAT. Pay with iDEAL, SEPA Direct Debit or card via Mollie.',
+                )
+            "
         />
 
         <div
             v-if="!configured"
             class="rounded-xl border border-brass/30 bg-brass/5 p-4 text-sm text-muted-foreground"
         >
-            Payments are not configured yet: add <code>MOLLIE_KEY</code> to
-            <code>.env</code>.
+            {{ $t('Payments are not configured yet: add') }}
+            <code>{{ $t('MOLLIE_KEY') }}</code> {{ $t('to') }}
+            <code>{{ $t('.env') }}</code
+            >.
         </div>
 
         <div class="grid gap-3 sm:grid-cols-3">
             <div class="rounded-xl border border-border bg-card p-4">
-                <p class="text-xs text-muted-foreground">Current plan</p>
+                <p class="text-xs text-muted-foreground">
+                    {{ $t('Current plan') }}
+                </p>
                 <p class="mt-2 text-xl font-medium capitalize">
-                    {{ plan ?? 'None' }}
+                    {{ plan ? $t(plan) : $t('None') }}
                 </p>
                 <p v-if="onTrial" class="mt-1 text-xs text-brass">
-                    Trial until {{ dateTime(trialEndsAt) }}
+                    {{
+                        $t('Trial until :date', { date: dateTime(trialEndsAt) })
+                    }}
                 </p>
                 <p
                     v-else-if="subscription"
                     class="mt-1 text-xs text-muted-foreground capitalize"
                 >
-                    {{ subscription.status }} ·
-                    {{ subscription.quantity }} location(s)
+                    {{ $t(subscription.status) }} ·
+                    {{
+                        $t(':count location(s)', {
+                            count: subscription.quantity,
+                        })
+                    }}
                 </p>
             </div>
             <div class="rounded-xl border border-border bg-card p-4">
-                <p class="text-xs text-muted-foreground">Billable locations</p>
+                <p class="text-xs text-muted-foreground">
+                    {{ $t('Billable locations') }}
+                </p>
                 <p class="tabular mt-2 font-mono text-xl">{{ locations }}</p>
             </div>
             <div class="rounded-xl border border-border bg-card p-4">
                 <p class="text-xs text-muted-foreground">
-                    AI reviews this month
+                    {{ $t('AI reviews this month') }}
                 </p>
                 <p class="tabular mt-2 font-mono text-xl">
                     {{ usage.ai_reviews }}
@@ -139,19 +158,33 @@ const modeLabel = (m: string) =>
                     <span class="tabular font-mono text-2xl">{{
                         euro(p.price_per_location)
                     }}</span>
-                    <span class="text-xs text-muted-foreground"
-                        >/ location / month</span
-                    >
+                    <span class="text-xs text-muted-foreground">{{
+                        $t('/ location / month')
+                    }}</span>
                 </p>
                 <ul
                     class="mt-4 flex-1 space-y-1.5 text-sm text-muted-foreground"
                 >
                     <li>
-                        {{ p.ai_reviews_per_location }} AI reviews per location
+                        {{
+                            $t(':count AI reviews per location', {
+                                count: p.ai_reviews_per_location,
+                            })
+                        }}
                     </li>
-                    <li>Modes: {{ p.modes.map(modeLabel).join(', ') }}</li>
+                    <li>
+                        {{
+                            $t('Modes: :modes', {
+                                modes: p.modes.map(modeLabel).join(', '),
+                            })
+                        }}
+                    </li>
                     <li v-if="p.min_locations > 1">
-                        Minimum {{ p.min_locations }} locations, volume discount
+                        {{
+                            $t('Minimum :count locations, volume discount', {
+                                count: p.min_locations,
+                            })
+                        }}
                     </li>
                 </ul>
                 <p class="mt-4 text-xs text-muted-foreground">
@@ -162,7 +195,7 @@ const modeLabel = (m: string) =>
                     <span class="text-foreground">{{
                         euro(p.quote.gross_cents)
                     }}</span
-                    >/month
+                    >{{ $t('/month') }}
                 </p>
                 <Button
                     v-if="canBill"
@@ -182,7 +215,7 @@ const modeLabel = (m: string) =>
             </div>
         </div>
 
-        <Panel v-if="payments.length" title="Payments" :padded="false">
+        <Panel v-if="payments.length" :title="$t('Payments')" :padded="false">
             <table class="w-full text-sm">
                 <tbody>
                     <tr
@@ -204,7 +237,7 @@ const modeLabel = (m: string) =>
                                     : 'text-muted-foreground'
                             "
                         >
-                            {{ pay.status }}
+                            {{ $t(pay.status) }}
                         </td>
                         <td class="tabular px-5 py-3 text-right font-mono">
                             {{ euro(pay.amount_cents) }}
@@ -217,9 +250,9 @@ const modeLabel = (m: string) =>
         <div
             v-if="canBill && subscription && subscription.status !== 'pending'"
         >
-            <Button variant="ghost" size="sm" @click="cancel"
-                >Cancel subscription</Button
-            >
+            <Button variant="ghost" size="sm" @click="cancel">{{
+                $t('Cancel subscription')
+            }}</Button>
         </div>
     </div>
 </template>

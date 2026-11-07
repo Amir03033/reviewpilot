@@ -59,22 +59,24 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 </script>
 
 <template>
-    <Head title="Approvals" />
+    <Head :title="$t('Approvals')" />
 
     <div class="space-y-5">
         <PageHeader
-            title="Approvals"
-            description="Highest risk first. Use J / K to move between reviews."
+            :title="$t('Approvals')"
+            :description="
+                $t('Highest risk first. Use J / K to move between reviews.')
+            "
         >
             <template #actions>
                 <select
                     v-if="locations.length > 1"
                     class="h-9 rounded-md border border-input bg-transparent px-2 text-sm dark:bg-input/30"
                     :value="filters.location ?? ''"
-                    aria-label="Location"
+                    :aria-label="$t('Location')"
                     @change="filterLocation"
                 >
-                    <option value="">All locations</option>
+                    <option value="">{{ $t('All locations') }}</option>
                     <option v-for="l in locations" :key="l.id" :value="l.id">
                         {{ l.name }}
                     </option>
@@ -84,8 +86,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 
         <EmptyState
             v-if="!items.length"
-            title="All caught up"
-            description="Every review has a reply or is scheduled. New reviews appear here automatically."
+            :title="$t('All caught up')"
+            :description="
+                $t(
+                    'Every review has a reply or is scheduled. New reviews appear here automatically.',
+                )
+            "
         />
 
         <div v-else class="grid gap-4 lg:grid-cols-[280px_1fr]">
@@ -147,7 +153,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                         <Link
                             :href="`/reviews/${current.id}`"
                             class="text-xs text-muted-foreground hover:text-foreground"
-                            >Details →</Link
+                            >{{ $t('Details →') }}</Link
                         >
                     </div>
                 </div>
@@ -170,8 +176,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                 >
                     <RiskFlags :flags="current.risk_flags" />
                     <p class="text-xs text-muted-foreground">
-                        Needs a person because this review was flagged as
-                        sensitive.
+                        {{
+                            $t(
+                                'Needs a person because this review was flagged as sensitive.',
+                            )
+                        }}
                     </p>
                 </div>
 
@@ -179,7 +188,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                     v-if="current.state === 'drafting'"
                     class="text-sm text-muted-foreground"
                 >
-                    Writing drafts… refresh in a moment.
+                    {{ $t('Writing drafts… refresh in a moment.') }}
                 </p>
 
                 <DraftEditor

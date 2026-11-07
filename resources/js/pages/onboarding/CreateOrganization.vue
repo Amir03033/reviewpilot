@@ -10,44 +10,47 @@ const form = useForm({ name: '', country: 'NL' });
 </script>
 
 <template>
-    <Head title="Create your organisation" />
+    <Head :title="$t('Create your organisation')" />
 
     <div class="flex min-h-svh items-center justify-center bg-background p-6">
         <div class="w-full max-w-md space-y-8">
             <div class="flex items-center gap-2"><AppLogo /></div>
             <div>
                 <h1 class="text-2xl font-semibold tracking-tight">
-                    Set up your organisation
+                    {{ $t('Set up your organisation') }}
                 </h1>
                 <p class="mt-2 text-sm text-muted-foreground">
-                    Your restaurant, café or group. You can add locations and
-                    invite your team next.
+                    {{
+                        $t(
+                            'Your restaurant, café or group. You can add locations and invite your team next.',
+                        )
+                    }}
                 </p>
             </div>
             <form class="space-y-5" @submit.prevent="form.post('/onboarding')">
                 <div class="grid gap-2">
-                    <Label for="name">Organisation name</Label>
+                    <Label for="name">{{ $t('Organisation name') }}</Label>
                     <Input
                         id="name"
                         v-model="form.name"
-                        placeholder="e.g. Burgerbar Groep"
+                        :placeholder="$t('e.g. Burgerbar Groep')"
                         required
                         autofocus
                     />
                     <InputError :message="form.errors.name" />
                 </div>
                 <div class="grid gap-2">
-                    <Label for="country">Country</Label>
+                    <Label for="country">{{ $t('Country') }}</Label>
                     <select
                         id="country"
                         v-model="form.country"
                         class="h-9 rounded-md border border-input bg-transparent px-3 text-sm dark:bg-input/30"
                     >
-                        <option value="NL">Netherlands</option>
-                        <option value="BE">Belgium</option>
-                        <option value="DE">Germany</option>
-                        <option value="GB">United Kingdom</option>
-                        <option value="FR">France</option>
+                        <option value="NL">{{ $t('Netherlands') }}</option>
+                        <option value="BE">{{ $t('Belgium') }}</option>
+                        <option value="DE">{{ $t('Germany') }}</option>
+                        <option value="GB">{{ $t('United Kingdom') }}</option>
+                        <option value="FR">{{ $t('France') }}</option>
                     </select>
                     <InputError :message="form.errors.country" />
                 </div>
@@ -56,10 +59,14 @@ const form = useForm({ name: '', country: 'NL' });
                     class="w-full"
                     :disabled="form.processing"
                 >
-                    Create organisation
+                    {{ $t('Create organisation') }}
                 </Button>
                 <p class="text-center text-xs text-muted-foreground">
-                    Includes a 14-day trial. No payment details needed.
+                    {{
+                        $t(
+                            'Includes a 14-day trial. No payment details needed.',
+                        )
+                    }}
                 </p>
             </form>
         </div>

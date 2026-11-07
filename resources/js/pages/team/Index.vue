@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/lib/i18n';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import InputError from '@/components/InputError.vue';
@@ -81,22 +82,22 @@ const saveEdit = (id: string) =>
         onSuccess: () => (editing.value = null),
     });
 const remove = (m: Member) =>
-    confirm(`Remove ${m.name}?`) &&
+    confirm(t('Remove :name?', { name: m.name ?? '' })) &&
     router.delete(`/team/${m.id}`, { preserveScroll: true });
 const locationName = (id: string) =>
     props.locations.find((l) => l.id === id)?.name ?? 'Unknown';
 </script>
 
 <template>
-    <Head title="Team" />
+    <Head :title="$t('Team')" />
 
     <div class="space-y-6">
         <PageHeader
-            title="Team"
-            description="Who can see and approve replies, per location."
+            :title="$t('Team')"
+            :description="$t('Who can see and approve replies, per location.')"
         />
 
-        <Panel title="Members" :padded="false">
+        <Panel :title="$t('Members')" :padded="false">
             <ul class="divide-y divide-border">
                 <li v-for="m in members" :key="m.id" class="px-5 py-4">
                     <div class="flex flex-wrap items-center gap-3">
@@ -106,17 +107,19 @@ const locationName = (id: string) =>
                                 <span
                                     v-if="m.is_self"
                                     class="text-xs text-muted-foreground"
-                                    >(you)</span
+                                    >{{ $t('(you)') }}</span
                                 >
                             </p>
                             <p class="text-xs text-muted-foreground">
                                 {{ m.email }}
-                                <span v-if="!m.two_factor">· no 2FA</span>
+                                <span v-if="!m.two_factor">{{
+                                    $t('· no 2FA')
+                                }}</span>
                             </p>
                         </div>
                         <span
                             class="rounded-full border border-border px-2 py-0.5 text-xs capitalize"
-                            >{{ m.role }}</span
+                            >{{ $t(m.role) }}</span
                         >
                         <span
                             v-if="m.role === 'member'"
@@ -132,14 +135,14 @@ const locationName = (id: string) =>
                                 size="sm"
                                 variant="ghost"
                                 @click="startEdit(m)"
-                                >Edit</Button
+                                >{{ $t('Edit') }}</Button
                             >
                             <Button
                                 v-if="!m.is_self"
                                 size="sm"
                                 variant="ghost"
                                 @click="remove(m)"
-                                >Remove</Button
+                                >{{ $t('Remove') }}</Button
                             >
                         </template>
                     </div>
@@ -152,11 +155,11 @@ const locationName = (id: string) =>
                             class="h-9 rounded-md border border-input bg-transparent px-2 text-sm capitalize dark:bg-input/30"
                         >
                             <option v-for="r in roles" :key="r" :value="r">
-                                {{ r }}
+                                {{ $t(r) }}
                             </option>
                         </select>
                         <p class="text-xs text-muted-foreground">
-                            {{ roleHelp[edit.role] }}
+                            {{ $t(roleHelp[edit.role]) }}
                         </p>
                         <div
                             v-if="edit.role === 'member'"
@@ -196,20 +199,20 @@ const locationName = (id: string) =>
                                         :key="r"
                                         :value="r"
                                     >
-                                        {{ r }}
+                                        {{ $t(r) }}
                                     </option>
                                 </select>
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <Button size="sm" @click="saveEdit(m.id)"
-                                >Save</Button
-                            >
+                            <Button size="sm" @click="saveEdit(m.id)">{{
+                                $t('Save')
+                            }}</Button>
                             <Button
                                 size="sm"
                                 variant="ghost"
                                 @click="editing = null"
-                                >Cancel</Button
+                                >{{ $t('Cancel') }}</Button
                             >
                         </div>
                     </div>
@@ -217,7 +220,7 @@ const locationName = (id: string) =>
             </ul>
         </Panel>
 
-        <Panel v-if="canManage" title="Invite someone">
+        <Panel v-if="canManage" :title="$t('Invite someone')">
             <form
                 class="grid gap-4 md:grid-cols-3"
                 @submit.prevent="
@@ -228,12 +231,12 @@ const locationName = (id: string) =>
                 "
             >
                 <div class="grid gap-2">
-                    <Label>Email</Label>
+                    <Label>{{ $t('Email') }}</Label>
                     <Input v-model="invite.email" type="email" required />
                     <InputError :message="invite.errors.email" />
                 </div>
                 <div class="grid gap-2">
-                    <Label>Role</Label>
+                    <Label>{{ $t('Role') }}</Label>
                     <select
                         v-model="invite.role"
                         class="h-9 rounded-md border border-input bg-transparent px-2 text-sm capitalize dark:bg-input/30"
@@ -243,15 +246,15 @@ const locationName = (id: string) =>
                             :key="r"
                             :value="r"
                         >
-                            {{ r }}
+                            {{ $t(r) }}
                         </option>
                     </select>
                     <p class="text-xs text-muted-foreground">
-                        {{ roleHelp[invite.role] }}
+                        {{ $t(roleHelp[invite.role]) }}
                     </p>
                 </div>
                 <div v-if="invite.role === 'member'" class="grid gap-2">
-                    <Label>Locations (as manager)</Label>
+                    <Label>{{ $t('Locations (as manager)') }}</Label>
                     <select
                         v-model="invite.location_ids"
                         multiple
@@ -267,16 +270,16 @@ const locationName = (id: string) =>
                     </select>
                 </div>
                 <div class="md:col-span-3">
-                    <Button type="submit" :disabled="invite.processing"
-                        >Send invitation</Button
-                    >
+                    <Button type="submit" :disabled="invite.processing">{{
+                        $t('Send invitation')
+                    }}</Button>
                 </div>
             </form>
         </Panel>
 
         <Panel
             v-if="invitations.length"
-            title="Pending invitations"
+            :title="$t('Pending invitations')"
             :padded="false"
         >
             <ul class="divide-y divide-border">
@@ -288,12 +291,12 @@ const locationName = (id: string) =>
                     <span class="flex-1"
                         >{{ i.email }}
                         <span class="text-xs text-muted-foreground capitalize"
-                            >· {{ i.role }}</span
+                            >· {{ $t(i.role) }}</span
                         ></span
                     >
-                    <span class="text-xs text-muted-foreground"
-                        >expires {{ timeAgo(i.expires_at) }}</span
-                    >
+                    <span class="text-xs text-muted-foreground">{{
+                        $t('expires :time', { time: timeAgo(i.expires_at) })
+                    }}</span>
                     <Button
                         v-if="canManage"
                         size="sm"
@@ -303,7 +306,7 @@ const locationName = (id: string) =>
                                 preserveScroll: true,
                             })
                         "
-                        >Revoke</Button
+                        >{{ $t('Revoke') }}</Button
                     >
                 </li>
             </ul>

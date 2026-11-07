@@ -19,41 +19,50 @@ const accept = () => router.post(`/invitations/${props.token}`);
 </script>
 
 <template>
-    <Head title="Invitation" />
+    <Head :title="$t('Invitation')" />
 
     <div class="flex min-h-svh items-center justify-center p-6">
         <div class="w-full max-w-md space-y-6">
             <div class="flex items-center gap-2"><AppLogo /></div>
             <template v-if="invitation">
                 <h1 class="text-2xl font-semibold tracking-tight">
-                    Join {{ invitation.organization }}
+                    {{
+                        $t('Join :organization', {
+                            organization: invitation.organization ?? '',
+                        })
+                    }}
                 </h1>
                 <p class="text-sm text-muted-foreground">
-                    You were invited as
+                    {{ $t('You were invited as') }}
                     <span class="text-foreground capitalize">{{
                         invitation.role
                     }}</span>
                     using {{ invitation.email }}.
                 </p>
-                <Button v-if="user" class="w-full" @click="accept"
-                    >Accept invitation</Button
-                >
+                <Button v-if="user" class="w-full" @click="accept">{{
+                    $t('Accept invitation')
+                }}</Button>
                 <div v-else class="flex gap-2">
                     <Button as-child class="flex-1"
-                        ><Link href="/login">Log in</Link></Button
+                        ><Link href="/login">{{ $t('Log in') }}</Link></Button
                     >
                     <Button as-child variant="outline" class="flex-1"
-                        ><Link href="/register">Create account</Link></Button
+                        ><Link href="/register">{{
+                            $t('Create account')
+                        }}</Link></Button
                     >
                 </div>
             </template>
             <template v-else>
                 <h1 class="text-2xl font-semibold tracking-tight">
-                    Invitation not valid
+                    {{ $t('Invitation not valid') }}
                 </h1>
                 <p class="text-sm text-muted-foreground">
-                    This invitation has expired or was already used. Ask your
-                    administrator for a new one.
+                    {{
+                        $t(
+                            'This invitation has expired or was already used. Ask your administrator for a new one.',
+                        )
+                    }}
                 </p>
             </template>
         </div>

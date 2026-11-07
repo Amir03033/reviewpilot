@@ -39,28 +39,42 @@ const apply = () =>
 </script>
 
 <template>
-    <Head title="Audit log" />
+    <Head :title="$t('Audit log')" />
 
     <div class="space-y-5">
         <PageHeader
-            title="Audit log"
-            description="Every change, approval and automated action. Records cannot be edited or deleted."
+            :title="$t('Audit log')"
+            :description="
+                $t(
+                    'Every change, approval and automated action. Records cannot be edited or deleted.',
+                )
+            "
         />
         <form class="max-w-sm" @submit.prevent="apply">
             <Input
                 v-model="action"
-                placeholder="Filter by action, e.g. reply."
+                :placeholder="$t('Filter by action, e.g. reply.')"
             />
         </form>
         <div class="overflow-x-auto rounded-xl border border-border bg-card">
             <table class="w-full text-sm">
                 <thead class="text-left text-xs text-muted-foreground">
                     <tr class="border-b border-border">
-                        <th class="px-5 py-2.5 font-normal">When</th>
-                        <th class="px-3 py-2.5 font-normal">Action</th>
-                        <th class="px-3 py-2.5 font-normal">Actor</th>
-                        <th class="px-3 py-2.5 font-normal">Subject</th>
-                        <th class="px-5 py-2.5 font-normal">Details</th>
+                        <th class="px-5 py-2.5 font-normal">
+                            {{ $t('When') }}
+                        </th>
+                        <th class="px-3 py-2.5 font-normal">
+                            {{ $t('Action') }}
+                        </th>
+                        <th class="px-3 py-2.5 font-normal">
+                            {{ $t('Actor') }}
+                        </th>
+                        <th class="px-3 py-2.5 font-normal">
+                            {{ $t('Subject') }}
+                        </th>
+                        <th class="px-5 py-2.5 font-normal">
+                            {{ $t('Details') }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -77,7 +91,7 @@ const apply = () =>
                         <td class="px-3 py-2.5 font-mono text-xs">
                             {{ l.action }}
                         </td>
-                        <td class="px-3 py-2.5 text-xs">{{ l.actor }}</td>
+                        <td class="px-3 py-2.5 text-xs">{{ $t(l.actor) }}</td>
                         <td
                             class="px-3 py-2.5 font-mono text-xs text-muted-foreground"
                         >

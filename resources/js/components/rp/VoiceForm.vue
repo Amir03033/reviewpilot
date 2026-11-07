@@ -51,7 +51,7 @@ const selectClass =
     >
         <div class="grid gap-2">
             <Label
-                >Formality
+                >{{ $t('Formality') }}
                 <span class="text-muted-foreground"
                     >({{ model.settings.formality }}/5)</span
                 ></Label
@@ -64,12 +64,12 @@ const selectClass =
                 class="accent-[var(--brass)]"
             />
             <p class="text-xs text-muted-foreground">
-                1 = casual (“je”), 5 = formal (“u”).
+                {{ $t('1 = casual (“je”), 5 = formal (“u”).') }}
             </p>
         </div>
         <div class="grid gap-2">
             <Label
-                >Warmth
+                >{{ $t('Warmth') }}
                 <span class="text-muted-foreground"
                     >({{ model.settings.warmth }}/5)</span
                 ></Label
@@ -83,94 +83,114 @@ const selectClass =
             />
         </div>
         <div class="grid gap-2">
-            <Label>Humour</Label>
+            <Label>{{ $t('Humour') }}</Label>
             <select v-model="model.settings.humor" :class="selectClass">
-                <option value="none">None</option>
-                <option value="light">Light</option>
-                <option value="playful">Playful</option>
+                <option value="none">{{ $t('None') }}</option>
+                <option value="light">{{ $t('Light') }}</option>
+                <option value="playful">{{ $t('Playful') }}</option>
             </select>
         </div>
         <div class="grid gap-2">
-            <Label>Emoji</Label>
+            <Label>{{ $t('Emoji') }}</Label>
             <select v-model="model.settings.emoji" :class="selectClass">
-                <option value="never">Never</option>
-                <option value="positive_only">Only on positive reviews</option>
-                <option value="allowed">Allowed</option>
+                <option value="never">{{ $t('Never') }}</option>
+                <option value="positive_only">
+                    {{ $t('Only on positive reviews') }}
+                </option>
+                <option value="allowed">{{ $t('Allowed') }}</option>
             </select>
         </div>
         <div class="grid gap-2">
-            <Label>Reply length</Label>
+            <Label>{{ $t('Reply length') }}</Label>
             <select v-model="model.settings.length" :class="selectClass">
-                <option value="short">Short (15–40 words)</option>
-                <option value="standard">Standard (40–90 words)</option>
-                <option value="detailed">Detailed (90–150 words)</option>
+                <option value="short">{{ $t('Short (15–40 words)') }}</option>
+                <option value="standard">
+                    {{ $t('Standard (40–90 words)') }}
+                </option>
+                <option value="detailed">
+                    {{ $t('Detailed (90–150 words)') }}
+                </option>
             </select>
         </div>
         <div class="grid gap-2">
-            <Label>Sign-off</Label>
+            <Label>{{ $t('Sign-off') }}</Label>
             <Input
                 v-model="model.settings.sign_off as string"
-                placeholder="e.g. Team Burgerbar, or Sanne (manager)"
+                :placeholder="$t('e.g. Team Burgerbar, or Sanne (manager)')"
             />
         </div>
         <div class="grid gap-2">
-            <Label>Reply language</Label>
+            <Label>{{ $t('Reply language') }}</Label>
             <select v-model="model.settings.language_mode" :class="selectClass">
-                <option value="auto">Same as the review</option>
-                <option value="fixed">Always one language</option>
+                <option value="auto">{{ $t('Same as the review') }}</option>
+                <option value="fixed">{{ $t('Always one language') }}</option>
             </select>
             <Input
                 v-if="model.settings.language_mode === 'fixed'"
                 v-model="model.settings.fixed_language as string"
-                placeholder="nl"
+                :placeholder="$t('nl')"
                 maxlength="2"
             />
         </div>
         <div class="grid gap-2">
-            <Label>Complaints &amp; compensation</Label>
+            <Label>{{ $t('Complaints & compensation') }}</Label>
             <select
                 v-model="model.settings.compensation_policy"
                 :class="selectClass"
             >
                 <option value="none">
-                    Never invite contact or offer anything
+                    {{ $t('Never invite contact or offer anything') }}
                 </option>
                 <option value="invite_contact">
-                    Invite the guest to get in touch (recommended)
+                    {{ $t('Invite the guest to get in touch (recommended)') }}
                 </option>
                 <option value="may_offer">
-                    May suggest making it right (always needs approval)
+                    {{
+                        $t(
+                            'May suggest making it right (always needs approval)',
+                        )
+                    }}
                 </option>
             </select>
         </div>
         <div class="grid gap-2">
             <Label
-                >Preferred phrases
-                <span class="text-muted-foreground">(one per line)</span></Label
+                >{{ $t('Preferred phrases') }}
+                <span class="text-muted-foreground">{{
+                    $t('(one per line)')
+                }}</span></Label
             >
             <Textarea v-model="preferred" :rows="4" />
         </div>
         <div class="grid gap-2">
             <Label
-                >Forbidden phrases
-                <span class="text-muted-foreground">(one per line)</span></Label
+                >{{ $t('Forbidden phrases') }}
+                <span class="text-muted-foreground">{{
+                    $t('(one per line)')
+                }}</span></Label
             >
             <Textarea v-model="forbidden" :rows="4" />
         </div>
         <div class="grid gap-2 md:col-span-2">
-            <Label>Brand guidelines</Label>
+            <Label>{{ $t('Brand guidelines') }}</Label>
             <Textarea
                 v-model="guidelines"
                 :rows="3"
-                placeholder="Who you are, how you talk, what makes you different."
+                :placeholder="
+                    $t('Who you are, how you talk, what makes you different.')
+                "
             />
         </div>
         <div class="grid gap-2 md:col-span-2">
-            <Label>Special instructions</Label>
+            <Label>{{ $t('Special instructions') }}</Label>
             <Textarea
                 v-model="instructions"
                 :rows="3"
-                placeholder="e.g. Invite unhappy guests to email klachten@… ; never mention prices."
+                :placeholder="
+                    $t(
+                        'e.g. Invite unhappy guests to email klachten@… ; never mention prices.',
+                    )
+                "
             />
         </div>
     </fieldset>

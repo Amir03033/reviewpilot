@@ -35,7 +35,7 @@ class InvitationController extends Controller
         $user = $request->user();
 
         if (strtolower($user->email) !== $invitation->email) {
-            $this->toast("This invitation is for {$invitation->email}. Log in with that address.", 'error');
+            $this->toast('This invitation is for :email. Log in with that address.', 'error', ['email' => $invitation->email]);
 
             return redirect()->route('invitations.show', $token);
         }

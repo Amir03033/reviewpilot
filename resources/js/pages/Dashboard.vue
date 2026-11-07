@@ -69,11 +69,11 @@ function filterLocation(event: Event) {
 </script>
 
 <template>
-    <Head title="Overview" />
+    <Head :title="$t('Overview')" />
 
     <div class="space-y-6">
         <PageHeader
-            title="Overview"
+            :title="$t('Overview')"
             :description="`Last ${kpis.days} days compared with the ${kpis.days} days before.`"
         >
             <template #actions>
@@ -81,10 +81,10 @@ function filterLocation(event: Event) {
                     v-if="locations.length > 1"
                     class="h-9 rounded-md border border-input bg-transparent px-2 text-sm dark:bg-input/30"
                     :value="filters.location ?? ''"
-                    aria-label="Location"
+                    :aria-label="$t('Location')"
                     @change="filterLocation"
                 >
-                    <option value="">All locations</option>
+                    <option value="">{{ $t('All locations') }}</option>
                     <option v-for="l in locations" :key="l.id" :value="l.id">
                         {{ l.name }}
                     </option>
@@ -94,11 +94,17 @@ function filterLocation(event: Event) {
 
         <EmptyState
             v-if="!setup.has_locations"
-            title="Connect your first location"
-            description="Connect Google Business Profile to import your locations and start answering every review."
+            :title="$t('Connect your first location')"
+            :description="
+                $t(
+                    'Connect Google Business Profile to import your locations and start answering every review.',
+                )
+            "
         >
             <Button as-child
-                ><Link href="/integrations">Connect Google</Link></Button
+                ><Link href="/integrations">{{
+                    $t('Connect Google')
+                }}</Link></Button
             >
         </EmptyState>
 
@@ -109,21 +115,24 @@ function filterLocation(event: Event) {
                     href="/approvals"
                     class="group rounded-xl border border-brass/30 bg-brass/5 p-4 transition-colors hover:bg-brass/10"
                 >
-                    <p class="text-xs text-brass">Waiting for you</p>
+                    <p class="text-xs text-brass">
+                        {{ $t('Waiting for you') }}
+                    </p>
                     <p class="tabular mt-2 font-mono text-3xl font-medium">
                         {{ today.awaiting_approval }}
                     </p>
                     <p class="mt-1 text-xs text-muted-foreground">
-                        <template v-if="today.oldest_waiting_at"
-                            >oldest
-                            {{ timeAgo(today.oldest_waiting_at) }}</template
-                        >
-                        <template v-else>All caught up</template>
+                        <template v-if="today.oldest_waiting_at">{{
+                            $t('oldest :time', {
+                                time: timeAgo(today.oldest_waiting_at),
+                            })
+                        }}</template>
+                        <template v-else>{{ $t('All caught up') }}</template>
                     </p>
                 </Link>
                 <div class="rounded-xl border border-border bg-card p-4">
                     <p class="text-xs text-muted-foreground">
-                        High risk, unanswered
+                        {{ $t('High risk, unanswered') }}
                     </p>
                     <p
                         class="tabular mt-2 font-mono text-3xl font-medium"
@@ -134,7 +143,7 @@ function filterLocation(event: Event) {
                 </div>
                 <div class="rounded-xl border border-border bg-card p-4">
                     <p class="text-xs text-muted-foreground">
-                        Scheduled auto-replies
+                        {{ $t('Scheduled auto-replies') }}
                     </p>
                     <p class="tabular mt-2 font-mono text-3xl font-medium">
                         {{ today.scheduled }}
@@ -142,12 +151,12 @@ function filterLocation(event: Event) {
                     <Link
                         href="/reviews?status=scheduled"
                         class="mt-1 block text-xs text-muted-foreground hover:text-foreground"
-                        >Review before they go out →</Link
+                        >{{ $t('Review before they go out →') }}</Link
                     >
                 </div>
                 <div class="rounded-xl border border-border bg-card p-4">
                     <p class="text-xs text-muted-foreground">
-                        Published last 24h
+                        {{ $t('Published last 24h') }}
                     </p>
                     <p class="tabular mt-2 font-mono text-3xl font-medium">
                         {{ today.published_24h }}
@@ -158,7 +167,7 @@ function filterLocation(event: Event) {
             <!-- KPIs -->
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <KpiCard
-                    label="Average rating"
+                    :label="$t('Average rating')"
                     :value="
                         c.average_rating ? `${num(c.average_rating, 2)}★` : '—'
                     "
@@ -166,20 +175,20 @@ function filterLocation(event: Event) {
                     :previous="p.average_rating"
                 />
                 <KpiCard
-                    label="New reviews"
+                    :label="$t('New reviews')"
                     :value="String(c.reviews)"
                     :current="c.reviews"
                     :previous="p.reviews"
                 />
                 <KpiCard
-                    label="Response rate"
+                    :label="$t('Response rate')"
                     :value="pct(c.response_rate)"
                     :current="c.response_rate"
                     :previous="p.response_rate"
                     suffix=" pts"
                 />
                 <KpiCard
-                    label="Median response time"
+                    :label="$t('Median response time')"
                     :value="
                         c.median_response_hours !== null
                             ? `${c.median_response_hours} h`
@@ -195,21 +204,25 @@ function filterLocation(event: Event) {
             <div class="grid gap-4 lg:grid-cols-3">
                 <Panel
                     class="lg:col-span-2"
-                    title="Rating trend"
-                    description="Rolling 30-day average; bars show daily review volume (90 days)."
+                    :title="$t('Rating trend')"
+                    :description="
+                        $t(
+                            'Rolling 30-day average; bars show daily review volume (90 days).',
+                        )
+                    "
                 >
                     <TrendChart :points="trend" />
                 </Panel>
 
                 <Panel
-                    title="What guests talk about"
-                    description="Topic mentions, last 30 days"
+                    :title="$t('What guests talk about')"
+                    :description="$t('Topic mentions, last 30 days')"
                 >
                     <p
                         v-if="!topics.length"
                         class="text-sm text-muted-foreground"
                     >
-                        No topics yet.
+                        {{ $t('No topics yet.') }}
                     </p>
                     <ul v-else class="space-y-3">
                         <li v-for="t in topics" :key="t.key">
@@ -254,8 +267,8 @@ function filterLocation(event: Event) {
 
             <Panel
                 v-if="locations.length"
-                title="Locations"
-                description="Last 30 days"
+                :title="$t('Locations')"
+                :description="$t('Last 30 days')"
                 :padded="false"
             >
                 <div class="overflow-x-auto">
@@ -263,21 +276,23 @@ function filterLocation(event: Event) {
                         <thead class="text-left text-xs text-muted-foreground">
                             <tr class="border-b border-border">
                                 <th class="px-5 py-2.5 font-normal">
-                                    Location
+                                    {{ $t('Location') }}
                                 </th>
                                 <th class="px-3 py-2.5 text-right font-normal">
-                                    Rating
+                                    {{ $t('Rating') }}
                                 </th>
                                 <th class="px-3 py-2.5 text-right font-normal">
-                                    Reviews
+                                    {{ $t('Reviews') }}
                                 </th>
                                 <th class="px-3 py-2.5 text-right font-normal">
-                                    Response rate
+                                    {{ $t('Response rate') }}
                                 </th>
                                 <th class="px-3 py-2.5 text-right font-normal">
-                                    Waiting
+                                    {{ $t('Waiting') }}
                                 </th>
-                                <th class="px-5 py-2.5 font-normal">Mode</th>
+                                <th class="px-5 py-2.5 font-normal">
+                                    {{ $t('Mode') }}
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -326,7 +341,7 @@ function filterLocation(event: Event) {
                                 <td
                                     class="px-5 py-3 text-xs text-muted-foreground capitalize"
                                 >
-                                    {{ l.mode }}
+                                    {{ $t(l.mode) }}
                                 </td>
                             </tr>
                         </tbody>

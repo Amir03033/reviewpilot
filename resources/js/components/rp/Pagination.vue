@@ -13,7 +13,7 @@ const clean = (label: string) =>
     <nav
         v-if="links.length > 3"
         class="flex flex-wrap items-center gap-1"
-        aria-label="Pagination"
+        :aria-label="$t('Pagination')"
     >
         <component
             :is="link.url ? Link : 'span'"

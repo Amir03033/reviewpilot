@@ -87,7 +87,7 @@ class ReviewActionController extends Controller
 
         return match ($reply?->state) {
             ReplyState::Published => $this->backWith('Reply published on Google.'),
-            ReplyState::Failed => $this->backWith('Not published: '.($reply->last_error ?: 'Google returned an error.'), 'error'),
+            ReplyState::Failed => $this->backWith('Not published: :reason', 'error', ['reason' => $reply->last_error ? __($reply->last_error) : __('Google returned an error.')]),
             default => $this->backWith('Reply approved. Publishing to Google…', 'info'),
         };
     }

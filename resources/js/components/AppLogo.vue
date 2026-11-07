@@ -24,8 +24,8 @@
         </svg>
     </div>
     <div class="ml-1 grid flex-1 text-left text-sm">
-        <span class="truncate leading-tight font-semibold tracking-tight"
-            >ReviewPilot</span
-        >
+        <span class="truncate leading-tight font-semibold tracking-tight">{{
+            $t('ReviewPilot')
+        }}</span>
     </div>
 </template>

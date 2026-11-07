@@ -54,12 +54,12 @@ function setStatus(status: string) {
 </script>
 
 <template>
-    <Head title="Inbox" />
+    <Head :title="$t('Inbox')" />
 
     <div class="space-y-5">
         <PageHeader
-            title="Inbox"
-            description="Every Google review across your locations."
+            :title="$t('Inbox')"
+            :description="$t('Every Google review across your locations.')"
         />
 
         <div class="flex flex-wrap items-center gap-1 border-b border-border">
@@ -75,7 +75,7 @@ function setStatus(status: string) {
                 "
                 @click="setStatus(String(key))"
             >
-                {{ label }}
+                {{ $t(label) }}
             </button>
         </div>
 
@@ -85,7 +85,7 @@ function setStatus(status: string) {
         >
             <Input
                 v-model="f.q"
-                placeholder="Search text or name…"
+                :placeholder="$t('Search text or name…')"
                 class="lg:col-span-2"
             />
             <select
@@ -93,7 +93,7 @@ function setStatus(status: string) {
                 class="h-9 rounded-md border border-input bg-transparent px-2 text-sm dark:bg-input/30"
                 @change="apply"
             >
-                <option value="">All locations</option>
+                <option value="">{{ $t('All locations') }}</option>
                 <option v-for="l in locations" :key="l.id" :value="l.id">
                     {{ l.name }}
                 </option>
@@ -103,9 +103,9 @@ function setStatus(status: string) {
                 class="h-9 rounded-md border border-input bg-transparent px-2 text-sm dark:bg-input/30"
                 @change="apply"
             >
-                <option value="">Any rating</option>
+                <option value="">{{ $t('Any rating') }}</option>
                 <option v-for="r in [5, 4, 3, 2, 1]" :key="r" :value="r">
-                    {{ r }} stars
+                    {{ $t(':count stars', { count: r }) }}
                 </option>
             </select>
             <select
@@ -113,7 +113,7 @@ function setStatus(status: string) {
                 class="h-9 rounded-md border border-input bg-transparent px-2 text-sm dark:bg-input/30"
                 @change="apply"
             >
-                <option value="">Any topic</option>
+                <option value="">{{ $t('Any topic') }}</option>
                 <option v-for="t in topics" :key="t.key" :value="t.key">
                     {{ t.label }}
                 </option>
@@ -122,7 +122,7 @@ function setStatus(status: string) {
 
         <EmptyState
             v-if="!reviews.data.length"
-            title="Nothing here"
+            :title="$t('Nothing here')"
             :description="
                 f.status === 'attention'
                     ? 'No reviews are waiting for you. Nice work.'

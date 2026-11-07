@@ -75,7 +75,7 @@ const polarityClass = (p: number) =>
 </script>
 
 <template>
-    <Head :title="`Review by ${review.reviewer}`" />
+    <Head :title="$t('Review by :name', { name: review.reviewer })" />
 
     <div class="grid gap-5 lg:grid-cols-[1fr_340px]">
         <div class="space-y-5">
@@ -109,7 +109,11 @@ const polarityClass = (p: number) =>
                     class="mt-3 text-xs text-muted-foreground"
                 >
                     <summary class="cursor-pointer">
-                        Edited by the guest ({{ review.revisions.length }}×)
+                        {{
+                            $t('Edited by the guest (:count×)', {
+                                count: review.revisions.length,
+                            })
+                        }}
                     </summary>
                     <div
                         v-for="(r, i) in review.revisions"
@@ -123,45 +127,55 @@ const polarityClass = (p: number) =>
             </Panel>
 
             <!-- Current reply state -->
-            <Panel v-if="reply && reply.state !== 'cancelled'" title="Reply">
+            <Panel
+                v-if="reply && reply.state !== 'cancelled'"
+                :title="$t('Reply')"
+            >
                 <p class="text-sm whitespace-pre-line">{{ reply.text }}</p>
                 <div
                     class="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
                 >
                     <template v-if="reply.state === 'scheduled'">
-                        Publishes automatically
-                        {{ timeAgo(reply.scheduled_for) }} ({{
-                            dateTime(reply.scheduled_for)
-                        }}).
+                        {{
+                            $t('Publishes automatically :relative (:date).', {
+                                relative: timeAgo(reply.scheduled_for),
+                                date: dateTime(reply.scheduled_for),
+                            })
+                        }}
                         <Button
                             v-if="permissions.approve"
                             size="sm"
                             variant="outline"
                             @click="post('cancel-scheduled')"
-                            >Cancel &amp; review</Button
+                            >{{ $t('Cancel & review') }}</Button
                         >
                     </template>
                     <template v-else-if="reply.state === 'published'">
-                        Published {{ timeAgo(reply.published_at) }}
                         {{
                             reply.published_via === 'automation'
-                                ? 'automatically'
-                                : ''
-                        }}.
+                                ? $t('Published automatically :time.', {
+                                      time: timeAgo(reply.published_at),
+                                  })
+                                : $t('Published :time.', {
+                                      time: timeAgo(reply.published_at),
+                                  })
+                        }}
                     </template>
-                    <template v-else-if="reply.state === 'publishing'"
-                        >Sending to Google…</template
-                    >
+                    <template v-else-if="reply.state === 'publishing'">{{
+                        $t('Sending to Google…')
+                    }}</template>
                     <template v-else-if="reply.state === 'failed'">
-                        <span class="text-critical"
-                            >Publishing failed: {{ reply.last_error }}</span
-                        >
+                        <span class="text-critical">{{
+                            $t('Publishing failed: :error', {
+                                error: reply.last_error,
+                            })
+                        }}</span>
                         <Button
                             v-if="permissions.approve"
                             size="sm"
                             variant="outline"
                             @click="post('retry')"
-                            >Retry</Button
+                            >{{ $t('Retry') }}</Button
                         >
                     </template>
                 </div>
@@ -172,7 +186,7 @@ const polarityClass = (p: number) =>
                     review.owner_reply_text &&
                     review.owner_reply_origin === 'external'
                 "
-                title="Replied directly on Google"
+                :title="$t('Replied directly on Google')"
             >
                 <p class="text-sm whitespace-pre-line">
                     {{ review.owner_reply_text }}
@@ -193,14 +207,18 @@ const polarityClass = (p: number) =>
                         'received',
                     ].includes(review.state) || drafts.length
                 "
-                title="Your reply"
-                description="Drafts follow your brand voice and only use the facts you configured."
+                :title="$t('Your reply')"
+                :description="
+                    $t(
+                        'Drafts follow your brand voice and only use the facts you configured.',
+                    )
+                "
             >
                 <p
                     v-if="review.state === 'drafting'"
                     class="mb-3 text-sm text-muted-foreground"
                 >
-                    Writing new drafts…
+                    {{ $t('Writing new drafts…') }}
                 </p>
                 <DraftEditor
                     :key="drafts.map((d) => d.id).join()"
@@ -213,21 +231,27 @@ const polarityClass = (p: number) =>
         </div>
 
         <aside class="space-y-5">
-            <Panel title="Analysis">
+            <Panel :title="$t('Analysis')">
                 <div v-if="analysis" class="space-y-4 text-sm">
                     <p v-if="analysis.summary" class="text-muted-foreground">
                         {{ analysis.summary }}
                     </p>
                     <dl class="grid grid-cols-2 gap-y-2 text-xs">
-                        <dt class="text-muted-foreground">Sentiment</dt>
+                        <dt class="text-muted-foreground">
+                            {{ $t('Sentiment') }}
+                        </dt>
                         <dd class="capitalize">
-                            {{ analysis.sentiment_label }}
+                            {{ $t(analysis.sentiment_label) }}
                         </dd>
-                        <dt class="text-muted-foreground">Language</dt>
+                        <dt class="text-muted-foreground">
+                            {{ $t('Language') }}
+                        </dt>
                         <dd class="font-mono uppercase">
                             {{ analysis.language ?? '—' }}
                         </dd>
-                        <dt class="text-muted-foreground">Risk score</dt>
+                        <dt class="text-muted-foreground">
+                            {{ $t('Risk score') }}
+                        </dt>
                         <dd
                             class="tabular font-mono"
                             :class="
@@ -240,13 +264,16 @@ const polarityClass = (p: number) =>
                     <div v-if="analysis.risk_flags.length" class="space-y-1.5">
                         <RiskFlags :flags="analysis.risk_flags" />
                         <p class="text-xs text-muted-foreground">
-                            Sensitive reviews always need a person before
-                            anything is published.
+                            {{
+                                $t(
+                                    'Sensitive reviews always need a person before anything is published.',
+                                )
+                            }}
                         </p>
                     </div>
                     <div v-if="analysis.topics.length">
                         <p class="mb-1.5 text-xs text-muted-foreground">
-                            Topics
+                            {{ $t('Topics') }}
                         </p>
                         <ul class="space-y-1.5">
                             <li
@@ -270,22 +297,24 @@ const polarityClass = (p: number) =>
                         v-if="analysis.entities?.dishes?.length"
                         class="text-xs"
                     >
-                        <span class="text-muted-foreground">Dishes:</span>
+                        <span class="text-muted-foreground">{{
+                            $t('Dishes:')
+                        }}</span>
                         {{ analysis.entities.dishes.join(', ') }}
                     </div>
                 </div>
                 <p v-else class="text-sm text-muted-foreground">
-                    Not analysed yet.
+                    {{ $t('Not analysed yet.') }}
                 </p>
             </Panel>
 
-            <Panel title="History">
+            <Panel :title="$t('History')">
                 <ol class="space-y-3">
                     <li v-for="(e, i) in timeline" :key="i" class="text-xs">
                         <p>
-                            {{ humanize(e.action) }}
+                            {{ $t(humanize(e.action)) }}
                             <span class="text-muted-foreground"
-                                >· {{ e.actor }}</span
+                                >· {{ $t(e.actor) }}</span
                             >
                         </p>
                         <p class="text-muted-foreground">

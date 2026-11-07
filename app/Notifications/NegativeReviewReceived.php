@@ -27,14 +27,16 @@ class NegativeReviewReceived extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $location = Location::withoutGlobalScopes()->find($this->review->location_id);
+        $stars = $this->review->star_rating;
+        $place = (string) $location?->name;
 
         return (new MailMessage)
-            ->subject("{$this->review->star_rating}★ review for {$location?->name} needs your attention")
-            ->greeting('A review needs a personal reply')
-            ->line(($this->review->reviewer_display_name ?? 'A guest')." left {$this->review->star_rating} stars at {$location?->name}:")
-            ->line('“'.Str::limit((string) ($this->review->comment ?: 'No text, rating only.'), 400).'”')
-            ->action('Open the review', route('reviews.show', $this->review->id))
-            ->line('ReviewPilot has prepared draft replies for you to check.');
+            ->subject(__(':stars★ review for :location needs your attention', ['stars' => $stars, 'location' => $place]))
+            ->greeting(__('A review needs a personal reply'))
+            ->line(__(':name left :stars stars at :location:', ['name' => $this->review->reviewer_display_name ?? __('A guest'), 'stars' => $stars, 'location' => $place]))
+            ->line('“'.Str::limit((string) ($this->review->comment ?: __('No text, rating only.')), 400).'”')
+            ->action(__('Open the review'), route('reviews.show', $this->review->id))
+            ->line(__('ReviewPilot has prepared draft replies for you to check.'));
     }
 
     public function toArray(object $notifiable): array

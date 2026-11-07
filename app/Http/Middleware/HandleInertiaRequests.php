@@ -8,6 +8,7 @@ use App\Models\Review;
 use App\Services\Billing\Entitlements;
 use App\Services\Google\GoogleOAuth;
 use App\Support\PlatformSettings;
+use App\Support\Translations;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -52,6 +53,8 @@ class HandleInertiaRequests extends Middleware
             ],
             // Lazy: evaluated at render time, after ResolveOrganization has run.
             'tenant' => fn () => $this->tenant($request),
+            'locale' => app()->getLocale(),
+            'translations' => fn () => Translations::for(app()->getLocale()),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

@@ -7,6 +7,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import LanguageSwitcher from '@/components/rp/LanguageSwitcher.vue';
 import UserInfo from '@/components/UserInfo.vue';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
@@ -34,10 +35,15 @@ defineProps<Props>();
         <DropdownMenuItem :as-child="true">
             <Link class="block w-full cursor-pointer" :href="edit()" prefetch>
                 <Settings class="mr-2 h-4 w-4" />
-                Settings
+                {{ $t('Settings') }}
             </Link>
         </DropdownMenuItem>
     </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <div class="flex items-center justify-between px-2 py-1.5 text-sm">
+        <span class="text-muted-foreground">{{ $t('Language') }}</span>
+        <LanguageSwitcher />
+    </div>
     <DropdownMenuSeparator />
     <DropdownMenuItem :as-child="true">
         <Link
@@ -48,7 +54,7 @@ defineProps<Props>();
             data-test="logout-button"
         >
             <LogOut class="mr-2 h-4 w-4" />
-            Log out
+            {{ $t('Log out') }}
         </Link>
     </DropdownMenuItem>
 </template>

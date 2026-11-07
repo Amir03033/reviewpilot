@@ -196,7 +196,7 @@ class LocationController extends Controller
         $this->audit->log('location.removed', $location);
         rescue(fn () => $billing->syncQuantity($this->organization()));
 
-        $this->toast('Location removed. Its data is deleted after '.config('reviewpilot.retention.disconnect_grace_days').' days.');
+        $this->toast('Location removed. Its data is deleted after :days days.', replace: ['days' => config('reviewpilot.retention.disconnect_grace_days')]);
 
         return redirect()->route('locations.index');
     }

@@ -41,7 +41,7 @@ enum ReviewState: string
 
     public function label(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Received => 'Received',
             self::AnalysisFailed => 'Analysis failed',
             self::Analyzed => 'Analyzed',
@@ -55,6 +55,6 @@ enum ReviewState: string
             self::Rejected => 'Rejected',
             self::NoAction => 'No action',
             self::Stale => 'Review changed',
-        };
+        });
     }
 }

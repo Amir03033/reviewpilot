@@ -25,10 +25,10 @@ class GoogleReconnectRequired extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Reconnect Google to keep syncing reviews')
-            ->line("ReviewPilot lost access to the Google account {$this->googleConnection->google_email}.")
-            ->line('New reviews are not synced and replies cannot be published until you reconnect.')
-            ->action('Reconnect Google', route('integrations.index'));
+            ->subject(__('Reconnect Google to keep syncing reviews'))
+            ->line(__('ReviewPilot lost access to the Google account :email.', ['email' => $this->googleConnection->google_email]))
+            ->line(__('New reviews are not synced and replies cannot be published until you reconnect.'))
+            ->action(__('Reconnect Google'), route('integrations.index'));
     }
 
     public function toArray(object $notifiable): array

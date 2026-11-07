@@ -28,16 +28,18 @@ class WeeklyDigest extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $s = $this->stats;
+        $average = $s['average'] ? ' '.__('(average :rating★)', ['rating' => number_format($s['average'], 1, app()->getLocale() === 'nl' ? ',' : '.')]) : '';
+
         $mail = (new MailMessage)
-            ->subject("Your week on Google: {$s['reviews']} new reviews – {$this->organization->name}")
-            ->greeting('Weekly review digest')
-            ->line("New reviews: {$s['reviews']}".($s['average'] ? ' (average '.number_format($s['average'], 1).'★)' : ''))
-            ->line("Replied: {$s['replied']} · Waiting for approval: {$s['pending']} · Negative: {$s['negative']}");
+            ->subject(__('Your week on Google: :count new reviews – :organization', ['count' => $s['reviews'], 'organization' => $this->organization->name]))
+            ->greeting(__('Weekly review digest'))
+            ->line(__('New reviews: :count', ['count' => $s['reviews']]).$average)
+            ->line(__('Replied: :replied · Waiting for approval: :pending · Negative: :negative', ['replied' => $s['replied'], 'pending' => $s['pending'], 'negative' => $s['negative']]));
 
         if ($s['top_topics'] !== []) {
-            $mail->line('Most mentioned in complaints: '.implode(', ', $s['top_topics']));
+            $mail->line(__('Most mentioned in complaints: :topics', ['topics' => implode(', ', $s['top_topics'])]));
         }
 
-        return $mail->action('Open ReviewPilot', route('dashboard'));
+        return $mail->action(__('Open ReviewPilot'), route('dashboard'));
     }
 }

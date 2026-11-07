@@ -187,7 +187,7 @@ class TenantSecurityTest extends TestCase
 
     public function test_every_application_route_requires_authentication(): void
     {
-        $public = ['home', 'webhooks.google', 'webhooks.mollie', 'invitations.show', 'well-known.passkeys'];
+        $public = ['home', 'webhooks.google', 'webhooks.mollie', 'invitations.show', 'well-known.passkeys', 'locale.update'];
 
         foreach (Route::getRoutes() as $route) {
             $name = $route->getName();

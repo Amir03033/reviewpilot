@@ -27,6 +27,6 @@ const tone = computed(() => {
     <span
         class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap"
         :class="tone"
-        >{{ label }}</span
+        >{{ $t(label) }}</span
     >
 </template>

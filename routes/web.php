@@ -5,6 +5,7 @@ use App\Http\Controllers\BrandVoiceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoogleIntegrationController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\OrganizationSettingsController;
@@ -16,6 +17,8 @@ use App\Http\Controllers\Webhooks\MollieWebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
+
+Route::post('locale', LocaleController::class)->middleware('throttle:30,1')->name('locale.update');
 
 // --- Webhooks (no session, no CSRF; authenticated by signature / API lookup) ---
 Route::post('webhooks/google/pubsub', GooglePubSubController::class)->middleware('throttle:600,1')->name('webhooks.google');

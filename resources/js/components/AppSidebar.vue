@@ -77,7 +77,7 @@ function switchOrg(event: Event) {
                 <select
                     class="w-full rounded-md border border-sidebar-border bg-transparent px-2 py-1.5 text-xs"
                     :value="tenant.organization.id"
-                    aria-label="Switch organisation"
+                    :aria-label="$t('Switch organisation')"
                     @change="switchOrg"
                 >
                     <option
@@ -99,17 +99,17 @@ function switchOrg(event: Event) {
 
         <SidebarContent>
             <SidebarGroup class="px-2 py-0">
-                <SidebarGroupLabel>Reputation</SidebarGroupLabel>
+                <SidebarGroupLabel>{{ $t('Reputation') }}</SidebarGroupLabel>
                 <SidebarMenu>
                     <SidebarMenuItem v-for="item in work" :key="item.title">
                         <SidebarMenuButton
                             as-child
                             :is-active="isCurrentUrl(item.href)"
-                            :tooltip="item.title"
+                            :tooltip="$t(item.title)"
                         >
                             <Link :href="item.href">
                                 <component :is="item.icon" />
-                                <span>{{ item.title }}</span>
+                                <span>{{ $t(item.title) }}</span>
                             </Link>
                         </SidebarMenuButton>
                         <SidebarMenuBadge
@@ -121,17 +121,17 @@ function switchOrg(event: Event) {
                 </SidebarMenu>
             </SidebarGroup>
             <SidebarGroup class="px-2 py-0">
-                <SidebarGroupLabel>Settings</SidebarGroupLabel>
+                <SidebarGroupLabel>{{ $t('Settings') }}</SidebarGroupLabel>
                 <SidebarMenu>
                     <SidebarMenuItem v-for="item in settings" :key="item.title">
                         <SidebarMenuButton
                             as-child
                             :is-active="isCurrentUrl(item.href)"
-                            :tooltip="item.title"
+                            :tooltip="$t(item.title)"
                         >
                             <Link :href="item.href">
                                 <component :is="item.icon" />
-                                <span>{{ item.title }}</span>
+                                <span>{{ $t(item.title) }}</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -144,10 +144,10 @@ function switchOrg(event: Event) {
                 v-if="tenant?.onTrial"
                 class="px-2 text-[11px] text-muted-foreground group-data-[collapsible=icon]:hidden"
             >
-                Trial ·
-                <Link href="/billing" class="text-brass hover:underline"
-                    >choose a plan</Link
-                >
+                {{ $t('Trial ·') }}
+                <Link href="/billing" class="text-brass hover:underline">{{
+                    $t('choose a plan')
+                }}</Link>
             </p>
             <NavUser />
         </SidebarFooter>

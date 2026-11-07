@@ -152,7 +152,7 @@ class ReviewController extends Controller
     {
         return [
             'id' => $r->id,
-            'reviewer' => $r->reviewer_is_anonymous ? 'Anonymous' : ($r->reviewer_display_name ?: 'Google user'),
+            'reviewer' => $r->reviewer_is_anonymous ? __('Anonymous') : ($r->reviewer_display_name ?: __('Google user')),
             'rating' => $r->star_rating,
             'excerpt' => mb_strimwidth((string) $r->comment, 0, 180, '…'),
             'summary' => $r->analysis?->summary,

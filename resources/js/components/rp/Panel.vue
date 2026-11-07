@@ -12,12 +12,12 @@ withDefaults(
             class="flex items-start justify-between gap-3 border-b border-border px-5 py-4"
         >
             <div>
-                <h2 class="text-sm font-medium">{{ title }}</h2>
+                <h2 class="text-sm font-medium">{{ $t(title ?? '') }}</h2>
                 <p
                     v-if="description"
                     class="mt-0.5 text-xs text-muted-foreground"
                 >
-                    {{ description }}
+                    {{ $t(description ?? '') }}
                 </p>
             </div>
             <slot name="actions" />

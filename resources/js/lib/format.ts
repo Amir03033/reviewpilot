@@ -1,4 +1,6 @@
-const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+import { currentLocale, t } from '@/lib/i18n';
+
+const intlLocale = () => (currentLocale() === 'en' ? 'en-GB' : 'nl-NL');
 
 export function timeAgo(iso: string | null | undefined): string {
     if (!iso) {
@@ -17,11 +19,13 @@ export function timeAgo(iso: string | null | undefined): string {
 
     for (const [unit, size] of units) {
         if (Math.abs(seconds) >= size) {
-            return rtf.format(Math.round(seconds / size), unit);
+            return new Intl.RelativeTimeFormat(intlLocale(), {
+                numeric: 'auto',
+            }).format(Math.round(seconds / size), unit);
         }
     }
 
-    return 'just now';
+    return t('just now');
 }
 
 export function dateTime(iso: string | null | undefined): string {
@@ -29,7 +33,7 @@ export function dateTime(iso: string | null | undefined): string {
         return '—';
     }
 
-    return new Date(iso).toLocaleString(undefined, {
+    return new Date(iso).toLocaleString(intlLocale(), {
         dateStyle: 'medium',
         timeStyle: 'short',
     });

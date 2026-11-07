@@ -41,14 +41,15 @@ abstract class Controller
         Gate::authorize($ability, $locationId);
     }
 
-    protected function toast(string $message, string $type = 'success'): void
+    /** Flash a toast. The message is an English source string, translated to the user's language. */
+    protected function toast(string $message, string $type = 'success', array $replace = []): void
     {
-        Inertia::flash('toast', ['type' => $type, 'message' => $message]);
+        Inertia::flash('toast', ['type' => $type, 'message' => __($message, $replace)]);
     }
 
-    protected function backWith(string $message, string $type = 'success'): RedirectResponse
+    protected function backWith(string $message, string $type = 'success', array $replace = []): RedirectResponse
     {
-        $this->toast($message, $type);
+        $this->toast($message, $type, $replace);
 
         return back();
     }

@@ -37,7 +37,7 @@ const good = computed(() =>
 
 <template>
     <div class="rounded-xl border border-border bg-card p-4">
-        <p class="text-xs text-muted-foreground">{{ label }}</p>
+        <p class="text-xs text-muted-foreground">{{ $t(label) }}</p>
         <p class="tabular mt-2 font-mono text-2xl font-medium tracking-tight">
             {{ value }}
         </p>
@@ -46,11 +46,15 @@ const good = computed(() =>
             class="tabular mt-1 text-xs"
             :class="good ? 'text-positive' : 'text-critical'"
         >
-            {{ delta > 0 ? '▲' : '▼' }} {{ Math.abs(delta)
-            }}{{ suffix ?? '' }} vs previous period
+            {{ delta > 0 ? '▲' : '▼' }}
+            {{
+                $t(':delta vs previous period', {
+                    delta: Math.abs(delta) + (suffix ?? ''),
+                })
+            }}
         </p>
         <p v-else class="mt-1 text-xs text-muted-foreground">
-            No change vs previous period
+            {{ $t('No change vs previous period') }}
         </p>
     </div>
 </template>

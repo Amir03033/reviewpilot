@@ -19,10 +19,10 @@ withDefaults(defineProps<Props>(), {
                     : 'text-xl font-semibold tracking-tight'
             "
         >
-            {{ title }}
+            {{ $t(title) }}
         </h2>
         <p v-if="description" class="text-sm text-muted-foreground">
-            {{ description }}
+            {{ $t(description) }}
         </p>
     </header>
 </template>

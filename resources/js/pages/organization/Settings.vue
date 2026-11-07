@@ -49,20 +49,26 @@ const destroy = () =>
 </script>
 
 <template>
-    <Head title="Organisation" />
+    <Head :title="$t('Organisation')" />
 
     <div class="space-y-6">
-        <PageHeader title="Organisation">
+        <PageHeader :title="$t('Organisation')">
             <template #actions>
                 <Button v-if="canManage" variant="outline" as-child
-                    ><Link href="/organization/audit">Audit log</Link></Button
+                    ><Link href="/organization/audit">{{
+                        $t('Audit log')
+                    }}</Link></Button
                 >
             </template>
         </PageHeader>
 
         <Panel
-            title="Automatic publishing"
-            description="Emergency stop for every location. Scheduled replies go back to the approval queue."
+            :title="$t('Automatic publishing')"
+            :description="
+                $t(
+                    'Emergency stop for every location. Scheduled replies go back to the approval queue.',
+                )
+            "
         >
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <p
@@ -97,7 +103,7 @@ const destroy = () =>
             </div>
         </Panel>
 
-        <Panel title="Details">
+        <Panel :title="$t('Details')">
             <form
                 class="grid gap-4 md:grid-cols-2"
                 @submit.prevent="
@@ -106,57 +112,57 @@ const destroy = () =>
             >
                 <fieldset :disabled="!canManage" class="contents">
                     <div class="grid gap-2">
-                        <Label>Name</Label
+                        <Label>{{ $t('Name') }}</Label
                         ><Input v-model="form.name" /><InputError
                             :message="form.errors.name"
                         />
                     </div>
                     <div class="grid gap-2">
-                        <Label>Country (ISO)</Label
+                        <Label>{{ $t('Country (ISO)') }}</Label
                         ><Input
                             v-model="form.country"
                             maxlength="2"
                         /><InputError :message="form.errors.country" />
                     </div>
                     <div class="grid gap-2">
-                        <Label>VAT number</Label
+                        <Label>{{ $t('VAT number') }}</Label
                         ><Input
                             v-model="form.vat_number"
-                            placeholder="NL123456789B01"
+                            :placeholder="$t('NL123456789B01')"
                         />
                     </div>
                     <div class="grid gap-2">
-                        <Label>Billing email</Label
+                        <Label>{{ $t('Billing email') }}</Label
                         ><Input
                             v-model="form.billing_email"
                             type="email"
                         /><InputError :message="form.errors.billing_email" />
                     </div>
                     <div class="grid gap-2">
-                        <Label>Default language</Label>
+                        <Label>{{ $t('Default language') }}</Label>
                         <select
                             v-model="form.default_locale"
                             class="h-9 rounded-md border border-input bg-transparent px-2 text-sm dark:bg-input/30"
                         >
-                            <option value="nl">Nederlands</option>
-                            <option value="en">English</option>
-                            <option value="de">Deutsch</option>
-                            <option value="fr">Français</option>
+                            <option value="nl">{{ $t('Nederlands') }}</option>
+                            <option value="en">{{ $t('English') }}</option>
+                            <option value="de">{{ $t('Deutsch') }}</option>
+                            <option value="fr">{{ $t('Français') }}</option>
                         </select>
                     </div>
                     <div class="grid gap-2">
-                        <Label>Time zone</Label
+                        <Label>{{ $t('Time zone') }}</Label
                         ><Input v-model="form.timezone" /><InputError
                             :message="form.errors.timezone"
                         />
                     </div>
                     <div class="grid gap-2">
-                        <Label>Keep review data (days)</Label>
+                        <Label>{{ $t('Keep review data (days)') }}</Label>
                         <Input
                             v-model.number="form.data_retention_days"
                             type="number"
                             min="30"
-                            placeholder="Plan default"
+                            :placeholder="$t('Plan default')"
                         />
                         <InputError
                             :message="form.errors.data_retention_days"
@@ -167,7 +173,7 @@ const destroy = () =>
                             v-if="canManage"
                             type="submit"
                             :disabled="form.processing"
-                            >Save</Button
+                            >{{ $t('Save') }}</Button
                         >
                     </div>
                 </fieldset>
@@ -176,19 +182,23 @@ const destroy = () =>
 
         <Panel
             v-if="isOwner"
-            title="Delete organisation"
-            description="Data is permanently removed after 30 days."
+            :title="$t('Delete organisation')"
+            :description="$t('Data is permanently removed after 30 days.')"
         >
             <div class="flex flex-wrap items-end gap-2">
                 <div class="grid gap-2">
-                    <Label>Type “{{ organization.name }}” to confirm</Label>
+                    <Label>{{
+                        $t('Type “:name” to confirm', {
+                            name: organization.name,
+                        })
+                    }}</Label>
                     <Input v-model="confirmName" class="w-72" />
                 </div>
                 <Button
                     variant="destructive"
                     :disabled="confirmName !== organization.name"
                     @click="destroy"
-                    >Delete organisation</Button
+                    >{{ $t('Delete organisation') }}</Button
                 >
             </div>
         </Panel>

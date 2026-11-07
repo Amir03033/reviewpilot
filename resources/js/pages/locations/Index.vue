@@ -28,29 +28,39 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Locations" />
+    <Head :title="$t('Locations')" />
 
     <div class="space-y-5">
         <PageHeader
-            title="Locations"
-            description="Each location has its own automation mode, facts and (optionally) voice."
+            :title="$t('Locations')"
+            :description="
+                $t(
+                    'Each location has its own automation mode, facts and (optionally) voice.',
+                )
+            "
         >
             <template #actions>
                 <Button v-if="canManage" as-child variant="outline"
-                    ><Link href="/integrations"
-                        >Import from Google</Link
-                    ></Button
+                    ><Link href="/integrations">{{
+                        $t('Import from Google')
+                    }}</Link></Button
                 >
             </template>
         </PageHeader>
 
         <EmptyState
             v-if="!locations.length"
-            title="No locations yet"
-            description="Import your Google Business Profile locations to get started."
+            :title="$t('No locations yet')"
+            :description="
+                $t(
+                    'Import your Google Business Profile locations to get started.',
+                )
+            "
         >
             <Button v-if="canManage" as-child
-                ><Link href="/integrations">Connect Google</Link></Button
+                ><Link href="/integrations">{{
+                    $t('Connect Google')
+                }}</Link></Button
             >
         </EmptyState>
 
@@ -70,14 +80,14 @@ defineOptions({
                     </div>
                     <span
                         class="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground capitalize"
-                        >{{ l.mode }}</span
+                        >{{ $t(l.mode) }}</span
                     >
                 </div>
                 <p class="mt-4 text-xs">
                     <template v-if="!l.google"
-                        ><span class="text-muted-foreground"
-                            >Not connected to Google</span
-                        ></template
+                        ><span class="text-muted-foreground">{{
+                            $t('Not connected to Google')
+                        }}</span></template
                     >
                     <template v-else-if="l.google.last_error"
                         ><span class="text-critical">{{
@@ -87,7 +97,11 @@ defineOptions({
                     <template v-else>
                         <span class="text-positive">●</span>
                         <span class="text-muted-foreground">
-                            Synced {{ timeAgo(l.google.last_synced_at) }}</span
+                            {{
+                                $t('Synced :time', {
+                                    time: timeAgo(l.google.last_synced_at),
+                                })
+                            }}</span
                         >
                     </template>
                 </p>
