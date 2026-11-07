@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 /** Platform-wide switches stored in the database (never only in cache). */
@@ -11,7 +12,11 @@ class PlatformSettings
 
     public static function get(string $key, ?string $default = null): ?string
     {
-        return DB::table('platform_settings')->where('key', $key)->value('value') ?? $default;
+        try {
+            return DB::table('platform_settings')->where('key', $key)->value('value') ?? $default;
+        } catch (QueryException) {
+            return $default; // tables not migrated yet (fresh install)
+        }
     }
 
     public static function set(string $key, ?string $value): void

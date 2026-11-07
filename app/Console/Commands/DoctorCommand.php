@@ -24,7 +24,8 @@ class DoctorCommand extends Command
     public function handle(): int
     {
         $production = app()->isProduction();
-        $this->line('Environment: '.app()->environment().($production ? '' : ' (production-only checks are shown as warnings)'));
+        $env = (string) app()->environment();
+        $this->line('Environment: '.($env !== '' ? $env : '(empty: set APP_ENV=production in .env)').($production ? '' : ' (production-only checks are shown as warnings)'));
 
         $this->section('Application');
         $this->check(filled(config('app.key')), 'APP_KEY is set');
@@ -66,7 +67,11 @@ class DoctorCommand extends Command
         $this->check(! in_array(config('mail.default'), ['log', 'array'], true), 'A real mailer is configured (alerts, invitations, email verification)', $production);
 
         $this->section('Safety');
-        $this->check(! User::query()->where('email', 'like', '%@reviewpilot.test')->exists() || ! $production, 'No demo accounts exist in production', $production);
+        if (! \Schema::hasTable('users')) {
+            $this->check(false, 'Database tables exist (run: php artisan migrate --force)');
+        } else {
+            $this->check(! User::query()->where('email', 'like', '%@reviewpilot.test')->exists() || ! $production, 'No demo accounts exist in production', $production);
+        }
         if (PlatformSettings::automationPaused()) {
             $this->warn('  ! Automatic publishing is paused platform-wide (reviewpilot:automation resume).');
         }

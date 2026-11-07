@@ -10,7 +10,7 @@
 | Config file | `/var/www/vhosts/reviewspilot.nl/httpdocs/.env` |
 | Logs | `/var/www/vhosts/reviewspilot.nl/httpdocs/storage/logs/` |
 | PHP 8.4 (CLI) | `/opt/plesk/php/8.4/bin/php` |
-| Node 22 (Plesk Node.js extension) | `/opt/plesk/node/22/bin/npm` |
+| Node 24 (Plesk Node.js extension) | `/opt/plesk/node/24/bin/npm` |
 | Git branch | `claude/charming-darwin-ky7wda` (switch to `main` after merging) |
 | Repo | `git@github.com:amir03033/reviewpilot.git` |
 | System user | the subscription's user, shown under *Websites & Domains → Hosting & DNS → Hosting* (called `SYSUSER` below) |
@@ -49,7 +49,7 @@
 **Enable additional deployment actions** and paste:
 ```
 /opt/plesk/php/8.4/bin/php /usr/lib/plesk-9.0/composer.phar install --no-dev --optimize-autoloader --no-interaction
-export PATH=/opt/plesk/node/22/bin:$PATH && npm ci && npm run build
+export PATH=/opt/plesk/node/24/bin:$PATH && npm ci && npm run build
 /opt/plesk/php/8.4/bin/php artisan migrate --force
 /opt/plesk/php/8.4/bin/php artisan optimize
 /opt/plesk/php/8.4/bin/php artisan queue:restart
