@@ -1,26 +1,27 @@
 # ReviewPilot — Product Strategy & Technical Blueprint
 
-> Status: **Planning phase (v1.0, 2026-11-07)**. No application code exists yet.
+> Status: **v1.0 blueprint (2026-11-07)**. The MVP application is implemented in this repository; see the root `README.md`.
+> Decisions taken since: **Claude (Anthropic)** for AI, **Mollie** for billing, **Laravel Cloud** (EU) as the hosting target.
 > This folder is the single source of truth for building ReviewPilot as a new, independent project.
 
 ## How to read this blueprint
 
-| # | Document | Audience |
-|---|----------|----------|
-| 01 | [Executive product overview](01-executive-overview.md) | Founders, investors |
-| 02 | [Market & competitor research](02-market-competitor-research.md) | Founders, sales |
-| 03 | [Product requirements document (PRD)](03-prd.md) | Product, engineering |
-| 04 | [Feature specification](04-feature-specification.md) | Engineering, design |
-| 05 | [Technical architecture](05-technical-architecture.md) | Engineering |
-| 06 | [Database schema & ERD](06-database-schema.md) | Engineering |
-| 07 | [API integration specification](07-api-integration-spec.md) | Engineering |
-| 08 | [UX/UI sitemap & screens](08-ux-ui-sitemap.md) | Design, frontend |
-| 09 | [Commercial & pricing strategy](09-pricing-strategy.md) | Founders, sales |
-| 10 | [Security & compliance assessment](10-security-compliance.md) | Engineering, legal |
-| 11 | [Development roadmap](11-roadmap.md) | Everyone |
-| 12 | [Risk register](12-risk-register.md) | Founders |
-| 13 | [MVP scope](13-mvp-scope.md) | Everyone |
-| 14 | [Long-term product vision](14-long-term-vision.md) | Founders |
+| #   | Document                                                         | Audience             |
+| --- | ---------------------------------------------------------------- | -------------------- |
+| 01  | [Executive product overview](01-executive-overview.md)           | Founders, investors  |
+| 02  | [Market & competitor research](02-market-competitor-research.md) | Founders, sales      |
+| 03  | [Product requirements document (PRD)](03-prd.md)                 | Product, engineering |
+| 04  | [Feature specification](04-feature-specification.md)             | Engineering, design  |
+| 05  | [Technical architecture](05-technical-architecture.md)           | Engineering          |
+| 06  | [Database schema & ERD](06-database-schema.md)                   | Engineering          |
+| 07  | [API integration specification](07-api-integration-spec.md)      | Engineering          |
+| 08  | [UX/UI sitemap & screens](08-ux-ui-sitemap.md)                   | Design, frontend     |
+| 09  | [Commercial & pricing strategy](09-pricing-strategy.md)          | Founders, sales      |
+| 10  | [Security & compliance assessment](10-security-compliance.md)    | Engineering, legal   |
+| 11  | [Development roadmap](11-roadmap.md)                             | Everyone             |
+| 12  | [Risk register](12-risk-register.md)                             | Founders             |
+| 13  | [MVP scope](13-mvp-scope.md)                                     | Everyone             |
+| 14  | [Long-term product vision](14-long-term-vision.md)               | Founders             |
 
 ## Evidence labels used throughout
 

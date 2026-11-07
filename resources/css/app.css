@@ -1,0 +1,203 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-sans:
+        'Geist Variable', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+    --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+    --color-brass: var(--brass);
+    --color-positive: var(--positive);
+    --color-warning: var(--warning);
+    --color-critical: var(--critical);
+    --color-info: var(--info);
+    --color-surface-2: var(--surface-2);
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+
+    --color-sidebar: var(--sidebar-background);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+}
+
+@layer utilities {
+    body,
+    html {
+        --font-sans:
+            'Geist Variable', ui-sans-serif, system-ui, sans-serif,
+            'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+            'Noto Color Emoji';
+    }
+}
+
+/*
+  ReviewPilot "Night service" design tokens.
+  Warm graphite surfaces, one brass accent, desaturated semantic colours.
+  See docs/blueprint/08-ux-ui-sitemap.md §1.
+*/
+:root {
+    --background: #f7f6f3;
+    --foreground: #1a1a1c;
+    --card: #ffffff;
+    --card-foreground: #1a1a1c;
+    --popover: #ffffff;
+    --popover-foreground: #1a1a1c;
+    --primary: #1d2024;
+    --primary-foreground: #f4f2ee;
+    --secondary: #eceae5;
+    --secondary-foreground: #1d2024;
+    --muted: #efede8;
+    --muted-foreground: #6b6964;
+    --accent: #ebe8e1;
+    --accent-foreground: #1d2024;
+    --destructive: #c4483c;
+    --destructive-foreground: #ffffff;
+    --border: #e2dfd8;
+    --input: #dcd9d1;
+    --ring: #b07f22;
+    --brass: #a87718;
+    --positive: #2f8a5c;
+    --warning: #b4791f;
+    --critical: #c4483c;
+    --info: #3f74ad;
+    --surface-2: #efede8;
+    --chart-1: #a87718;
+    --chart-2: #8a8780;
+    --chart-3: #2f8a5c;
+    --chart-4: #c4483c;
+    --chart-5: #3f74ad;
+    --radius: 0.625rem;
+    --sidebar-background: #f1efea;
+    --sidebar-foreground: #2a2a2c;
+    --sidebar-primary: #1d2024;
+    --sidebar-primary-foreground: #f4f2ee;
+    --sidebar-accent: #e6e3dc;
+    --sidebar-accent-foreground: #1d2024;
+    --sidebar-border: #e2dfd8;
+    --sidebar-ring: #b07f22;
+    --sidebar: #f1efea;
+}
+
+.dark {
+    --background: #0f1012;
+    --foreground: #eceae6;
+    --card: #16181b;
+    --card-foreground: #eceae6;
+    --popover: #1a1c20;
+    --popover-foreground: #eceae6;
+    --primary: #d9a441;
+    --primary-foreground: #141210;
+    --secondary: #1d2024;
+    --secondary-foreground: #eceae6;
+    --muted: #1d2024;
+    --muted-foreground: #9a9893;
+    --accent: #23262b;
+    --accent-foreground: #eceae6;
+    --destructive: #e2675b;
+    --destructive-foreground: #141210;
+    --border: #2a2e33;
+    --input: #2f333a;
+    --ring: #d9a441;
+    --brass: #d9a441;
+    --positive: #5fb98a;
+    --warning: #e0a243;
+    --critical: #e2675b;
+    --info: #6fa3d8;
+    --surface-2: #1d2024;
+    --chart-1: #d9a441;
+    --chart-2: #6b6964;
+    --chart-3: #5fb98a;
+    --chart-4: #e2675b;
+    --chart-5: #6fa3d8;
+    --sidebar-background: #121316;
+    --sidebar-foreground: #d6d4cf;
+    --sidebar-primary: #d9a441;
+    --sidebar-primary-foreground: #141210;
+    --sidebar-accent: #1d2024;
+    --sidebar-accent-foreground: #eceae6;
+    --sidebar-border: #24272c;
+    --sidebar-ring: #d9a441;
+    --sidebar: #121316;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+@layer utilities {
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
+}

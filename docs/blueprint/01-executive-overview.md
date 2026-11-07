@@ -13,31 +13,31 @@ Restaurants live and die by their Google rating. Owners and managers know they s
 
 **ReviewPilot** is a reputation operations platform for hospitality, starting with Google Business Profile.
 
-| Layer | What it does | Why it matters |
-|------|--------------|----------------|
-| **Respond** | AI drafts personalised, on-brand replies. People approve them, or governed automation publishes them. | Saves time and keeps every review answered. |
-| **Govern** | Approval workflows, risk classification, policies, audit trail, per-location voice. | Brand safety for groups and franchises. |
-| **Understand** | Sentiment, topic and dish-level analysis, trends, branch comparison. | Makes reviews a source of operational data. |
-| **Act** | Recurring complaints become *issues*, with an owner, a deadline and a measured outcome. | The differentiator: it closes the loop from review to fix to proof. |
-| **Grow** (later) | Compliant review-request campaigns via QR, receipts, and reservation or POS integrations. | More reviews and more recent reviews. Recency matters to consumers [V-2]. |
+| Layer            | What it does                                                                                          | Why it matters                                                            |
+| ---------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Respond**      | AI drafts personalised, on-brand replies. People approve them, or governed automation publishes them. | Saves time and keeps every review answered.                               |
+| **Govern**       | Approval workflows, risk classification, policies, audit trail, per-location voice.                   | Brand safety for groups and franchises.                                   |
+| **Understand**   | Sentiment, topic and dish-level analysis, trends, branch comparison.                                  | Makes reviews a source of operational data.                               |
+| **Act**          | Recurring complaints become _issues_, with an owner, a deadline and a measured outcome.               | The differentiator: it closes the loop from review to fix to proof.       |
+| **Grow** (later) | Compliant review-request campaigns via QR, receipts, and reservation or POS integrations.             | More reviews and more recent reviews. Recency matters to consumers [V-2]. |
 
 Tagline (kept): **"Every review deserves a response."**
 Positioning line (added): **"…and every complaint deserves a fix."**
 
 ## 3. Critical assessment of the original concept
 
-| Original idea | Verdict | Reasoning |
-|---------------|---------|-----------|
-| AI response generator as the core | **Necessary, but not sufficient** | Commoditising fast. Google is testing native AI replies in GBP [V-2]. Many $10–$75/month tools exist [V-2]. On its own, it cannot sustain a premium price. |
-| Three operating modes (Manual / Smart / Auto-Pilot) | **Keep, with guardrails** | Smart approval is the sweet spot. Full Auto-Pilot is a liability on negative reviews and must stay limited to positive, low-risk reviews with a hold window. |
-| Negative review intelligence | **Core differentiator, make it the centre** | Few SMB tools close the loop to operational action. Enterprise tools (Reputation, Birdeye) do this at roughly $150–$450 per location per month [V-2]. |
-| Multi-location management | **Core, and drives ICP choice** | Groups pay more, churn less, and feel governance pain the most. |
-| Competitor intelligence | **Downgrade to a later, light feature** | Only public Places data is available: rating, count and at most 5 reviews per place [V-2]. Caching rules and per-call cost apply. No scraping. Its value is a nice-to-have. |
-| Reputation score, forecasting | **Defer or cut** | Low review volume per location makes forecasts noise. Vanity scores do not change behaviour. |
-| WhatsApp / Slack | **Slack later, WhatsApp only for alerts** | WhatsApp is popular in the NL, but templates add cost and approval overhead. Email and in-app come first. |
-| White-label | **Defer until agency channel proven** | It adds a lot of multi-tenant complexity (domains, branding, billing hierarchy). |
-| Review widgets | **Low priority** | Cheap to build, low willingness to pay, and display may conflict with Google terms. Verify before building. |
-| Review collection campaigns | **High priority after MVP** | Strong ROI story. Must be built **without review gating**, which Google prohibits [V-2]. |
+| Original idea                                       | Verdict                                     | Reasoning                                                                                                                                                                   |
+| --------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AI response generator as the core                   | **Necessary, but not sufficient**           | Commoditising fast. Google is testing native AI replies in GBP [V-2]. Many $10–$75/month tools exist [V-2]. On its own, it cannot sustain a premium price.                  |
+| Three operating modes (Manual / Smart / Auto-Pilot) | **Keep, with guardrails**                   | Smart approval is the sweet spot. Full Auto-Pilot is a liability on negative reviews and must stay limited to positive, low-risk reviews with a hold window.                |
+| Negative review intelligence                        | **Core differentiator, make it the centre** | Few SMB tools close the loop to operational action. Enterprise tools (Reputation, Birdeye) do this at roughly $150–$450 per location per month [V-2].                       |
+| Multi-location management                           | **Core, and drives ICP choice**             | Groups pay more, churn less, and feel governance pain the most.                                                                                                             |
+| Competitor intelligence                             | **Downgrade to a later, light feature**     | Only public Places data is available: rating, count and at most 5 reviews per place [V-2]. Caching rules and per-call cost apply. No scraping. Its value is a nice-to-have. |
+| Reputation score, forecasting                       | **Defer or cut**                            | Low review volume per location makes forecasts noise. Vanity scores do not change behaviour.                                                                                |
+| WhatsApp / Slack                                    | **Slack later, WhatsApp only for alerts**   | WhatsApp is popular in the NL, but templates add cost and approval overhead. Email and in-app come first.                                                                   |
+| White-label                                         | **Defer until agency channel proven**       | It adds a lot of multi-tenant complexity (domains, branding, billing hierarchy).                                                                                            |
+| Review widgets                                      | **Low priority**                            | Cheap to build, low willingness to pay, and display may conflict with Google terms. Verify before building.                                                                 |
+| Review collection campaigns                         | **High priority after MVP**                 | Strong ROI story. Must be built **without review gating**, which Google prohibits [V-2].                                                                                    |
 
 ## 4. Who we sell to first
 
@@ -64,12 +64,12 @@ Full reasoning is in [02](02-market-competitor-research.md) and [09](09-pricing-
 
 ## 7. Headline timeline (realistic)
 
-| Milestone | Earliest | Notes |
-|-----------|----------|-------|
-| Google API access application submitted | Week 1 | Requires a 60+-day-old verified Business Profile and a website [V]. Create ReviewPilot's own profile **now**. |
-| Private alpha (own test profiles) | ~Month 3 | |
-| Paid design-partner beta (5–10 groups) | ~Month 5–6 | |
-| Public launch NL | ~Month 8–10 | |
-| Intelligence and Issues layer complete | ~Month 10–12 | |
+| Milestone                               | Earliest     | Notes                                                                                                         |
+| --------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------- |
+| Google API access application submitted | Week 1       | Requires a 60+-day-old verified Business Profile and a website [V]. Create ReviewPilot's own profile **now**. |
+| Private alpha (own test profiles)       | ~Month 3     |                                                                                                               |
+| Paid design-partner beta (5–10 groups)  | ~Month 5–6   |                                                                                                               |
+| Public launch NL                        | ~Month 8–10  |                                                                                                               |
+| Intelligence and Issues layer complete  | ~Month 10–12 |                                                                                                               |
 
 Assumptions: two senior full-stack engineers, a part-time designer and a founder doing sales. See [11](11-roadmap.md).

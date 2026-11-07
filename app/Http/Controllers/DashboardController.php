@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\GoogleConnection;
+use App\Models\Location;
+use App\Services\Insights\DashboardStats;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class DashboardController extends Controller
+{
+    public function __invoke(Request $request): Response
+    {
+        $locationId = $request->string('location')->toString() ?: null;
+        if ($locationId) {
+            $this->authorizeLocation('view-location', $locationId);
+        }
+
+        $stats = new DashboardStats($this->membership(), $locationId);
+
+        return Inertia::render('Dashboard', [
+            'today' => $stats->today(),
+            'kpis' => $stats->kpis(30),
+            'trend' => $stats->trend(90),
+            'topics' => $stats->topics(30, 6),
+            'locations' => $stats->locations(30),
+            'filters' => ['location' => $locationId],
+            'setup' => [
+                'google_connected' => GoogleConnection::query()->exists(),
+                'has_locations' => Location::query()->exists(),
+            ],
+        ]);
+    }
+}
