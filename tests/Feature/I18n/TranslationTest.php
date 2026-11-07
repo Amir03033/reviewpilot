@@ -62,7 +62,7 @@ class TranslationTest extends TestCase
         // Symfony's test request sends "en-us" by default; a Dutch browser sends nl-NL.
         $this->withHeader('Accept-Language', 'nl-NL,nl;q=0.9')
             ->get('/login')->assertInertia(fn ($page) => $page->where('locale', 'nl')
-                ->where('translations.Log in', fn ($v) => $v !== 'Log in'));
+            ->where('translations.Log in', fn ($v) => $v !== 'Log in'));
 
         $this->post('/locale', ['locale' => 'en'])->assertRedirect();
         $this->get('/login')->assertInertia(fn ($page) => $page->where('locale', 'en'));

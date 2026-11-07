@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -33,7 +35,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail, PasskeyUser
+class User extends Authenticatable implements FilamentUser, HasLocalePreference, MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
@@ -80,6 +82,17 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /** Emails (incl. queued notifications) are sent in the user's own language. */
+    /**
+     * Admin panel (/admin): platform admins only, with a verified email and, in
+     * production, two-factor authentication switched on.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->is_platform_admin
+            && $this->hasVerifiedEmail()
+            && ($this->two_factor_confirmed_at !== null || ! config('reviewpilot.admin.require_two_factor'));
+    }
+
     public function preferredLocale(): string
     {
         return in_array($this->locale, ['nl', 'en'], true) ? $this->locale : 'nl';

@@ -195,7 +195,7 @@ const disconnect = (id: string) => {
                             :value="l.id"
                             :disabled="!l.verified"
                             class="accent-[var(--brass)]"
-                            :aria-label="`Select ${l.title}`"
+                            :aria-label="$t('Select :name', { name: l.title })"
                         />
                         <span v-else class="w-[13px]" />
                         <div class="min-w-0 flex-1">

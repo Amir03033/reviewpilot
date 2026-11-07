@@ -6,6 +6,7 @@ use App\Enums\ReviewState;
 use App\Jobs\PublishReply;
 use App\Jobs\SyncLocationReviews;
 use App\Models\AiGeneration;
+use App\Models\DataExport;
 use App\Models\GbpLocationLink;
 use App\Models\InboundEvent;
 use App\Models\Location;
@@ -13,6 +14,7 @@ use App\Models\Organization;
 use App\Models\OrganizationMembership;
 use App\Models\Review;
 use App\Models\ReviewReply;
+use App\Models\User;
 use App\Notifications\WeeklyDigest;
 use App\Services\Billing\BillingService;
 use App\Services\Insights\DashboardStats;
@@ -21,6 +23,7 @@ use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
+use Illuminate\Support\Facades\Storage;
 
 /*
 | ReviewPilot scheduled work. Run the scheduler with `php artisan schedule:work`
@@ -82,6 +85,35 @@ Artisan::command('reviewpilot:prune', function () {
     $this->info('Pruned retention data.');
 })->purpose('Apply data retention rules');
 
+Artisan::command('reviewpilot:make-admin {email} {--revoke}', function (string $email) {
+    $user = User::query()->where('email', $email)->first();
+    if (! $user) {
+        $this->error("No user with email {$email}. Register in the app first.");
+
+        return 1;
+    }
+    $user->forceFill(['is_platform_admin' => ! $this->option('revoke')])->save();
+    $this->info($this->option('revoke') ? "{$email} is no longer a platform admin." : "{$email} can now open /admin.");
+    if (! $this->option('revoke') && ! $user->two_factor_confirmed_at && config('reviewpilot.admin.require_two_factor')) {
+        $this->warn('Turn on two-factor authentication (Settings → Security) first: /admin requires it.');
+    }
+
+    return 0;
+})->purpose('Give (or with --revoke remove) access to the internal admin panel');
+
+Artisan::command('reviewpilot:prune-exports', function () {
+    $count = 0;
+    DataExport::withoutGlobalScopes()->where(fn ($q) => $q->where('expires_at', '<', now())->orWhere('created_at', '<', now()->subDays(30)))
+        ->each(function (DataExport $export) use (&$count) {
+            if ($export->path) {
+                Storage::disk('local')->delete($export->path);
+            }
+            $export->delete();
+            $count++;
+        });
+    $this->info("Removed {$count} expired export(s).");
+})->purpose('Delete data exports whose download link has expired');
+
 Artisan::command('reviewpilot:purge-organizations', function () {
     $grace = now()->subDays((int) config('reviewpilot.retention.disconnect_grace_days'));
 
@@ -95,7 +127,9 @@ Artisan::command('reviewpilot:weekly-digest', function () {
     Organization::query()->each(function (Organization $org) {
         $recipients = OrganizationMembership::withoutGlobalScopes()->where('organization_id', $org->id)
             ->whereIn('role', [OrganizationRole::Owner->value, OrganizationRole::Admin->value])
-            ->with('user')->get()->pluck('user')->filter();
+            ->with('user')->get()
+            ->filter(fn (OrganizationMembership $m) => $m->wantsEmail('weekly_digest'))
+            ->pluck('user')->filter();
 
         if ($recipients->isEmpty()) {
             return;
@@ -146,5 +180,6 @@ Schedule::command('reviewpilot:poll')->cron('*/'.max(5, (int) config('reviewpilo
 Schedule::command('reviewpilot:poll --mode=reconcile')->dailyAt('03:17');
 Schedule::command('reviewpilot:prune')->dailyAt('04:07');
 Schedule::command('reviewpilot:purge-organizations')->dailyAt('04:27');
+Schedule::command('reviewpilot:prune-exports')->dailyAt('04:41');
 Schedule::command('reviewpilot:weekly-digest')->weeklyOn(1, '07:43')->timezone('Europe/Amsterdam');
 Schedule::command('reviewpilot:billing-reconcile')->dailyAt('05:13');

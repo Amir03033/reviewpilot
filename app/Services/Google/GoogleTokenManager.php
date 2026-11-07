@@ -72,11 +72,15 @@ class GoogleTokenManager
 
         // Tell everyone who can fix it (owners and admins), not only the person who
         // originally connected Google; they may have left the company.
-        $recipients = OrganizationMembership::withoutGlobalScopes()
+        // Members can switch this email off in their notification settings.
+        $memberships = OrganizationMembership::withoutGlobalScopes()
             ->where('organization_id', $connection->organization_id)
-            ->whereIn('role', [OrganizationRole::Owner->value, OrganizationRole::Admin->value])
-            ->with('user')->get()->pluck('user')->filter()
-            ->push($connection->connectedBy)->filter()->unique('id');
+            ->with('user')->get();
+        $recipients = $memberships
+            ->filter(fn (OrganizationMembership $m) => in_array($m->role, [OrganizationRole::Owner, OrganizationRole::Admin], true)
+                || $m->user_id === $connection->connected_by)
+            ->filter(fn (OrganizationMembership $m) => $m->wantsEmail('google_reconnect'))
+            ->pluck('user')->filter()->unique('id');
         Notification::send($recipients, new GoogleReconnectRequired($connection));
 
         throw new GoogleReauthRequired($reason);

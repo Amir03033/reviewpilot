@@ -3,6 +3,7 @@
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BrandVoiceController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DataExportController;
 use App\Http\Controllers\GoogleIntegrationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvitationController;
@@ -45,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('org')->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
+        Route::post('dashboard/checklist/dismiss', [DashboardController::class, 'dismissChecklist'])->name('dashboard.checklist.dismiss');
 
         // Reviews & approvals
         Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
@@ -99,6 +101,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('organization/accept-terms', [OrganizationSettingsController::class, 'acceptTerms'])->name('organization.accept-terms');
         Route::put('organization/kill-switch', [OrganizationSettingsController::class, 'killSwitch'])->name('organization.kill-switch');
         Route::delete('organization', [OrganizationSettingsController::class, 'destroy'])->name('organization.destroy');
+        Route::post('organization/export', [DataExportController::class, 'store'])->middleware('throttle:5,60')->name('organization.export');
+        Route::get('organization/export/{export}', [DataExportController::class, 'download'])->middleware('signed')->name('organization.export.download');
         Route::get('organization/audit', [OrganizationSettingsController::class, 'audit'])->name('organization.audit');
     });
 });

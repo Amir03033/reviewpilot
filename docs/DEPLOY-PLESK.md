@@ -187,6 +187,36 @@ Fix everything marked ✗, then open https://reviewspilot.nl and register. The M
 
 _Tools & Settings → Backup Manager_ (or per domain): schedule a **daily** backup including **databases**, stored **remotely** (FTP/S3). Test a restore once.
 
+## 12. Company details, admin panel and error monitoring
+
+Add to `.env` (these appear on the legal pages, invoices and the homepage footer), then run `artisan optimize`:
+
+```
+COMPANY_LEGAL_NAME=...
+COMPANY_ADDRESS=...
+COMPANY_POSTAL_CODE=...
+COMPANY_CITY=...
+COMPANY_KVK=...
+COMPANY_VAT_NUMBER=...
+COMPANY_IBAN=...
+COMPANY_EMAIL=info@reviewspilot.nl
+COMPANY_PRIVACY_EMAIL=privacy@reviewspilot.nl
+HOSTING_PROVIDER=...
+
+# Optional: error monitoring via sentry.io (choose the EU region when signing up)
+SENTRY_LARAVEL_DSN=
+```
+
+**Admin panel** (`https://reviewspilot.nl/admin`): first turn on two-factor authentication for your own account (*Settings → Security*), then:
+
+```bash
+/opt/plesk/php/8.4/bin/php /var/www/vhosts/reviewspilot.nl/httpdocs/artisan reviewpilot:make-admin you@example.com
+```
+
+PHP needs the `zip` extension for data exports (already in the list in step 1).
+
+See `docs/GOOGLE-VERIFICATION.md` for the Google app verification steps.
+
 ## Emergency stop
 
 ```bash

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dateTime } from '@/lib/format';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import InputError from '@/components/InputError.vue';
@@ -25,7 +26,18 @@ const props = defineProps<{
     };
     canManage: boolean;
     isOwner: boolean;
+    exports: {
+        id: string;
+        status: string;
+        created_at: string;
+        expires_at: string | null;
+        size_bytes: number | null;
+        download_url: string | null;
+    }[];
 }>();
+
+const requestExport = () =>
+    router.post('/organization/export', {}, { preserveScroll: true });
 
 defineOptions({
     layout: { breadcrumbs: [{ title: 'Organisation', href: '/organization' }] },
@@ -208,6 +220,46 @@ const destroy = () =>
                     </div>
                 </fieldset>
             </form>
+        </Panel>
+
+        <Panel
+            v-if="canManage"
+            :title="$t('Export data')"
+            :description="
+                $t(
+                    'Download all reviews, replies, locations, team members, invoices and the audit log as CSV files.',
+                )
+            "
+        >
+            <Button variant="outline" @click="requestExport">{{
+                $t('Request export')
+            }}</Button>
+            <ul v-if="exports.length" class="mt-4 space-y-2 text-sm">
+                <li
+                    v-for="e in exports"
+                    :key="e.id"
+                    class="flex flex-wrap items-center justify-between gap-2"
+                >
+                    <span class="text-muted-foreground">{{
+                        dateTime(e.created_at)
+                    }}</span>
+                    <a
+                        v-if="e.download_url"
+                        :href="e.download_url"
+                        class="font-medium text-brass hover:underline"
+                        >{{ $t('Download ZIP') }}</a
+                    >
+                    <span v-else class="text-xs text-muted-foreground">{{
+                        $t(
+                            e.status === 'pending'
+                                ? 'Being prepared…'
+                                : e.status === 'failed'
+                                  ? 'Failed'
+                                  : 'Expired',
+                        )
+                    }}</span>
+                </li>
+            </ul>
         </Panel>
 
         <Panel

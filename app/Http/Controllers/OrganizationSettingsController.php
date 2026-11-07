@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Models\DataExport;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,6 +24,18 @@ class OrganizationSettingsController extends Controller
             'organization' => $org->only(['id', 'name', 'country', 'vat_number', 'default_locale', 'timezone', 'automation_kill_switch', 'billing_email', 'data_retention_days', 'billing_name', 'billing_address', 'billing_postal_code', 'billing_city']),
             'canManage' => $this->membership()->role->canManageOrganization(),
             'isOwner' => $this->membership()->role->value === 'owner',
+            'exports' => $this->membership()->role->canManageOrganization()
+                ? DataExport::query()->latest()->limit(5)->get()->map(fn (DataExport $e) => [
+                    'id' => $e->id,
+                    'status' => $e->status,
+                    'created_at' => $e->created_at->toIso8601String(),
+                    'expires_at' => $e->expires_at?->toIso8601String(),
+                    'size_bytes' => $e->size_bytes,
+                    'download_url' => $e->status === 'ready' && $e->expires_at?->isFuture()
+                        ? URL::temporarySignedRoute('organization.export.download', $e->expires_at, ['export' => $e->id])
+                        : null,
+                ])
+                : [],
         ]);
     }
 

@@ -47,6 +47,11 @@ return [
         ],
     ],
 
+    'admin' => [
+        // Platform admins must have 2FA enabled to open /admin (recommended: keep true).
+        'require_two_factor' => (bool) env('REVIEWPILOT_ADMIN_REQUIRE_2FA', env('APP_ENV') === 'production'),
+    ],
+
     'trial_days' => (int) env('REVIEWPILOT_TRIAL_DAYS', 14),
 
     /*

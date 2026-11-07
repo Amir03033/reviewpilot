@@ -8,8 +8,8 @@ use App\Models\Review;
 use App\Services\Billing\Entitlements;
 use App\Services\Google\GoogleOAuth;
 use App\Support\PlatformSettings;
-use App\Support\Translations;
 use App\Support\Tenancy\TenantContext;
+use App\Support\Translations;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 

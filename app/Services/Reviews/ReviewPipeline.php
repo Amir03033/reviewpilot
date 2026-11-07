@@ -118,7 +118,7 @@ class ReviewPipeline
             ->where('organization_id', $review->organization_id)
             ->with('user')
             ->get()
-            ->filter(fn (OrganizationMembership $m) => $m->canApproveFor($review->location_id))
+            ->filter(fn (OrganizationMembership $m) => $m->wantsEmail('negative_review') && $m->canApproveFor($review->location_id))
             ->map->user
             ->filter();
 

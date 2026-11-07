@@ -5,7 +5,7 @@ defineProps<{ rating: number; size?: 'sm' | 'md' }>();
 <template>
     <span
         class="inline-flex items-center gap-0.5"
-        :aria-label="`${rating} out of 5 stars`"
+        :aria-label="$t(':rating out of 5 stars', { rating })"
         role="img"
     >
         <svg

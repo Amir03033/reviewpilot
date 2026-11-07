@@ -20,6 +20,10 @@ const sidebarNavItems: NavItem[] = [
         href: editSecurity(),
     },
     {
+        title: 'Notifications',
+        href: '/settings/notifications',
+    },
+    {
         title: 'Appearance',
         href: editAppearance(),
     },

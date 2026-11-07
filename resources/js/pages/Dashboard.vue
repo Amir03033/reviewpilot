@@ -4,6 +4,7 @@ import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/rp/EmptyState.vue';
 import KpiCard from '@/components/rp/KpiCard.vue';
+import OnboardingChecklist from '@/components/rp/OnboardingChecklist.vue';
 import PageHeader from '@/components/rp/PageHeader.vue';
 import Panel from '@/components/rp/Panel.vue';
 import TrendChart from '@/components/rp/TrendChart.vue';
@@ -48,6 +49,16 @@ const props = defineProps<{
     }[];
     filters: { location: string | null };
     setup: { google_connected: boolean; has_locations: boolean };
+    checklist: {
+        dismissed: boolean;
+        steps: {
+            key: string;
+            title: string;
+            description: string;
+            href: string;
+            done: boolean;
+        }[];
+    } | null;
 }>();
 
 defineOptions({
@@ -74,7 +85,11 @@ function filterLocation(event: Event) {
     <div class="space-y-6">
         <PageHeader
             :title="$t('Overview')"
-            :description="`Last ${kpis.days} days compared with the ${kpis.days} days before.`"
+            :description="
+                $t('Last :days days compared with the :days days before.', {
+                    days: kpis.days,
+                })
+            "
         >
             <template #actions>
                 <select
@@ -91,6 +106,15 @@ function filterLocation(event: Event) {
                 </select>
             </template>
         </PageHeader>
+
+        <OnboardingChecklist
+            v-if="
+                checklist &&
+                !checklist.dismissed &&
+                checklist.steps.some((s) => !s.done)
+            "
+            :steps="checklist.steps"
+        />
 
         <EmptyState
             v-if="!setup.has_locations"

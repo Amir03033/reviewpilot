@@ -66,6 +66,15 @@ class DoctorCommand extends Command
         $this->section('Mail');
         $this->check(! in_array(config('mail.default'), ['log', 'array'], true), 'A real mailer is configured (alerts, invitations, email verification)', $production);
 
+        $this->section('Monitoring');
+        $this->check(filled(config('sentry.dsn')), 'Error monitoring: SENTRY_LARAVEL_DSN is set', false);
+        $this->check(! config('sentry.send_default_pii'), 'Sentry does not send personal data (SENTRY_SEND_DEFAULT_PII=false)');
+
+        $this->section('Company details (invoices and legal pages)');
+        foreach (['legal_name' => 'COMPANY_LEGAL_NAME', 'address' => 'COMPANY_ADDRESS', 'kvk' => 'COMPANY_KVK', 'vat_number' => 'COMPANY_VAT_NUMBER'] as $key => $env) {
+            $this->check(filled(config("reviewpilot.company.{$key}")), "{$env} is set", $production);
+        }
+
         $this->section('Safety');
         if (! \Schema::hasTable('users')) {
             $this->check(false, 'Database tables exist (run: php artisan migrate --force)');
