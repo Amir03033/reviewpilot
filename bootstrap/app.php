@@ -33,7 +33,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // Error monitoring: only active when SENTRY_LARAVEL_DSN is set. No personal data
         // (IP, cookies, request bodies) is sent unless SENTRY_SEND_DEFAULT_PII=true.
-        Integration::handles($exceptions);
+        // Guarded so a server where `composer install` has not run yet still boots.
+        if (class_exists(Integration::class)) {
+            Integration::handles($exceptions);
+        }
 
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
