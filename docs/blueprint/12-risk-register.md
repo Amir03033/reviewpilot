@@ -1,0 +1,36 @@
+# 12 — Risk Register
+
+Likelihood (L) and Impact (I) on a 1–5 scale. Score = L × I.
+
+| ID | Risk | Category | L | I | Score | Mitigation | Owner |
+|----|------|----------|---|---|-------|-----------|-------|
+| R1 | **Google API access denied or delayed** (60-day profile requirement, review backlog) [V] | Platform | 3 | 5 | **15** | Start the profile in week 1. Build against `FakeGbpClient`. Prepare a strong application (website, privacy policy, clear use case). Fallback: partner with an already-approved integrator (e.g. a unified API vendor [V-2]) temporarily. | Founder |
+| R2 | **Google ships native AI replies broadly** (testing in 2026 [V-2]), commoditising the core feature | Market | 4 | 4 | **16** | Position on governance, multi-location, intelligence and Issues, not on reply writing. Keep pricing tied to outcomes and groups. | Founder |
+| R3 | **Google deprecates or changes the v4 Reviews API** or tightens policies | Platform | 2 | 5 | 10 | Isolate behind `GbpClient`. Monitor Google's deprecation schedule and changelog. Keep the data model source-agnostic. | Tech lead |
+| R4 | **Bad auto-published reply goes viral** (insensitive reply to a food poisoning case) | AI / brand | 2 | 5 | 10 | Non-configurable human gates, hold window, circuit breaker, evals, conservative defaults (Smart, not Auto-Pilot). Clear terms: the customer remains the publisher. | Tech lead |
+| R5 | **AI fabricates facts or makes promises** | AI quality | 3 | 4 | 12 | Fact sheet grounding, deterministic guardrails, compensation policy, human approval by default | Tech lead |
+| R6 | **Low draft quality in Dutch** (stiff, wrong u/je, repetitive) | AI quality | 3 | 4 | 12 | Dutch-first eval set, native-speaker review, few-shot from approved replies, anti-repetition, a model per language if needed | Product |
+| R7 | **Independent restaurants won't pay / high churn** (sector bankruptcies peaked in 2025 [V]) | Market | 4 | 3 | 12 | Primary ICP = groups. Self-serve Essentials with minimal support cost. Pause option. | Founder |
+| R8 | **NL market too small** (~800–1,450 serviceable locations [A]) | Market | 4 | 4 | **16** | i18n from day 1. BE (Flemish) early. DACH by year 2. Vertical expansion (hotels, salons). | Founder |
+| R9 | **High CAC** (restaurants are hard to reach and time-poor) | GTM | 4 | 4 | **16** | Partners (POS, reservations, KHN), groups (one deal = many locations), product-led reports. Measure CAC per channel from month 1. | Founder |
+| R10 | **Cross-tenant data leak** | Security | 2 | 5 | 10 | Global scopes + composite FKs + generated isolation tests + code review checklist. RLS later. | Tech lead |
+| R11 | **OAuth token compromise** | Security | 2 | 5 | 10 | Dedicated encryption key, no token logging, least privilege, rotation, anomaly alerts (unusual publish volume) | Tech lead |
+| R12 | **GDPR non-compliance** (health data in reviews, LLM transfers) | Legal | 3 | 4 | 12 | DPIA, DPA, EU hosting, LLM data residency / ZDR, minimisation, lawyer review | Founder |
+| R13 | **Review-gating accusations** from collection features | Legal / platform | 2 | 4 | 8 | No sentiment-conditional routing. Legal review. Ask every guest the same way. | Product |
+| R14 | **Places API terms limit competitor features** | Legal | 4 | 2 | 8 | Keep competitor features light. Do not market them as core. | Product |
+| R15 | **LLM cost spikes / price changes / outage** | Infra | 2 | 3 | 6 | Provider abstraction, budgets, Batch API for non-urgent work, fallback provider | Tech lead |
+| R16 | **Quota exhaustion at scale** (300 QPM default [V]) | Infra | 3 | 3 | 9 | Push notifications, adaptive polling, batchGetReviews [T], early quota increase request | Tech lead |
+| R17 | **Analytics noise at low volume** (false alerts erode trust) | Product | 4 | 3 | 12 | Minimum-N thresholds, explicit sample sizes, group-level aggregation, conservative alerting | Product |
+| R18 | **Scope creep** (trying to be Birdeye) | Execution | 4 | 4 | **16** | This MVP scope doc. Each new feature needs evidence from ≥ 3 customers. Quarterly cut list. | Founder |
+| R19 | **Small team / key-person risk** | Execution | 3 | 4 | 12 | Documentation (this blueprint, ADRs), boring tech, managed services, pairing on critical modules | Founder |
+| R20 | **EU AI Act obligations misread** | Legal | 2 | 3 | 6 | Counsel review. Provenance stored. Disclosure option built in. | Founder |
+| R21 | **Fake reviews / competitor attacks on customers** (customers expect us to "remove" reviews) | Product expectation | 3 | 2 | 6 | Explain clearly that only Google can remove reviews. Offer "suspected fake" flagging plus guidance to Google's reporting flow. Don't automate reporting. | Product |
+| R22 | **Restaurant POS/reservation vendors build it themselves** | Market | 3 | 3 | 9 | Partner early. Be the white-label engine for them (Phase 7+). | Founder |
+
+## Top reasons ReviewPilot could fail (and what to watch)
+
+1. **"Nice to have" trap:** owners like it but won't pay €69. *Signal:* trial→paid < 15% after onboarding improvements. *Response:* push harder on groups, and cut Essentials if support costs exceed its revenue.
+2. **Commoditisation by Google:** native AI replies make the core free. *Signal:* churn reasons citing "Google does this now". *Response:* the Issues/intelligence wedge must be proven by month 12.
+3. **Distribution failure:** a great product with no cheap channel. *Signal:* CAC > €800 per location sustained. *Response:* partnership-first, or pivot to selling via POS vendors as an embedded white-label.
+4. **Platform dependency:** one Google decision can halt the business. *Response:* diversify sources over time. Keep the relationship with Google clean (strict policy compliance).
+5. **Building too much before validation:** *Response:* design partners in month 5–6, and kill features with low usage.
