@@ -87,4 +87,29 @@ class ClaudeClientTest extends TestCase
 
         $this->client($this->message([['type' => 'text', 'text' => 'not json']]))->structured($this->request());
     }
+
+    public function test_system_prompt_is_cached_and_cache_tokens_are_metered(): void
+    {
+        $message = $this->message([['type' => 'text', 'text' => '{"sentiment":"positive"}']]);
+        $message['usage'] = ['input_tokens' => 50, 'output_tokens' => 300, 'cache_read_input_tokens' => 2000, 'cache_creation_input_tokens' => 0];
+
+        $this->client($message)->structured($this->request());
+
+        $sent = json_decode((string) $this->history[0]['request']->getBody(), true);
+        $this->assertSame([['type' => 'text', 'text' => 'Analyse the review.', 'cache_control' => ['type' => 'ephemeral']]], $sent['system']);
+
+        $generation = AiGeneration::withoutGlobalScopes()->sole();
+        $this->assertSame(2000, (int) $generation->cache_read_tokens);
+        // 50*$4 + 300*$20 + 2000*$0.20 = 200 + 6000 + 400 = 6600 (USD per 1M tokens) -> 660000 µ¢
+        $this->assertSame(660000, (int) $generation->cost_microcents);
+    }
+
+    public function test_prompt_caching_can_be_switched_off(): void
+    {
+        config(['reviewpilot.ai.prompt_caching' => false]);
+        $this->client($this->message([['type' => 'text', 'text' => '{"sentiment":"positive"}']]))->structured($this->request());
+
+        $sent = json_decode((string) $this->history[0]['request']->getBody(), true);
+        $this->assertArrayNotHasKey('cache_control', $sent['system'][0]);
+    }
 }

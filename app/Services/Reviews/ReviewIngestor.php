@@ -11,6 +11,7 @@ use App\Models\ResponseDraft;
 use App\Models\Review;
 use App\Models\ReviewReply;
 use App\Models\ReviewRevision;
+use App\Services\Ai\BatchAnalyzer;
 use App\Services\Google\GbpReview;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
@@ -122,8 +123,17 @@ class ReviewIngestor
             return $review;
         }
 
+        $draft = ! $alreadyReplied && ! $tooOld;
+
+        // Imported history that only needs an analysis: half price via the Batches API.
+        if ($isBackfill && ! $draft && $review->hasText() && BatchAnalyzer::enabled()) {
+            app(BatchAnalyzer::class)->queue($review);
+
+            return $review;
+        }
+
         // Analyse (for insights); only draft for recent, unanswered reviews.
-        ProcessReview::dispatch($review->id, draft: ! $alreadyReplied && ! $tooOld, backfill: $isBackfill);
+        ProcessReview::dispatch($review->id, draft: $draft, backfill: $isBackfill);
 
         return $review;
     }

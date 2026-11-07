@@ -27,10 +27,7 @@ class ClaudeClient implements LlmClient
 
     public function structured(LlmRequest $request): LlmResult
     {
-        $model = $request->model
-            ?? config("reviewpilot.ai.models.{$request->purpose}")
-            ?? config('reviewpilot.ai.models.draft');
-        $effort = config("reviewpilot.ai.effort.{$request->purpose}") ?? 'medium';
+        $model = self::model($request);
         $started = microtime(true);
 
         try {
@@ -39,12 +36,9 @@ class ClaudeClient implements LlmClient
             $message = $this->client()->beta->messages->create(
                 model: $model,
                 maxTokens: 16000,
-                system: $request->system,
+                system: self::system($request),
                 messages: [['role' => 'user', 'content' => $request->user]],
-                outputConfig: [
-                    'effort' => $effort,
-                    'format' => ['type' => 'json_schema', 'schema' => $request->schema],
-                ],
+                outputConfig: self::outputConfig($request),
                 fallbacks: $fallbacks ? 'default' : null,
                 betas: $fallbacks ? [self::FALLBACK_BETA] : null,
             );
@@ -59,9 +53,11 @@ class ClaudeClient implements LlmClient
         $servedModel = $message->model ?: $model;
         $inputTokens = $message->usage->inputTokens;
         $outputTokens = $message->usage->outputTokens;
+        $cacheRead = (int) ($message->usage->cacheReadInputTokens ?? 0);
+        $cacheWrite = (int) ($message->usage->cacheCreationInputTokens ?? 0);
 
         if ($message->stopReason === 'refusal') {
-            $this->recorder->record($request, 'anthropic', $servedModel, 'refused', $inputTokens, $outputTokens, $this->ms($started), error: 'refusal');
+            $this->recorder->record($request, 'anthropic', $servedModel, 'refused', $inputTokens, $outputTokens, $this->ms($started), error: 'refusal', cacheReadTokens: $cacheRead, cacheWriteTokens: $cacheWrite);
             throw new LlmException('Claude declined this request.');
         }
 
@@ -76,16 +72,49 @@ class ClaudeClient implements LlmClient
         $data = is_string($text) ? json_decode($text, true) : null;
 
         if (! is_array($data) || $message->stopReason === 'max_tokens') {
-            $this->recorder->record($request, 'anthropic', $servedModel, 'invalid_output', $inputTokens, $outputTokens, $this->ms($started), ['text' => $text, 'stop_reason' => $message->stopReason]);
+            $this->recorder->record($request, 'anthropic', $servedModel, 'invalid_output', $inputTokens, $outputTokens, $this->ms($started), ['text' => $text, 'stop_reason' => $message->stopReason], cacheReadTokens: $cacheRead, cacheWriteTokens: $cacheWrite);
             throw new LlmException('Claude returned output that is not valid JSON.');
         }
 
-        $generation = $this->recorder->record($request, 'anthropic', $servedModel, 'ok', $inputTokens, $outputTokens, $this->ms($started), $data);
+        $generation = $this->recorder->record($request, 'anthropic', $servedModel, 'ok', $inputTokens, $outputTokens, $this->ms($started), $data, cacheReadTokens: $cacheRead, cacheWriteTokens: $cacheWrite);
 
         return new LlmResult($data, $generation);
     }
 
-    private function client(): Client
+    public static function model(LlmRequest $request): string
+    {
+        return $request->model
+            ?? config("reviewpilot.ai.models.{$request->purpose}")
+            ?? config('reviewpilot.ai.models.draft');
+    }
+
+    /**
+     * The system prompt as one text block with a cache breakpoint. The system prompt holds
+     * only stable instructions (per location: voice, facts, examples), and everything that
+     * changes per review goes in the user message, so repeated calls read it from cache.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function system(LlmRequest $request): array
+    {
+        $block = ['type' => 'text', 'text' => $request->system];
+        if (config('reviewpilot.ai.prompt_caching', true)) {
+            $block['cacheControl'] = ['type' => 'ephemeral'];
+        }
+
+        return [$block];
+    }
+
+    /** @return array<string, mixed> */
+    public static function outputConfig(LlmRequest $request): array
+    {
+        return [
+            'effort' => config("reviewpilot.ai.effort.{$request->purpose}") ?? 'medium',
+            'format' => ['type' => 'json_schema', 'schema' => $request->schema],
+        ];
+    }
+
+    public function client(): Client
     {
         if ($this->client) {
             return $this->client;

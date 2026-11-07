@@ -70,4 +70,11 @@ return [
         'timeout' => (int) env('ANTHROPIC_TIMEOUT', 120),
     ],
 
+    // Web Push (VAPID). Generate keys with: php artisan reviewpilot:webpush-keys
+    'webpush' => [
+        'public_key' => env('WEBPUSH_PUBLIC_KEY'),
+        'private_key' => env('WEBPUSH_PRIVATE_KEY'),
+        'subject' => env('WEBPUSH_SUBJECT', 'mailto:'.env('COMPANY_EMAIL', 'info@reviewspilot.nl')),
+    ],
+
 ];

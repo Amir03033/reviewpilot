@@ -3,6 +3,7 @@
 namespace App\Services\Reviews;
 
 use App\Enums\ReviewState;
+use App\Models\AiGeneration;
 use App\Models\Organization;
 use App\Models\OrganizationMembership;
 use App\Models\Review;
@@ -53,18 +54,36 @@ class ReviewPipeline
         $review->transitionTo(ReviewState::Analyzed);
         $review->refresh();
 
+        if (! $draft || $review->owner_reply_origin !== 'none') {
+            $review->transitionTo(ReviewState::NoAction);
+        } else {
+            // Imported history is never answered automatically: a person decides.
+            $this->draft($review, automate: ! $backfill);
+        }
+
+        // Alert after drafting, so the email/push can already show the suggested reply.
         if (! $backfill) {
             $this->notifyIfNegative($review, $analysis->requires_human);
         }
+    }
 
-        if (! $draft || $review->owner_reply_origin !== 'none') {
-            $review->transitionTo(ReviewState::NoAction);
+    /**
+     * Finish a first-import review whose analysis came back from the Message Batches API.
+     * Same outcome as run($review, draft: false, backfill: true).
+     */
+    public function completeBatchedAnalysis(Review $review, array $data, AiGeneration $generation): void
+    {
+        $organization = Organization::find($review->organization_id);
+        if (! $organization || ! $this->entitlements->isActive($organization)) {
+            $review->transitionTo($review->owner_reply_text ? ReviewState::NoAction : ReviewState::NeedsHumanWriting);
 
             return;
         }
 
-        // Imported history is never answered automatically: a person decides.
-        $this->draft($review, automate: ! $backfill);
+        $this->analyzer->storeFromModel($review, $data, $generation);
+        $this->usage->meter($organization->id, 'backfill_processed', 1);
+        $review->transitionTo(ReviewState::Analyzed);
+        $review->transitionTo(ReviewState::NoAction);
     }
 
     public function draft(Review $review, ?string $hint = null, bool $automate = true): void
@@ -118,7 +137,7 @@ class ReviewPipeline
             ->where('organization_id', $review->organization_id)
             ->with('user')
             ->get()
-            ->filter(fn (OrganizationMembership $m) => $m->wantsEmail('negative_review') && $m->canApproveFor($review->location_id))
+            ->filter(fn (OrganizationMembership $m) => ($m->wantsEmail('negative_review') || $m->wantsEmail('push_alerts')) && $m->canApproveFor($review->location_id))
             ->map->user
             ->filter();
 

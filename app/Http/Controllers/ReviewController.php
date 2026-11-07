@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\DraftStatus;
 use App\Enums\ReviewState;
 use App\Models\AuditLog;
+use App\Models\DraftFeedback;
 use App\Models\Location;
 use App\Models\Review;
 use App\Models\Topic;
@@ -179,6 +180,12 @@ class ReviewController extends Controller
             'language' => $d->language,
             'guardrails_passed' => $d->guardrails_passed,
             'failed_checks' => $checks->where('pass', false)->values(),
+            'is_ai' => $d->original_text !== null,
+            'my_feedback' => match (DraftFeedback::query()->where('draft_id', $d->id)->where('user_id', auth()->id())->value('rating')) {
+                1 => 'up',
+                -1 => 'down',
+                default => null,
+            },
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Services\Reviews;
 
+use App\Models\AiGeneration;
 use App\Models\Review;
 use App\Models\ReviewAnalysis;
 use App\Models\ReviewTopicMention;
@@ -39,7 +40,20 @@ class ReviewAnalyzer
 
     public function analyze(Review $review): ReviewAnalysis
     {
-        $data = $review->hasText() ? $this->llmAnalysis($review) : $this->ratingOnly($review);
+        return $this->store($review, $review->hasText() ? $this->llmAnalysis($review) : $this->ratingOnly($review));
+    }
+
+    /** Store an analysis produced elsewhere (e.g. by the Message Batches API). */
+    public function storeFromModel(Review $review, array $data, AiGeneration $generation): ReviewAnalysis
+    {
+        $data['_generation_id'] = $generation->id;
+        $data['_model'] = $generation->model;
+
+        return $this->store($review, $data);
+    }
+
+    private function store(Review $review, array $data): ReviewAnalysis
+    {
         $data = $this->applyBackstop($review, $data);
 
         return DB::transaction(function () use ($review, $data) {
@@ -98,9 +112,21 @@ class ReviewAnalyzer
 
     private function llmAnalysis(Review $review): array
     {
+        $result = $this->llm->structured($this->request($review));
+
+        $data = $result->data;
+        $data['_generation_id'] = $result->generation->id;
+        $data['_model'] = $result->generation->model;
+
+        return $data;
+    }
+
+    /** The LLM request for one review. The system prompt is identical for every review (cached). */
+    public function request(Review $review): LlmRequest
+    {
         $location = $review->location()->withoutGlobalScopes()->first();
 
-        $result = $this->llm->structured(new LlmRequest(
+        return new LlmRequest(
             purpose: 'analysis',
             system: $this->systemPrompt(),
             user: json_encode([
@@ -113,13 +139,7 @@ class ReviewAnalyzer
             organizationId: $review->organization_id,
             locationId: $review->location_id,
             context: ['comment' => $review->comment, 'rating' => $review->star_rating],
-        ));
-
-        $data = $result->data;
-        $data['_generation_id'] = $result->generation->id;
-        $data['_model'] = $result->generation->model;
-
-        return $data;
+        );
     }
 
     private function ratingOnly(Review $review): array

@@ -3,6 +3,7 @@
 use App\Enums\OrganizationRole;
 use App\Enums\ReplyState;
 use App\Enums\ReviewState;
+use App\Jobs\GenerateLocationInsight;
 use App\Jobs\PublishReply;
 use App\Jobs\SyncLocationReviews;
 use App\Models\AiGeneration;
@@ -10,13 +11,16 @@ use App\Models\DataExport;
 use App\Models\GbpLocationLink;
 use App\Models\InboundEvent;
 use App\Models\Location;
+use App\Models\LocationInsight;
 use App\Models\Organization;
 use App\Models\OrganizationMembership;
 use App\Models\Review;
 use App\Models\ReviewReply;
 use App\Models\User;
 use App\Notifications\WeeklyDigest;
+use App\Services\Ai\BatchAnalyzer;
 use App\Services\Billing\BillingService;
+use App\Services\Billing\Entitlements;
 use App\Services\Insights\DashboardStats;
 use App\Support\PlatformSettings;
 use App\Support\Tenancy\TenantContext;
@@ -24,6 +28,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Storage;
+use Minishlink\WebPush\VAPID;
 
 /*
 | ReviewPilot scheduled work. Run the scheduler with `php artisan schedule:work`
@@ -84,6 +89,37 @@ Artisan::command('reviewpilot:prune', function () {
 
     $this->info('Pruned retention data.');
 })->purpose('Apply data retention rules');
+
+Artisan::command('reviewpilot:weekly-insights', function (Entitlements $entitlements) {
+    $count = 0;
+    Organization::query()->each(function (Organization $org) use ($entitlements, &$count) {
+        if (! $entitlements->isActive($org)) {
+            return;
+        }
+        Location::withoutGlobalScopes()->where('organization_id', $org->id)->where('status', 'active')
+            ->pluck('id')->each(function (string $id) use (&$count) {
+                GenerateLocationInsight::dispatch($id);
+                $count++;
+            });
+    });
+    $this->info("Queued advice for {$count} location(s).");
+})->purpose('Write the weekly AI advice per location');
+
+Artisan::command('reviewpilot:ai-batches', function (BatchAnalyzer $batches) {
+    $collected = $batches->collect();
+    $submitted = $batches->submit();
+    $this->info("Batches: {$submitted} review(s) submitted, {$collected} result(s) processed.");
+})->purpose('Submit and collect Message Batches API work (first-import analysis)');
+
+Artisan::command('reviewpilot:webpush-keys', function () {
+    $keys = VAPID::createVapidKeys();
+    $this->line('Add these two lines to .env, then run php artisan optimize:');
+    $this->newLine();
+    $this->line('WEBPUSH_PUBLIC_KEY='.$keys['publicKey']);
+    $this->line('WEBPUSH_PRIVATE_KEY='.$keys['privateKey']);
+    $this->newLine();
+    $this->warn('Never change these keys later: existing phone subscriptions would stop working.');
+})->purpose('Generate the key pair for push notifications');
 
 Artisan::command('reviewpilot:make-admin {email} {--revoke}', function (string $email) {
     $user = User::query()->where('email', $email)->first();
@@ -153,6 +189,12 @@ Artisan::command('reviewpilot:weekly-digest', function () {
                     'pending' => $today['awaiting_approval'],
                     'negative' => $kpis['negative'],
                     'top_topics' => $topics,
+                    'advice' => LocationInsight::withoutGlobalScopes()->where('organization_id', $org->id)
+                        ->where('period_end', '>=', now()->subDays(3)->toDateString())->get()
+                        ->flatMap(fn (LocationInsight $i) => collect($i->recommendations)->take(1)->map(fn ($r) => [
+                            'location' => Location::withoutGlobalScopes()->whereKey($i->location_id)->value('name'),
+                            'title' => (string) ($r['title'] ?? ''),
+                        ]))->take(3)->values()->all(),
                 ]));
             }
         });
@@ -180,6 +222,8 @@ Schedule::command('reviewpilot:poll')->cron('*/'.max(5, (int) config('reviewpilo
 Schedule::command('reviewpilot:poll --mode=reconcile')->dailyAt('03:17');
 Schedule::command('reviewpilot:prune')->dailyAt('04:07');
 Schedule::command('reviewpilot:purge-organizations')->dailyAt('04:27');
+Schedule::command('reviewpilot:ai-batches')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('reviewpilot:prune-exports')->dailyAt('04:41');
+Schedule::command('reviewpilot:weekly-insights')->weeklyOn(1, '06:13')->timezone('Europe/Amsterdam');
 Schedule::command('reviewpilot:weekly-digest')->weeklyOn(1, '07:43')->timezone('Europe/Amsterdam');
 Schedule::command('reviewpilot:billing-reconcile')->dailyAt('05:13');

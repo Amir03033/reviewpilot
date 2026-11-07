@@ -43,6 +43,7 @@ class FakeLlmClient implements LlmClient
     {
         $data = match ($request->purpose) {
             'analysis' => $this->analysis($request->context),
+            'insights' => $this->insights($request->context),
             default => $this->drafts($request->context),
         };
 
@@ -50,6 +51,30 @@ class FakeLlmClient implements LlmClient
         $generation = $this->recorder->record($request, 'fake', 'fake-model', 'ok', $tokens, (int) (strlen(json_encode($data)) / 4), 1, $data);
 
         return new LlmResult($data, $generation);
+    }
+
+    /** Offline stand-in for weekly advice: derived only from the computed stats. */
+    private function insights(array $ctx): array
+    {
+        $stats = $ctx['stats'] ?? [];
+        $nl = ($ctx['locale'] ?? 'nl') === 'nl';
+        $problems = collect($stats['topics'] ?? [])->where('negative', '>', 0)->sortByDesc('negative')->take(3);
+        $praise = collect($stats['topics'] ?? [])->where('positive', '>', 0)->sortByDesc('positive')->take(2);
+
+        return [
+            'headline' => $problems->isEmpty()
+                ? ($nl ? 'Geen terugkerende klachten deze maand' : 'No recurring complaints this month')
+                : ($nl ? "Meeste klachten over: {$problems->first()['topic']}" : "Most complaints about: {$problems->first()['topic']}"),
+            'summary' => ($nl ? 'Gebaseerd op ' : 'Based on ').($stats['reviews'] ?? 0).($nl ? ' reviews in de afgelopen 30 dagen (offline voorbeeld, geen AI).' : ' reviews in the last 30 days (offline example, no AI).'),
+            'recommendations' => $problems->map(fn ($t) => [
+                'title' => ($nl ? 'Kijk naar ' : 'Look into ').mb_strtolower($t['topic']),
+                'detail' => ($nl ? "{$t['negative']} gasten klaagden hierover." : "{$t['negative']} guests complained about this."),
+                'topic' => $t['topic'],
+                'priority' => $t['negative'] >= 3 ? 'high' : 'medium',
+                'based_on' => $t['negative'],
+            ])->values()->all(),
+            'praise' => $praise->map(fn ($t) => $t['topic'])->values()->all(),
+        ];
     }
 
     private function analysis(array $ctx): array

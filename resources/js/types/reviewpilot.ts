@@ -53,6 +53,24 @@ export type Draft = {
     language: string | null;
     guardrails_passed: boolean;
     failed_checks: { name: string; pass: boolean; message: string | null }[];
+    is_ai: boolean;
+    my_feedback: 'up' | 'down' | null;
 };
 
 export type Option = { id: string; name: string };
+
+export type Insight = {
+    headline: string;
+    summary: string;
+    recommendations: {
+        title: string;
+        detail: string;
+        topic: string;
+        priority: 'high' | 'medium' | 'low';
+        based_on: number;
+    }[];
+    praise: string[];
+    period_start: string;
+    period_end: string;
+    reviews: number;
+};

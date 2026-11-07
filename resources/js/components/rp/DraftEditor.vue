@@ -101,6 +101,48 @@ function reject() {
     );
 }
 
+const feedbackOpen = ref(false);
+const feedbackComment = ref('');
+const reasons = [
+    ['tone', 'Wrong tone'],
+    ['wrong_facts', 'Wrong facts'],
+    ['too_long', 'Too long'],
+    ['too_short', 'Too short'],
+    ['too_generic', 'Too generic'],
+    ['wrong_language', 'Wrong language'],
+    ['other', 'Other'],
+] as const;
+
+function rate(rating: 'up' | 'down', reason?: string) {
+    if (!active.value) {
+        return;
+    }
+
+    if (rating === 'down' && !reason) {
+        feedbackOpen.value = true;
+
+        return;
+    }
+
+    router.post(
+        `/drafts/${active.value.id}/feedback`,
+        {
+            rating,
+            reason: reason ?? null,
+            comment: feedbackComment.value || null,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                feedbackOpen.value = false;
+                feedbackComment.value = '';
+            },
+        },
+    );
+}
+
+watch(activeId, () => (feedbackOpen.value = false));
+
 const quickHints = [
     'Shorter',
     'More formal',
@@ -127,7 +169,7 @@ const quickHints = [
                     writingManually = false;
                 "
             >
-                {{ d.variant }}
+                {{ $t(humanize(d.variant)) }}
                 <span v-if="!d.guardrails_passed" class="text-critical">•</span>
             </button>
             <button
@@ -156,7 +198,9 @@ const quickHints = [
         <Textarea
             v-model="text"
             :rows="compact ? 5 : 7"
-            :placeholder="writingManually ? 'Write your reply…' : 'Draft reply'"
+            :placeholder="
+                writingManually ? $t('Write your reply…') : $t('Draft reply')
+            "
         />
 
         <div
@@ -166,6 +210,68 @@ const quickHints = [
                 $t(':count characters', { count: text.length })
             }}</span>
             <span v-if="edited" class="text-brass">{{ $t('Edited') }}</span>
+        </div>
+
+        <div
+            v-if="active?.is_ai && !writingManually"
+            class="space-y-2 text-xs text-muted-foreground"
+        >
+            <div class="flex items-center gap-2">
+                <span>{{ $t('Is this a good draft?') }}</span>
+                <button
+                    type="button"
+                    class="rounded-md border px-2 py-0.5 transition-colors"
+                    :class="
+                        active.my_feedback === 'up'
+                            ? 'border-positive/50 bg-positive/10 text-positive'
+                            : 'border-border hover:bg-accent'
+                    "
+                    :aria-pressed="active.my_feedback === 'up'"
+                    :aria-label="$t('Good draft')"
+                    @click="rate('up')"
+                >
+                    👍
+                </button>
+                <button
+                    type="button"
+                    class="rounded-md border px-2 py-0.5 transition-colors"
+                    :class="
+                        active.my_feedback === 'down'
+                            ? 'border-critical/50 bg-critical/10 text-critical'
+                            : 'border-border hover:bg-accent'
+                    "
+                    :aria-pressed="active.my_feedback === 'down'"
+                    :aria-label="$t('Bad draft')"
+                    @click="rate('down')"
+                >
+                    👎
+                </button>
+            </div>
+            <div
+                v-if="feedbackOpen"
+                class="space-y-2 rounded-md border border-border p-3"
+            >
+                <p>
+                    {{ $t('What was wrong? This is used for future drafts.') }}
+                </p>
+                <Input
+                    v-model="feedbackComment"
+                    maxlength="500"
+                    :placeholder="$t('Optional: tell us more')"
+                    class="h-8 text-sm"
+                />
+                <div class="flex flex-wrap gap-1.5">
+                    <button
+                        v-for="r in reasons"
+                        :key="r[0]"
+                        type="button"
+                        class="rounded-full border border-border px-2.5 py-0.5 hover:bg-accent"
+                        @click="rate('down', r[0])"
+                    >
+                        {{ $t(r[1]) }}
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div
@@ -191,8 +297,8 @@ const quickHints = [
             >
                 {{
                     edited || writingManually
-                        ? 'Publish edited reply'
-                        : 'Approve & publish'
+                        ? $t('Publish edited reply')
+                        : $t('Approve & publish')
                 }}
             </Button>
             <Button

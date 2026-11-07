@@ -217,6 +217,16 @@ PHP needs the `zip` extension for data exports (already in the list in step 1).
 
 See `docs/GOOGLE-VERIFICATION.md` for the Google app verification steps.
 
+## 13. Push notifications (phones)
+
+Generate the keys once and paste the two lines it prints into `.env`, then run `artisan optimize`:
+
+```bash
+/opt/plesk/php/8.4/bin/php /var/www/vhosts/reviewspilot.nl/httpdocs/artisan reviewpilot:webpush-keys
+```
+
+Never change these keys afterwards. Each user turns push on per device under _Settings → Notifications_. On iPhone the site must first be added to the home screen.
+
 ## Emergency stop
 
 ```bash

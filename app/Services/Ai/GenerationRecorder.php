@@ -22,10 +22,11 @@ class GenerationRecorder
         int $latencyMs = 0,
         ?array $response = null,
         ?string $error = null,
+        int $cacheReadTokens = 0,
+        int $cacheWriteTokens = 0,
+        bool $batched = false,
     ): AiGeneration {
-        $prices = config("reviewpilot.ai.prices.{$model}") ?? config('reviewpilot.ai.prices.default');
-        // USD per 1M tokens -> micro-cents (1 cent = 1,000,000 micro-cents).
-        $costMicrocents = (int) round(($inputTokens * $prices['input'] + $outputTokens * $prices['output']) * 100);
+        $costMicrocents = self::cost($model, $inputTokens, $outputTokens, $cacheReadTokens, $cacheWriteTokens, $batched);
 
         $generation = AiGeneration::withoutGlobalScopes()->create([
             'organization_id' => $request->organizationId,
@@ -36,6 +37,9 @@ class GenerationRecorder
             'prompt_version' => config('reviewpilot.ai.prompt_version'),
             'input_tokens' => $inputTokens,
             'output_tokens' => $outputTokens,
+            'cache_read_tokens' => $cacheReadTokens,
+            'cache_write_tokens' => $cacheWriteTokens,
+            'batched' => $batched,
             'cost_microcents' => $costMicrocents,
             'latency_ms' => $latencyMs,
             'status' => $status,
@@ -51,6 +55,25 @@ class GenerationRecorder
         }
 
         return $generation;
+    }
+
+    /**
+     * Cost in micro-cents (1 cent = 1,000,000 micro-cents) from USD-per-1M-token prices.
+     * input_tokens from the API excludes cached tokens, which are priced separately.
+     */
+    public static function cost(string $model, int $input, int $output, int $cacheRead = 0, int $cacheWrite = 0, bool $batched = false): int
+    {
+        $p = config("reviewpilot.ai.prices.{$model}") ?? config('reviewpilot.ai.prices.default');
+        $usd = $input * $p['input']
+            + $output * $p['output']
+            + $cacheRead * ($p['cache_read'] ?? $p['input'] * 0.1)
+            + $cacheWrite * ($p['cache_write'] ?? $p['input'] * 1.25);
+
+        if ($batched) {
+            $usd *= (float) config('reviewpilot.ai.batch_discount', 0.5);
+        }
+
+        return (int) round($usd * 100);
     }
 
     public function meter(string $organizationId, string $metric, int $quantity): void

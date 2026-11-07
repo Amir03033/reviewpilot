@@ -132,11 +132,13 @@ return [
         'models' => [
             'analysis' => env('AI_MODEL_ANALYSIS', 'claude-opus-5-5'),
             'draft' => env('AI_MODEL_DRAFT', 'claude-opus-5-5'),
+            'insights' => env('AI_MODEL_INSIGHTS', 'claude-opus-5-5'),
         ],
         // Claude effort per task: analysis is classification-like, drafting needs more care.
         'effort' => [
             'analysis' => env('AI_EFFORT_ANALYSIS', 'low'),
             'draft' => env('AI_EFFORT_DRAFT', 'medium'),
+            'insights' => env('AI_EFFORT_INSIGHTS', 'medium'),
         ],
         'prompt_version' => 'v1',
         'max_reply_chars' => 1500,
@@ -144,13 +146,24 @@ return [
         'recent_replies_window' => 30,
 
         // USD per 1M tokens (Anthropic list prices), used for cost metering only. Review monthly.
+        // cache_write = writing the cached prompt prefix (5-minute cache, 1.25x input);
+        // cache_read = reading it back (much cheaper than normal input).
         'prices' => [
-            'default' => ['input' => 4.00, 'output' => 20.00],
-            'claude-opus-5-5' => ['input' => 4.00, 'output' => 20.00],
-            'claude-sonnet-5-5' => ['input' => 2.00, 'output' => 10.00],
-            'claude-haiku-5-5' => ['input' => 0.10, 'output' => 0.50],
-            'fake-model' => ['input' => 0.0, 'output' => 0.0],
+            'default' => ['input' => 4.00, 'output' => 20.00, 'cache_write' => 5.00, 'cache_read' => 0.20],
+            'claude-opus-5-5' => ['input' => 4.00, 'output' => 20.00, 'cache_write' => 5.00, 'cache_read' => 0.20],
+            'claude-sonnet-5-5' => ['input' => 2.00, 'output' => 10.00, 'cache_write' => 2.50, 'cache_read' => 0.20],
+            'claude-haiku-5-5' => ['input' => 0.10, 'output' => 0.50, 'cache_write' => 0.125, 'cache_read' => 0.01],
+            'fake-model' => ['input' => 0.0, 'output' => 0.0, 'cache_write' => 0.0, 'cache_read' => 0.0],
         ],
+        // Message Batches API discount on all token prices.
+        'batch_discount' => 0.5,
+        // Prompt caching of the fixed instructions (system prompt). Turn off only to debug.
+        'prompt_caching' => (bool) env('AI_PROMPT_CACHING', true),
+        // First import: analyse reviews older than the draft window through the Message
+        // Batches API (half price, results usually within an hour).
+        'batch_backfill' => (bool) env('AI_BATCH_BACKFILL', true),
+        // Learning from the team: approved replies and corrections used as examples.
+        'style_examples' => 6,
     ],
 
     'sync' => [

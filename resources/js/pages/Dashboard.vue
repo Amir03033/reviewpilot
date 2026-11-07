@@ -3,7 +3,9 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/rp/EmptyState.vue';
+import InsightCard from '@/components/rp/InsightCard.vue';
 import KpiCard from '@/components/rp/KpiCard.vue';
+import type { Insight } from '@/types/reviewpilot';
 import OnboardingChecklist from '@/components/rp/OnboardingChecklist.vue';
 import PageHeader from '@/components/rp/PageHeader.vue';
 import Panel from '@/components/rp/Panel.vue';
@@ -49,6 +51,7 @@ const props = defineProps<{
     }[];
     filters: { location: string | null };
     setup: { google_connected: boolean; has_locations: boolean };
+    advice: (Insight & { location_id: string; location: string | null })[];
     checklist: {
         dismissed: boolean;
         steps: {
@@ -133,6 +136,20 @@ function filterLocation(event: Event) {
         </EmptyState>
 
         <template v-else>
+            <div
+                v-if="advice.length"
+                class="grid gap-3"
+                :class="advice.length > 1 ? 'lg:grid-cols-2' : ''"
+            >
+                <InsightCard
+                    v-for="a in advice"
+                    :key="a.location_id"
+                    :insight="a"
+                    :location="a.location"
+                    :href="`/locations/${a.location_id}`"
+                />
+            </div>
+
             <!-- Today strip -->
             <div class="grid gap-3 md:grid-cols-4">
                 <Link

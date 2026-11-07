@@ -6,7 +6,9 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import InsightCard from '@/components/rp/InsightCard.vue';
 import KpiCard from '@/components/rp/KpiCard.vue';
+import type { Insight } from '@/types/reviewpilot';
 import PageHeader from '@/components/rp/PageHeader.vue';
 import Panel from '@/components/rp/Panel.vue';
 import VoiceForm, { type VoiceData } from '@/components/rp/VoiceForm.vue';
@@ -50,7 +52,27 @@ const props = defineProps<{
     stats: { current: Stats; previous: Stats };
     allowedModes: { value: string; allowed: boolean }[];
     canManage: boolean;
+    insight: Insight | null;
+    aiQuality: {
+        approved: number;
+        approved_unchanged: number;
+        average_edit: number | null;
+        thumbs_up: number;
+        thumbs_down: number;
+    };
 }>();
+
+const insightBusy = ref(false);
+const refreshInsight = () =>
+    router.post(
+        `/locations/${props.location.id}/insights`,
+        {},
+        {
+            preserveScroll: true,
+            onStart: () => (insightBusy.value = true),
+            onFinish: () => (insightBusy.value = false),
+        },
+    );
 
 defineOptions({
     layout: {
@@ -177,6 +199,85 @@ const remove = () => {
                 :previous="stats.previous.response_rate"
                 suffix=" pts"
             />
+        </div>
+
+        <div class="grid gap-5 lg:grid-cols-3">
+            <div class="space-y-2 lg:col-span-2">
+                <InsightCard v-if="insight" :insight="insight" />
+                <div
+                    v-else
+                    class="rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground"
+                >
+                    {{
+                        $t(
+                            'Every Monday ReviewPilot writes concrete advice for this location, based on the last 30 days of reviews.',
+                        )
+                    }}
+                </div>
+                <Button
+                    v-if="canManage"
+                    variant="ghost"
+                    size="sm"
+                    :disabled="insightBusy"
+                    @click="refreshInsight"
+                    >{{
+                        insightBusy
+                            ? $t('Writing advice…')
+                            : $t('Write new advice now')
+                    }}</Button
+                >
+            </div>
+            <section class="rounded-xl border border-border bg-card p-5">
+                <p class="text-xs text-muted-foreground">
+                    {{ $t('AI draft quality (90 days)') }}
+                </p>
+                <dl class="mt-3 space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <dt>{{ $t('Approved without changes') }}</dt>
+                        <dd class="tabular font-mono">
+                            {{
+                                aiQuality.approved
+                                    ? pct(
+                                          Math.round(
+                                              (aiQuality.approved_unchanged /
+                                                  aiQuality.approved) *
+                                                  100,
+                                          ),
+                                      )
+                                    : '—'
+                            }}
+                        </dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>{{ $t('Average share edited') }}</dt>
+                        <dd class="tabular font-mono">
+                            {{
+                                aiQuality.average_edit !== null
+                                    ? pct(
+                                          Math.round(
+                                              aiQuality.average_edit * 100,
+                                          ),
+                                      )
+                                    : '—'
+                            }}
+                        </dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>{{ $t('Ratings') }}</dt>
+                        <dd class="tabular font-mono">
+                            👍 {{ aiQuality.thumbs_up }} · 👎
+                            {{ aiQuality.thumbs_down }}
+                        </dd>
+                    </div>
+                </dl>
+                <p class="mt-3 text-xs text-muted-foreground">
+                    {{
+                        $t(
+                            'ReviewPilot learns from your edits and ratings: the more you approve and correct, the closer drafts get to your style.',
+                        )
+                    }}
+                </p>
+            </section>
         </div>
 
         <div class="grid gap-5 lg:grid-cols-2">

@@ -4,6 +4,7 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BrandVoiceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataExportController;
+use App\Http\Controllers\DraftFeedbackController;
 use App\Http\Controllers\GoogleIntegrationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvitationController;
@@ -53,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('reviews/{review}', [ReviewController::class, 'show'])->name('reviews.show');
         Route::get('approvals', [ReviewController::class, 'approvals'])->name('approvals.index');
         Route::post('drafts/{draft}/approve', [ReviewActionController::class, 'approve'])->middleware('plan')->name('drafts.approve');
+        Route::post('drafts/{draft}/feedback', [DraftFeedbackController::class, 'store'])->middleware('throttle:60,1')->name('drafts.feedback');
         Route::post('reviews/{review}/reply', [ReviewActionController::class, 'manual'])->middleware('plan')->name('reviews.reply');
         Route::post('reviews/{review}/regenerate', [ReviewActionController::class, 'regenerate'])->middleware(['plan', 'throttle:regenerate'])->name('reviews.regenerate');
         Route::post('reviews/{review}/reject', [ReviewActionController::class, 'reject'])->name('reviews.reject');
@@ -66,6 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('locations/{location}/policy', [LocationController::class, 'updatePolicy'])->name('locations.policy');
         Route::put('locations/{location}/facts', [LocationController::class, 'updateFacts'])->name('locations.facts');
         Route::put('locations/{location}/voice', [BrandVoiceController::class, 'updateLocation'])->name('locations.voice');
+        Route::post('locations/{location}/insights', [LocationController::class, 'refreshInsight'])->middleware(['plan', 'throttle:3,60'])->name('locations.insights');
         Route::post('locations/{location}/sync', [LocationController::class, 'sync'])->name('locations.sync');
         Route::delete('locations/{location}', [LocationController::class, 'destroy'])->name('locations.destroy');
 

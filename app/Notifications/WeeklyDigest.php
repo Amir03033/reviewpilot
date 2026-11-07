@@ -40,6 +40,13 @@ class WeeklyDigest extends Notification implements ShouldQueue
             $mail->line(__('Most mentioned in complaints: :topics', ['topics' => implode(', ', $s['top_topics'])]));
         }
 
+        foreach (array_slice($s['advice'] ?? [], 0, 3) as $i => $advice) {
+            if ($i === 0) {
+                $mail->line('**'.__('Advice for this week').':**');
+            }
+            $mail->line('• '.$advice['location'].': '.$advice['title']);
+        }
+
         return $mail->action(__('Open ReviewPilot'), route('dashboard'));
     }
 }

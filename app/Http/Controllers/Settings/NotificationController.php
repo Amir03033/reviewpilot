@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\OrganizationMembership;
+use App\Models\PushSubscription;
+use App\Services\Push\WebPushSender;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -25,6 +27,10 @@ class NotificationController extends Controller
                 'role' => $m->role->value,
                 'settings' => $m->notificationSettings(),
             ])->values(),
+            'push' => [
+                'publicKey' => WebPushSender::configured() ? config('services.webpush.public_key') : null,
+                'devices' => PushSubscription::query()->where('user_id', $request->user()->id)->count(),
+            ],
         ]);
     }
 

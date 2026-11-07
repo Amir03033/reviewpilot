@@ -24,6 +24,7 @@ class OrganizationMembership extends Model
     /** Email types a member can switch on or off, with their defaults. */
     public const NOTIFICATION_DEFAULTS = [
         'negative_review' => true,
+        'push_alerts' => true,
         'google_reconnect' => true,
         'weekly_digest' => true,
     ];

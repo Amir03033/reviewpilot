@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Services\Push\WebPushSender;
 use App\Support\PlatformSettings;
 use Illuminate\Console\Command;
 use Throwable;
@@ -65,6 +66,9 @@ class DoctorCommand extends Command
 
         $this->section('Mail');
         $this->check(! in_array(config('mail.default'), ['log', 'array'], true), 'A real mailer is configured (alerts, invitations, email verification)', $production);
+
+        $this->section('Push notifications');
+        $this->check(WebPushSender::configured(), 'WEBPUSH_PUBLIC_KEY / WEBPUSH_PRIVATE_KEY are set (run reviewpilot:webpush-keys)', false);
 
         $this->section('Monitoring');
         $this->check(filled(config('sentry.dsn')), 'Error monitoring: SENTRY_LARAVEL_DSN is set', false);

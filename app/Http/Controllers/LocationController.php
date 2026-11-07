@@ -3,18 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AutomationMode;
+use App\Enums\DraftStatus;
 use App\Enums\ReplyState;
 use App\Jobs\SyncLocationReviews;
+use App\Models\DraftFeedback;
 use App\Models\GbpLocationLink;
 use App\Models\Location;
 use App\Models\LocationFact;
+use App\Models\LocationInsight;
+use App\Models\ResponseDraft;
 use App\Models\Review;
 use App\Models\ReviewReply;
+use App\Services\Ai\LlmException;
 use App\Services\Audit\AuditLogger;
 use App\Services\Automation\AutomationEvaluator;
 use App\Services\Billing\BillingService;
 use App\Services\Billing\Entitlements;
 use App\Services\Insights\DashboardStats;
+use App\Services\Insights\LocationAdvisor;
 use App\Services\Reviews\BrandVoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -78,7 +84,59 @@ class LocationController extends Controller
                 'allowed' => $m === AutomationMode::Manual || $entitlements->allowsMode($this->organization(), $m->value),
             ]),
             'canManage' => $this->membership()->canApproveFor($location->id),
+            'insight' => $this->insightData(LocationInsight::query()->where('location_id', $location->id)->latest('period_end')->first()),
+            'aiQuality' => $this->aiQuality($location->id),
         ]);
+    }
+
+    /** Generate this location's advice now instead of waiting for Monday. */
+    public function refreshInsight(string $id, LocationAdvisor $advisor): RedirectResponse
+    {
+        $location = Location::query()->findOrFail($id);
+        $this->authorizeLocation('approve-for-location', $location->id);
+
+        try {
+            $insight = $advisor->generate($location);
+        } catch (LlmException $e) {
+            report($e);
+
+            return $this->backWith('The AI could not write advice right now. Try again later.', 'error');
+        }
+
+        return $insight
+            ? $this->backWith('New advice is ready.')
+            : $this->backWith('Not enough reviews with text in the last 30 days for useful advice yet.', 'info');
+    }
+
+    public static function insightData(?LocationInsight $insight): ?array
+    {
+        return $insight ? [
+            'headline' => $insight->headline,
+            'summary' => $insight->summary,
+            'recommendations' => $insight->recommendations,
+            'praise' => $insight->praise ?? [],
+            'period_start' => $insight->period_start->toDateString(),
+            'period_end' => $insight->period_end->toDateString(),
+            'reviews' => $insight->stats['reviews'] ?? 0,
+        ] : null;
+    }
+
+    /** How good the AI drafts are for this location, from approvals, edits and thumbs (90 days). */
+    private function aiQuality(string $locationId): array
+    {
+        $since = now()->subDays(90);
+        $approved = ResponseDraft::query()->where('location_id', $locationId)
+            ->where('status', DraftStatus::Approved->value)->whereNotNull('original_text')
+            ->where('updated_at', '>=', $since)->get(['edit_distance_ratio']);
+        $feedback = DraftFeedback::query()->where('location_id', $locationId)->where('created_at', '>=', $since)->get(['rating']);
+
+        return [
+            'approved' => $approved->count(),
+            'approved_unchanged' => $approved->filter(fn ($d) => (float) $d->edit_distance_ratio < 0.02)->count(),
+            'average_edit' => $approved->count() ? round((float) $approved->avg('edit_distance_ratio'), 2) : null,
+            'thumbs_up' => $feedback->where('rating', 1)->count(),
+            'thumbs_down' => $feedback->where('rating', -1)->count(),
+        ];
     }
 
     public function update(Request $request, string $id): RedirectResponse

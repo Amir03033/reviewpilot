@@ -53,7 +53,14 @@ class LaunchFeaturesTest extends TestCase
         $review = $this->makeReview($this->makeLocation($org), 1, 'Koud eten en lang gewacht.');
         (new ProcessReview($review->id))->handle(app(ReviewPipeline::class));
 
-        Notification::assertNotSentTo($owner, NegativeReviewReceived::class);
+        // Email off: the in-app (and push) alert remains, the email does not go out.
+        Notification::assertSentTo($owner, NegativeReviewReceived::class, fn ($n, array $channels) => ! in_array('mail', $channels, true));
+
+        // Email and push both off: no alert at all.
+        $membership->forceFill(['notification_preferences' => ['negative_review' => false, 'push_alerts' => false]])->save();
+        $second = $this->makeReview($this->makeLocation($org), 1, 'Weer koud eten.');
+        (new ProcessReview($second->id))->handle(app(ReviewPipeline::class));
+        Notification::assertSentToTimes($owner, NegativeReviewReceived::class, 1);
     }
 
     public function test_you_cannot_change_someone_elses_notification_settings(): void
