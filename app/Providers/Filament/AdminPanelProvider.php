@@ -3,6 +3,8 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
+use App\Filament\Widgets\AiUsageByOrganization;
+use App\Filament\Widgets\AiUsageChart;
 use App\Filament\Widgets\PlatformStats;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -42,6 +44,8 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups(['Health'])
             ->widgets([
                 PlatformStats::class,
+                AiUsageChart::class,
+                AiUsageByOrganization::class,
             ])
             ->middleware([
                 EncryptCookies::class,

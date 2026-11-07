@@ -87,6 +87,15 @@ class LaunchFeaturesTest extends TestCase
         $this->actingAs($owner)->get('/dashboard')->assertInertia(fn ($page) => $page->where('checklist.dismissed', true));
     }
 
+    public function test_ai_usage_is_shared_for_the_sidebar_meter(): void
+    {
+        [$owner] = $this->makeOrganization();
+
+        $this->actingAs($owner)->get('/dashboard')->assertInertia(fn ($page) => $page
+            ->where('tenant.aiUsage.used', 0)
+            ->where('tenant.aiUsage.allowance', 400)); // trial = Pro: 400 per location
+    }
+
     // --- Data export ---
 
     public function test_export_contains_the_organisations_data_only_and_is_emailed(): void

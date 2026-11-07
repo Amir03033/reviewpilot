@@ -207,7 +207,7 @@ HOSTING_PROVIDER=...
 SENTRY_LARAVEL_DSN=
 ```
 
-**Admin panel** (`https://reviewspilot.nl/admin`): first turn on two-factor authentication for your own account (*Settings → Security*), then:
+**Admin panel** (`https://reviewspilot.nl/admin`): first turn on two-factor authentication for your own account (_Settings → Security_), then:
 
 ```bash
 /opt/plesk/php/8.4/bin/php /var/www/vhosts/reviewspilot.nl/httpdocs/artisan reviewpilot:make-admin you@example.com

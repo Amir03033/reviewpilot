@@ -13,6 +13,7 @@ import {
 } from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
+import AiUsageMeter from '@/components/rp/AiUsageMeter.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
     Sidebar,
@@ -140,6 +141,7 @@ function switchOrg(event: Event) {
         </SidebarContent>
 
         <SidebarFooter>
+            <AiUsageMeter />
             <p
                 v-if="tenant?.onTrial"
                 class="px-2 text-[11px] text-muted-foreground group-data-[collapsible=icon]:hidden"

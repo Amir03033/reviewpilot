@@ -75,6 +75,10 @@ class HandleInertiaRequests extends Middleware
             'plan' => app(Entitlements::class)->plan($organization),
             'onTrial' => $organization->onTrial(),
             'termsAccepted' => $organization->hasAcceptedCurrentTerms(),
+            'aiUsage' => [
+                'used' => app(Entitlements::class)->aiReviewsUsedThisMonth($organization),
+                'allowance' => app(Entitlements::class)->aiReviewAllowance($organization),
+            ],
             'trialEndsAt' => $organization->trial_ends_at?->toIso8601String(),
             'pendingApprovals' => Review::query()->accessibleBy($membership)->visible()
                 ->whereIn('workflow_state', ReviewState::inboxAttention())->count(),

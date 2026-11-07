@@ -9,13 +9,13 @@ Do step 2 once the API access is approved and the site is live with the pages be
 
 ## 1. What must be online first
 
-| Item | URL / file | Status in the code |
-|---|---|---|
-| Homepage that explains the app | https://reviewspilot.nl | Done (`resources/js/pages/Welcome.vue`) |
-| Privacy policy incl. Limited Use statement | https://reviewspilot.nl/legal/privacy (short: `/privacy`) | Done; fill in the `COMPANY_*` values in `.env` |
-| Terms of service | https://reviewspilot.nl/legal/terms | Done |
-| App logo, 120×120 px | https://reviewspilot.nl/logo-120.png | Done (`public/logo-120.png`); a 512 px version is at `/logo-512.png` |
-| Support email | `COMPANY_EMAIL` (e.g. info@reviewspilot.nl) | Create the mailbox in Plesk |
+| Item                                       | URL / file                                                | Status in the code                                                   |
+| ------------------------------------------ | --------------------------------------------------------- | -------------------------------------------------------------------- |
+| Homepage that explains the app             | https://reviewspilot.nl                                   | Done (`resources/js/pages/Welcome.vue`)                              |
+| Privacy policy incl. Limited Use statement | https://reviewspilot.nl/legal/privacy (short: `/privacy`) | Done; fill in the `COMPANY_*` values in `.env`                       |
+| Terms of service                           | https://reviewspilot.nl/legal/terms                       | Done                                                                 |
+| App logo, 120×120 px                       | https://reviewspilot.nl/logo-120.png                      | Done (`public/logo-120.png`); a 512 px version is at `/logo-512.png` |
+| Support email                              | `COMPANY_EMAIL` (e.g. info@reviewspilot.nl)               | Create the mailbox in Plesk                                          |
 
 The privacy policy must name the same company and contact details as the consent screen. Fill these in `.env` and run `php artisan optimize`:
 
@@ -35,7 +35,7 @@ HOSTING_PROVIDER=...   # who hosts the server, listed as a sub-processor
 
 1. Go to https://search.google.com/search-console and sign in with the **same Google account that owns the Cloud project**.
 2. Add a property → **Domain** → `reviewspilot.nl`.
-3. Google shows a TXT record (`google-site-verification=...`). In Plesk: *Websites & Domains → DNS Settings → Add Record* → type **TXT**, host empty (`reviewspilot.nl.`), value = the code.
+3. Google shows a TXT record (`google-site-verification=...`). In Plesk: _Websites & Domains → DNS Settings → Add Record_ → type **TXT**, host empty (`reviewspilot.nl.`), value = the code.
 4. Wait a few minutes, then click **Verify**.
 
 ## 3. Branding (Google Cloud Console → Google Auth Platform → Branding)
@@ -64,7 +64,7 @@ Google asks for a short screen recording (2–4 minutes) in **English**. The vid
 1. Open https://reviewspilot.nl and show the homepage and the privacy policy link (5 s).
 2. Log in. Switch the language to EN (user menu → Language) so the reviewer can follow.
 3. Go to **Integrations → Connect Google**.
-4. On Google's consent screen, **pause on the page** so the app name and the requested permission (Business Profile) are visible. The URL must contain the `client_id`. Click *Allow*.
+4. On Google's consent screen, **pause on the page** so the app name and the requested permission (Business Profile) are visible. The URL must contain the `client_id`. Click _Allow_.
 5. Back in ReviewPilot: show the list of discovered locations and click **Import** for one location.
 6. Open **Reviews**, open one review, and show the three suggested replies.
 7. Edit a reply, click **Approve & publish**, then open the location on Google Maps and show the reply that appeared.
@@ -74,8 +74,8 @@ Use a real location with at least one review (the friend's "Reza Perzische Tapij
 
 ## 6. Submit
 
-*Google Auth Platform → Verification centre → Prepare for verification*. Answer the questions, add the video link and the justification above. The review usually takes days to a few weeks. Google emails questions to the developer contact address; answer them quickly.
+_Google Auth Platform → Verification centre → Prepare for verification_. Answer the questions, add the video link and the justification above. The review usually takes days to a few weeks. Google emails questions to the developer contact address; answer them quickly.
 
 ## 7. Until verification is done
 
-Keep the consent screen in **Testing** mode and add each pilot customer's Google account under *Audience → Test users* (max. 100). Test users see a warning screen they can click through.
+Keep the consent screen in **Testing** mode and add each pilot customer's Google account under _Audience → Test users_ (max. 100). Test users see a warning screen they can click through.

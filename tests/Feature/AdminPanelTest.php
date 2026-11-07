@@ -4,7 +4,11 @@ namespace Tests\Feature;
 
 use App\Filament\Pages\Dashboard;
 use App\Filament\Resources\OrganizationResource\Pages\ViewOrganization;
+use App\Filament\Widgets\AiUsageByOrganization;
+use App\Filament\Widgets\AiUsageChart;
+use App\Models\AiGeneration;
 use App\Models\AuditLog;
+use App\Models\UsageRecord;
 use App\Models\User;
 use App\Support\PlatformSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -59,6 +63,24 @@ class AdminPanelTest extends TestCase
             $this->actingAs($admin)->get($page)->assertOk();
         }
         $this->actingAs($admin)->get("/admin/organizations/{$org->id}")->assertOk()->assertSee($org->name);
+    }
+
+    public function test_ai_usage_widgets_render(): void
+    {
+        [, $org] = $this->makeOrganization();
+        AiGeneration::withoutGlobalScopes()->create([
+            'organization_id' => $org->id, 'purpose' => 'draft', 'provider' => 'anthropic', 'model' => 'm',
+            'prompt_version' => 'v1', 'cost_microcents' => 250_000_000, 'status' => 'ok',
+        ]);
+        foreach (['reviews_processed' => 12, 'ai_cost_microcents' => 250_000_000] as $metric => $quantity) {
+            UsageRecord::withoutGlobalScopes()->create(['organization_id' => $org->id, 'metric' => $metric, 'period' => now()->startOfMonth()->toDateString(), 'quantity' => $quantity]);
+        }
+        $admin = $this->admin();
+        $admin->save();
+        $this->actingAs($admin);
+
+        Livewire::test(AiUsageChart::class)->assertOk();
+        Livewire::test(AiUsageByOrganization::class)->assertOk()->assertSee($org->name)->assertSee('$ 2.50')->assertSee('12 / 400');
     }
 
     public function test_make_admin_command(): void

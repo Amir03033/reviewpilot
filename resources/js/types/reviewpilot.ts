@@ -11,6 +11,7 @@ export type Tenant = {
     plan: string | null;
     onTrial: boolean;
     termsAccepted: boolean;
+    aiUsage: { used: number; allowance: number };
     trialEndsAt: string | null;
     pendingApprovals: number;
     organizations: { id: string; name: string }[];
