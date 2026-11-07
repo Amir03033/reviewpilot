@@ -47,6 +47,8 @@ class DraftGenerator
             'recent_replies' => $recent,
             'compensation_policy' => $voice['settings']['compensation_policy'] ?? 'invite_contact',
             'max_chars' => (int) config('reviewpilot.ai.max_reply_chars'),
+            'emoji_policy' => $voice['settings']['emoji'] ?? 'never',
+            'rating' => $review->star_rating,
         ];
 
         $variants = $this->requestVariants($review, $analysis, $location, $voice, $facts, $recent, $language, $hint);

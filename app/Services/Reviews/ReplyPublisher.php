@@ -32,6 +32,13 @@ class ReplyPublisher
         }
 
         $reply = DB::transaction(function () use ($draft, $user, $text) {
+            // Re-read under lock: a draft can be approved exactly once (double clicks,
+            // two managers, or a stale browser tab).
+            $fresh = ResponseDraft::withoutGlobalScopes()->whereKey($draft->id)->lockForUpdate()->first();
+            if (! $fresh || $fresh->status !== DraftStatus::Proposed) {
+                throw new InvalidArgumentException('This draft was already handled. Refresh to see the latest state.');
+            }
+
             $edited = $text !== trim((string) $draft->original_text);
 
             $draft->forceFill([
@@ -162,7 +169,9 @@ class ReplyPublisher
 
     private function upsertReply(ResponseDraft $draft, string $text, ReplyState $state, string $via, ?CarbonInterface $scheduledFor = null): ReviewReply
     {
-        $reply = ReviewReply::withoutGlobalScopes()->firstOrNew(['review_id' => $draft->review_id]);
+        // Row lock: two simultaneous approvals (double click, two managers) cannot both win.
+        $reply = ReviewReply::withoutGlobalScopes()->where('review_id', $draft->review_id)->lockForUpdate()->first()
+            ?? new ReviewReply(['review_id' => $draft->review_id]);
 
         if ($reply->exists && $reply->state === ReplyState::Publishing) {
             throw new InvalidArgumentException('This reply is already being published.');

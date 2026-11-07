@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\OrganizationMembership;
 use App\Services\Ai\ClaudeClient;
+use App\Services\Ai\DisabledLlmClient;
 use App\Services\Ai\FakeLlmClient;
 use App\Services\Ai\LlmClient;
 use App\Services\Billing\BillingGateway;
@@ -31,9 +32,19 @@ class AppServiceProvider extends ServiceProvider
         // One tenant context per request / job (reset between Octane requests and queued jobs).
         $this->app->scoped(TenantContext::class);
 
-        $this->app->bind(LlmClient::class, fn ($app) => match (config('reviewpilot.ai.provider')) {
-            'anthropic', 'claude' => $app->make(ClaudeClient::class),
-            default => $app->make(FakeLlmClient::class),
+        $this->app->bind(LlmClient::class, function ($app) {
+            $provider = config('reviewpilot.ai.provider');
+
+            if (in_array($provider, ['anthropic', 'claude'], true)) {
+                return $app->make(ClaudeClient::class);
+            }
+
+            // The offline demo AI must never answer real guests.
+            if ($app->isProduction()) {
+                return new DisabledLlmClient("AI provider \"{$provider}\" is not allowed in production. Set AI_PROVIDER=anthropic.");
+            }
+
+            return $app->make(FakeLlmClient::class);
         });
 
         $this->app->bind(GbpClient::class, HttpGbpClient::class);

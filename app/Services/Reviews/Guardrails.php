@@ -60,6 +60,18 @@ class Guardrails
         $threshold = (float) config('reviewpilot.ai.similarity_threshold', 0.85);
         $checks['originality'] = $this->result($mostSimilar < $threshold, sprintf('Too similar (%.0f%%) to a recent reply.', $mostSimilar * 100));
 
+        $unverified = $this->unverifiedSpecifics($text, $context['fact_values']);
+        $checks['unverified_specifics'] = $this->result($unverified === [], 'Mentions details that are not in the location facts: '.implode(', ', $unverified).'.');
+
+        $emojiPolicy = $context['emoji_policy'] ?? 'allowed';
+        $hasEmoji = (bool) preg_match('/\p{Extended_Pictographic}/u', $text);
+        $emojiAllowed = match ($emojiPolicy) {
+            'never' => ! $hasEmoji,
+            'positive_only' => ! $hasEmoji || (int) ($context['rating'] ?? 0) >= 4,
+            default => true,
+        };
+        $checks['emoji'] = $this->result($emojiAllowed, 'Uses emoji, which the brand voice does not allow here.');
+
         $promises = (bool) preg_match(self::PROMISE_PATTERN, $text);
         $mayOffer = $context['compensation_policy'] === 'may_offer';
         $checks['promises'] = $this->result(! $promises || $mayOffer, 'Offers compensation, which the brand voice does not allow.');
@@ -126,6 +138,47 @@ class Guardrails
         }
 
         return true;
+    }
+
+    /**
+     * Concrete details (times, prices, percentages, dates) that do not appear in the
+     * location facts are likely invented. Only facts may contain specifics.
+     *
+     * @return array<int, string>
+     */
+    private function unverifiedSpecifics(string $text, array $factValues): array
+    {
+        $facts = mb_strtolower(implode(' ', $factValues));
+        $patterns = [
+            '/\b\d{1,2}[:.]\d{2}\b/u',                                   // 22:00, 9.30
+            '/\b\d{1,2}\s?(uur|am|pm|u)\b/iu',                            // 10 uur, 9pm
+            '/(€\s?\d+([.,]\d+)?|\b\d+([.,]\d+)?\s?(euro|eur)\b)/iu',    // €15, 15 euro
+            '/\b\d+\s?%/u',                                               // 10%
+            '/\b\d{1,2}[-\/]\d{1,2}([-\/]\d{2,4})?\b/u',                  // 12-05, 12/05/2026
+        ];
+
+        // Numbers that the facts actually contain (as whole values, e.g. "2200" for 22:00).
+        $factNumbers = [];
+        foreach ($patterns as $pattern) {
+            preg_match_all($pattern, $facts, $m);
+            foreach ($m[0] as $value) {
+                $factNumbers[preg_replace('/\D/', '', $value)] = true;
+            }
+        }
+
+        $found = [];
+        foreach ($patterns as $pattern) {
+            preg_match_all($pattern, $text, $matches);
+            foreach ($matches[0] as $match) {
+                $needle = mb_strtolower(trim($match));
+                $digits = preg_replace('/\D/', '', $needle);
+                if (! str_contains($facts, $needle) && ! isset($factNumbers[$digits])) {
+                    $found[] = trim($match);
+                }
+            }
+        }
+
+        return array_values(array_unique($found));
     }
 
     /** @return array{pass: bool, message: ?string} */

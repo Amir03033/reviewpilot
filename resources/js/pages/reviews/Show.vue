@@ -189,6 +189,8 @@ const polarityClass = (p: number) =>
                         'rejected',
                         'drafting',
                         'publish_failed',
+                        'analysis_failed',
+                        'received',
                     ].includes(review.state) || drafts.length
                 "
                 title="Your reply"

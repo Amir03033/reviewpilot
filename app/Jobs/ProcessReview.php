@@ -17,7 +17,7 @@ class ProcessReview implements ShouldQueue
 
     public array $backoff = [30, 120, 600];
 
-    public function __construct(public string $reviewId, public bool $draft = true, public ?string $hint = null)
+    public function __construct(public string $reviewId, public bool $draft = true, public ?string $hint = null, public bool $backfill = false)
     {
         $this->onQueue('ai');
         $this->afterCommit();
@@ -42,6 +42,6 @@ class ProcessReview implements ShouldQueue
             return;
         }
 
-        $pipeline->run($review, $this->draft);
+        $pipeline->run($review, $this->draft, $this->backfill);
     }
 }

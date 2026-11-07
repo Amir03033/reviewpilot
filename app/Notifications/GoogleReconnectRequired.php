@@ -12,7 +12,7 @@ class GoogleReconnectRequired extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public GoogleConnection $connection)
+    public function __construct(public GoogleConnection $googleConnection)
     {
         $this->onQueue('notifications');
     }
@@ -26,7 +26,7 @@ class GoogleReconnectRequired extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('Reconnect Google to keep syncing reviews')
-            ->line("ReviewPilot lost access to the Google account {$this->connection->google_email}.")
+            ->line("ReviewPilot lost access to the Google account {$this->googleConnection->google_email}.")
             ->line('New reviews are not synced and replies cannot be published until you reconnect.')
             ->action('Reconnect Google', route('integrations.index'));
     }
@@ -35,9 +35,9 @@ class GoogleReconnectRequired extends Notification implements ShouldQueue
     {
         return [
             'kind' => 'google_reconnect',
-            'organization_id' => $this->connection->organization_id,
-            'connection_id' => $this->connection->id,
-            'email' => $this->connection->google_email,
+            'organization_id' => $this->googleConnection->organization_id,
+            'connection_id' => $this->googleConnection->id,
+            'email' => $this->googleConnection->google_email,
         ];
     }
 }

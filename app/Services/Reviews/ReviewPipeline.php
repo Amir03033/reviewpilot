@@ -28,11 +28,14 @@ class ReviewPipeline
         private GenerationRecorder $usage,
     ) {}
 
-    public function run(Review $review, bool $draft = true): void
+    public function run(Review $review, bool $draft = true, bool $backfill = false): void
     {
         $organization = Organization::findOrFail($review->organization_id);
 
-        if (! $this->entitlements->canProcessWithAi($organization)) {
+        // Backfilled history does not consume the monthly allowance, but still requires a plan.
+        $allowed = $backfill ? $this->entitlements->isActive($organization) : $this->entitlements->canProcessWithAi($organization);
+
+        if (! $allowed) {
             // No plan or AI allowance used up: keep the review visible for a manual reply.
             $review->transitionTo($review->owner_reply_text ? ReviewState::NoAction : ReviewState::NeedsHumanWriting);
 
@@ -46,11 +49,13 @@ class ReviewPipeline
             throw $e;
         }
 
-        $this->usage->meter($organization->id, 'reviews_processed', 1);
+        $this->usage->meter($organization->id, $backfill ? 'backfill_processed' : 'reviews_processed', 1);
         $review->transitionTo(ReviewState::Analyzed);
         $review->refresh();
 
-        $this->notifyIfNegative($review, $analysis->requires_human);
+        if (! $backfill) {
+            $this->notifyIfNegative($review, $analysis->requires_human);
+        }
 
         if (! $draft || $review->owner_reply_origin !== 'none') {
             $review->transitionTo(ReviewState::NoAction);
@@ -58,10 +63,11 @@ class ReviewPipeline
             return;
         }
 
-        $this->draft($review);
+        // Imported history is never answered automatically: a person decides.
+        $this->draft($review, automate: ! $backfill);
     }
 
-    public function draft(Review $review, ?string $hint = null): void
+    public function draft(Review $review, ?string $hint = null, bool $automate = true): void
     {
         $review->transitionTo(ReviewState::Drafting);
         $analysis = $review->analysis()->first();
@@ -89,7 +95,7 @@ class ReviewPipeline
         $best->setRelation('review', $review);
 
         // Regeneration requested by a person always goes back to that person.
-        if ($hint === null && $analysis) {
+        if ($automate && $hint === null && $analysis) {
             $decision = $this->automation->evaluate($review, $analysis, $best);
 
             if ($decision->eligible) {

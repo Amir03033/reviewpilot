@@ -12,6 +12,7 @@ use App\Models\ReviewAnalysis;
 use App\Models\ReviewReply;
 use App\Models\ReviewRevision;
 use App\Services\Billing\Entitlements;
+use App\Support\PlatformSettings;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 
@@ -42,6 +43,9 @@ class AutomationEvaluator
         // --- Hard gates (never configurable) ---
         if ($mode === AutomationMode::Manual) {
             $reasons[] = 'Location is in manual mode.';
+        }
+        if (PlatformSettings::automationPaused()) {
+            $reasons[] = 'Automatic publishing is paused platform-wide.';
         }
         if ($organization->automation_kill_switch) {
             $reasons[] = 'Automation is paused for the organisation.';
@@ -94,6 +98,45 @@ class AutomationEvaluator
         }
 
         return new AutomationDecision(true, [], $this->publishAt($location, max($policy->hold_minutes, $cfg['min_hold_minutes']), $policy->business_hours_only));
+    }
+
+    /**
+     * Last-moment safety check right before an automated reply goes to Google, against
+     * the review and analysis as they are NOW (they may have changed since scheduling).
+     *
+     * @return array<int, string> reasons to stop (empty = safe)
+     */
+    public function publishTimeBlockers(Review $review): array
+    {
+        $cfg = config('reviewpilot.automation');
+        $reasons = [];
+        $analysis = ReviewAnalysis::withoutGlobalScopes()->where('review_id', $review->id)->where('is_current', true)->latest()->first();
+        $organization = Organization::find($review->organization_id);
+        $policy = Location::withoutGlobalScopes()->find($review->location_id)?->automationPolicy;
+
+        if (PlatformSettings::automationPaused()) {
+            $reasons[] = 'platform_paused';
+        }
+        if (! $organization || $organization->automation_kill_switch) {
+            $reasons[] = 'organization_paused';
+        }
+        if ($policy?->isPaused()) {
+            $reasons[] = 'location_paused';
+        }
+        if ($review->removed_at) {
+            $reasons[] = 'review_removed';
+        }
+        if ($review->star_rating <= $cfg['hard_gate_max_rating']) {
+            $reasons[] = 'low_rating';
+        }
+        if (! $analysis || $analysis->requires_human || array_intersect($analysis->risk_flags ?? [], $cfg['hard_gate_flags']) !== []) {
+            $reasons[] = 'sensitive';
+        }
+        if ($review->owner_reply_origin === 'external') {
+            $reasons[] = 'already_answered_on_google';
+        }
+
+        return $reasons;
     }
 
     private function publishedTodayByAutomation(Location $location): int

@@ -19,6 +19,7 @@ class Subscription extends Model
             'quantity' => 'integer',
             'amount_cents' => 'integer',
             'current_period_ends_at' => 'datetime',
+            'past_due_at' => 'datetime',
             'canceled_at' => 'datetime',
         ];
     }

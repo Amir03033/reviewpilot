@@ -48,6 +48,13 @@ class GoogleLocationService
             'last_error' => null,
         ])->save();
 
+        // Reconnecting after a disconnect: resume syncing the locations this account manages.
+        $locationIds = GbpLocationLink::withoutGlobalScopes()
+            ->whereIn('gbp_account_id', GbpAccount::withoutGlobalScopes()->where('google_connection_id', $connection->id)->select('id'))
+            ->whereNotNull('location_id')
+            ->pluck('location_id');
+        Location::withoutGlobalScopes()->whereIn('id', $locationIds)->where('status', 'disconnected')->update(['status' => 'active']);
+
         $this->audit->log('google.connected', $connection, ['email' => $tokens['email']]);
 
         return $connection;

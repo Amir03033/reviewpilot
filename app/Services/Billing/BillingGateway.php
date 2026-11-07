@@ -28,4 +28,7 @@ interface BillingGateway
     public function updateSubscriptionAmount(string $customerId, string $subscriptionId, int $amountCents, string $description): void;
 
     public function cancelSubscription(string $customerId, string $subscriptionId): void;
+
+    /** @return array{id: string, status: string} */
+    public function getSubscription(string $customerId, string $subscriptionId): array;
 }

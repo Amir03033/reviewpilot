@@ -18,12 +18,12 @@ use Illuminate\Support\Facades\Route;
 Route::inertia('/', 'Welcome')->name('home');
 
 // --- Webhooks (no session, no CSRF; authenticated by signature / API lookup) ---
-Route::post('webhooks/google/pubsub', GooglePubSubController::class)->name('webhooks.google');
-Route::post('webhooks/mollie', MollieWebhookController::class)->name('webhooks.mollie');
+Route::post('webhooks/google/pubsub', GooglePubSubController::class)->middleware('throttle:600,1')->name('webhooks.google');
+Route::post('webhooks/mollie', MollieWebhookController::class)->middleware('throttle:300,1')->name('webhooks.mollie');
 
 // --- Invitations (viewable logged out; accepting requires login) ---
 Route::get('invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
-Route::post('invitations/{token}', [InvitationController::class, 'accept'])->middleware('auth')->name('invitations.accept');
+Route::post('invitations/{token}', [InvitationController::class, 'accept'])->middleware(['auth', 'verified'])->name('invitations.accept');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('onboarding', [OnboardingController::class, 'create'])->name('onboarding.create');
@@ -37,12 +37,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
         Route::get('reviews/{review}', [ReviewController::class, 'show'])->name('reviews.show');
         Route::get('approvals', [ReviewController::class, 'approvals'])->name('approvals.index');
-        Route::post('drafts/{draft}/approve', [ReviewActionController::class, 'approve'])->name('drafts.approve');
-        Route::post('reviews/{review}/reply', [ReviewActionController::class, 'manual'])->name('reviews.reply');
-        Route::post('reviews/{review}/regenerate', [ReviewActionController::class, 'regenerate'])->middleware('throttle:regenerate')->name('reviews.regenerate');
+        Route::post('drafts/{draft}/approve', [ReviewActionController::class, 'approve'])->middleware('plan')->name('drafts.approve');
+        Route::post('reviews/{review}/reply', [ReviewActionController::class, 'manual'])->middleware('plan')->name('reviews.reply');
+        Route::post('reviews/{review}/regenerate', [ReviewActionController::class, 'regenerate'])->middleware(['plan', 'throttle:regenerate'])->name('reviews.regenerate');
         Route::post('reviews/{review}/reject', [ReviewActionController::class, 'reject'])->name('reviews.reject');
         Route::post('reviews/{review}/cancel-scheduled', [ReviewActionController::class, 'cancelScheduled'])->name('reviews.cancel-scheduled');
-        Route::post('reviews/{review}/retry', [ReviewActionController::class, 'retry'])->name('reviews.retry');
+        Route::post('reviews/{review}/retry', [ReviewActionController::class, 'retry'])->middleware('plan')->name('reviews.retry');
 
         // Locations
         Route::get('locations', [LocationController::class, 'index'])->name('locations.index');
@@ -62,7 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('integrations', [GoogleIntegrationController::class, 'index'])->name('integrations.index');
         Route::post('integrations/google/connect', [GoogleIntegrationController::class, 'redirect'])->name('integrations.google.connect');
         Route::get('integrations/google/callback', [GoogleIntegrationController::class, 'callback'])->name('integrations.google.callback');
-        Route::post('integrations/google/import', [GoogleIntegrationController::class, 'import'])->name('integrations.google.import');
+        Route::post('integrations/google/import', [GoogleIntegrationController::class, 'import'])->middleware('plan')->name('integrations.google.import');
         Route::post('integrations/google/{connection}/refresh', [GoogleIntegrationController::class, 'refresh'])->name('integrations.google.refresh');
         Route::delete('integrations/google/{connection}', [GoogleIntegrationController::class, 'disconnect'])->name('integrations.google.disconnect');
 

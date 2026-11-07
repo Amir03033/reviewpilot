@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ReplyState;
 use App\Enums\ReviewState;
 use App\Jobs\RegenerateDrafts;
 use App\Models\ResponseDraft;
@@ -22,7 +23,7 @@ class ReviewActionController extends Controller
 
         $data = $request->validate(['text' => ['nullable', 'string', 'max:4000']]);
 
-        return $this->attempt(fn () => $this->publisher->approve($draft, $request->user(), $data['text'] ?? null), 'Reply approved and sent to Google.');
+        return $this->publishOutcome(fn () => $this->publisher->approve($draft, $request->user(), $data['text'] ?? null));
     }
 
     public function manual(Request $request, string $reviewId): RedirectResponse
@@ -32,7 +33,7 @@ class ReviewActionController extends Controller
 
         $data = $request->validate(['text' => ['required', 'string', 'min:2', 'max:4000']]);
 
-        return $this->attempt(fn () => $this->publisher->submitManual($review, $request->user(), $data['text']), 'Reply sent to Google.');
+        return $this->publishOutcome(fn () => $this->publisher->submitManual($review, $request->user(), $data['text']));
     }
 
     public function regenerate(Request $request, string $reviewId): RedirectResponse
@@ -73,6 +74,22 @@ class ReviewActionController extends Controller
         $this->authorizeLocation('approve-for-location', $review->location_id);
 
         return $this->attempt(fn () => $this->publisher->retry($review), 'Publishing again…');
+    }
+
+    /** Tell the truth about what happened: published, still sending, or failed (and why). */
+    private function publishOutcome(callable $action): RedirectResponse
+    {
+        try {
+            $reply = $action()->fresh();
+        } catch (InvalidArgumentException $e) {
+            return $this->backWith($e->getMessage(), 'error');
+        }
+
+        return match ($reply?->state) {
+            ReplyState::Published => $this->backWith('Reply published on Google.'),
+            ReplyState::Failed => $this->backWith('Not published: '.($reply->last_error ?: 'Google returned an error.'), 'error'),
+            default => $this->backWith('Reply approved. Publishing to Google…', 'info'),
+        };
     }
 
     private function attempt(callable $action, string $success): RedirectResponse

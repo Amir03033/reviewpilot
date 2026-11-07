@@ -44,6 +44,13 @@ class DemoSeeder extends Seeder
 
     public function run(): void
     {
+        if (app()->isProduction()) {
+            // Demo accounts have a known password and fake reviews: never in production.
+            $this->command?->warn('DemoSeeder skipped: not allowed in production.');
+
+            return;
+        }
+
         config(['reviewpilot.ai.provider' => config('reviewpilot.ai.provider') ?: 'fake']);
 
         $user = User::query()->firstOrCreate(

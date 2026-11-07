@@ -10,6 +10,7 @@ use App\Models\PublicationAttempt;
 use App\Models\Review;
 use App\Models\ReviewReply;
 use App\Services\Audit\AuditLogger;
+use App\Services\Automation\AutomationEvaluator;
 use App\Services\Google\GbpClient;
 use App\Services\Google\GoogleApiException;
 use App\Services\Google\GoogleRateLimited;
@@ -41,7 +42,7 @@ class PublishReply implements ShouldQueue
         return [10, 30, 60, 120, 300, 600, 1200];
     }
 
-    public function handle(GbpClient $client, AuditLogger $audit): void
+    public function handle(GbpClient $client, AuditLogger $audit, AutomationEvaluator $evaluator): void
     {
         $reply = ReviewReply::withoutGlobalScopes()->find($this->replyId);
 
@@ -52,12 +53,18 @@ class PublishReply implements ShouldQueue
         $review = Review::withoutGlobalScopes()->findOrFail($reply->review_id);
         $organization = Organization::findOrFail($review->organization_id);
 
-        // Automated replies respect the kill switch up to the very last moment.
-        if ($reply->published_via === 'automation' && $organization->automation_kill_switch) {
-            $reply->forceFill(['state' => ReplyState::Cancelled])->save();
-            $review->transitionTo(ReviewState::PendingApproval);
+        // Automated replies are re-checked right before publishing: pauses, rating, and
+        // sensitivity as they are NOW. Anything suspicious goes back to a person.
+        if ($reply->published_via === 'automation') {
+            $blockers = $evaluator->publishTimeBlockers($review);
 
-            return;
+            if ($blockers !== []) {
+                $reply->forceFill(['state' => ReplyState::Cancelled, 'last_error' => 'Stopped before publishing: '.implode(', ', $blockers)])->save();
+                $review->transitionTo(ReviewState::PendingApproval);
+                $audit->log('reply.auto_publish_blocked', $review, ['reasons' => $blockers], actorType: 'automation');
+
+                return;
+            }
         }
 
         $link = GbpLocationLink::withoutGlobalScopes()->with('account.connection')->where('location_id', $review->location_id)->first();

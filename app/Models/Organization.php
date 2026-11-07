@@ -52,7 +52,8 @@ class Organization extends Model
 
     public function activeSubscription(): HasOne
     {
-        return $this->hasOne(Subscription::class)->whereIn('status', ['active', 'past_due'])->latestOfMany();
+        // No latestOfMany(): it aggregates MAX(uuid), which PostgreSQL does not support.
+        return $this->hasOne(Subscription::class)->whereIn('status', ['active', 'past_due'])->latest();
     }
 
     public function onTrial(): bool

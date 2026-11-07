@@ -93,6 +93,9 @@ class TeamController extends Controller
             'locations.*.role' => ['required', Rule::enum(LocationRole::class)],
         ]);
 
+        if ($membership->role === OrganizationRole::Owner && $this->membership()->role !== OrganizationRole::Owner) {
+            return $this->backWith('Only owners can change another owner.', 'error');
+        }
         if ($membership->role === OrganizationRole::Owner && $data['role'] !== 'owner' && $this->ownerCount() <= 1) {
             return $this->backWith('An organisation needs at least one owner.', 'error');
         }
@@ -119,6 +122,9 @@ class TeamController extends Controller
         $this->authorizeManage();
         $membership = OrganizationMembership::query()->findOrFail($membershipId);
 
+        if ($membership->role === OrganizationRole::Owner && $this->membership()->role !== OrganizationRole::Owner) {
+            return $this->backWith('Only owners can remove an owner.', 'error');
+        }
         if ($membership->role === OrganizationRole::Owner && $this->ownerCount() <= 1) {
             return $this->backWith('You cannot remove the last owner.', 'error');
         }

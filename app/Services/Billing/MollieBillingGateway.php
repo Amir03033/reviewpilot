@@ -81,6 +81,13 @@ class MollieBillingGateway implements BillingGateway
         $this->mollie->subscriptions->cancelForId($customerId, $subscriptionId);
     }
 
+    public function getSubscription(string $customerId, string $subscriptionId): array
+    {
+        $subscription = $this->mollie->subscriptions->getForId($customerId, $subscriptionId);
+
+        return ['id' => $subscription->id, 'status' => (string) $subscription->status];
+    }
+
     /** @return array{currency: string, value: string} */
     private function money(int $cents): array
     {

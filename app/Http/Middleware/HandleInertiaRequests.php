@@ -7,6 +7,7 @@ use App\Models\Organization;
 use App\Models\Review;
 use App\Services\Billing\Entitlements;
 use App\Services\Google\GoogleOAuth;
+use App\Support\PlatformSettings;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -71,13 +72,14 @@ class HandleInertiaRequests extends Middleware
             'onTrial' => $organization->onTrial(),
             'trialEndsAt' => $organization->trial_ends_at?->toIso8601String(),
             'pendingApprovals' => Review::query()->accessibleBy($membership)->visible()
-                ->whereIn('workflow_state', ReviewState::needsAttention())->count(),
+                ->whereIn('workflow_state', ReviewState::inboxAttention())->count(),
             'organizations' => $user?->memberships()->get()->map(fn ($m) => [
                 'id' => $m->organization_id,
                 'name' => Organization::query()->whereKey($m->organization_id)->value('name'),
             ])->values(),
+            'automationPausedGlobally' => PlatformSettings::automationPaused(),
             'demoMode' => [
-                'ai' => config('reviewpilot.ai.provider') === 'fake',
+                'ai' => ! in_array(config('reviewpilot.ai.provider'), ['anthropic', 'claude'], true),
                 'google' => ! app(GoogleOAuth::class)->isConfigured(),
             ],
         ] : null;

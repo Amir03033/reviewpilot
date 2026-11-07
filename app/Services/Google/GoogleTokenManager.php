@@ -3,9 +3,12 @@
 namespace App\Services\Google;
 
 use App\Enums\ConnectionStatus;
+use App\Enums\OrganizationRole;
 use App\Models\GoogleConnection;
+use App\Models\OrganizationMembership;
 use App\Notifications\GoogleReconnectRequired;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Notification;
 
 class GoogleTokenManager
 {
@@ -67,7 +70,14 @@ class GoogleTokenManager
     {
         $connection->forceFill(['status' => ConnectionStatus::NeedsReauth, 'last_error' => $reason])->save();
 
-        $connection->connectedBy?->notify(new GoogleReconnectRequired($connection));
+        // Tell everyone who can fix it (owners and admins), not only the person who
+        // originally connected Google; they may have left the company.
+        $recipients = OrganizationMembership::withoutGlobalScopes()
+            ->where('organization_id', $connection->organization_id)
+            ->whereIn('role', [OrganizationRole::Owner->value, OrganizationRole::Admin->value])
+            ->with('user')->get()->pluck('user')->filter()
+            ->push($connection->connectedBy)->filter()->unique('id');
+        Notification::send($recipients, new GoogleReconnectRequired($connection));
 
         throw new GoogleReauthRequired($reason);
     }

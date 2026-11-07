@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const page = usePage();
@@ -20,6 +20,21 @@ const tenant = computed(() => page.props.tenant);
             Google is not configured (add <code>GOOGLE_CLIENT_ID</code> /
             <code>GOOGLE_CLIENT_SECRET</code>).</span
         >
+    </div>
+    <div
+        v-if="tenant && !tenant.plan"
+        class="border-b border-critical/30 bg-critical/10 px-6 py-2 text-xs text-critical md:px-4"
+    >
+        Your trial or subscription has ended. Reviews still sync, but AI drafts
+        and publishing are paused.
+        <Link href="/billing" class="font-medium underline">Choose a plan</Link>
+    </div>
+    <div
+        v-if="tenant?.automationPausedGlobally"
+        class="border-b border-critical/30 bg-critical/10 px-6 py-2 text-xs text-critical md:px-4"
+    >
+        Automatic publishing is temporarily paused by ReviewPilot. Replies wait
+        for your approval.
     </div>
     <div
         v-if="tenant?.organization.automation_kill_switch"

@@ -51,6 +51,8 @@ return [
     'trial_plan' => 'pro',
 
     'billing' => [
+        // Days a failed recurring payment keeps the plan active before features are locked.
+        'past_due_grace_days' => (int) env('REVIEWPILOT_PAST_DUE_GRACE_DAYS', 14),
         'currency' => 'EUR',
         'vat_rate' => (float) env('REVIEWPILOT_VAT_RATE', 0.21),
     ],
@@ -60,6 +62,8 @@ return [
         'min_rating' => 4,
         'max_risk_score' => 20,
         'min_confidence' => 0.8,
+        // Platform-wide emergency stop (also switchable with `php artisan reviewpilot:automation pause`).
+        'globally_disabled' => (bool) env('REVIEWPILOT_AUTOMATION_DISABLED', false),
         'hold_minutes' => 120,
         'min_hold_minutes' => 15,
         'daily_cap' => 20,
@@ -68,6 +72,9 @@ return [
         // Risk flags that ALWAYS require a human, regardless of mode or policy.
         'hard_gate_flags' => [
             'food_safety',
+            'hygiene',
+            'refund_request',
+            'personal_data',
             'discrimination',
             'legal_threat',
             'health_authority',
@@ -79,7 +86,10 @@ return [
 
     'ai' => [
         // "anthropic" (Claude) in production; "fake" runs fully offline for local dev/demos/tests.
-        'provider' => env('AI_PROVIDER', 'fake'),
+        // Defaults to Claude in production. "fake" is refused in production (see AppServiceProvider).
+        'provider' => env('AI_PROVIDER', env('APP_ENV') === 'production' ? 'anthropic' : 'fake'),
+        // Server-side refusal fallbacks (Anthropic beta). Set to false if your account rejects it.
+        'refusal_fallbacks' => (bool) env('AI_REFUSAL_FALLBACKS', true),
         'models' => [
             'analysis' => env('AI_MODEL_ANALYSIS', 'claude-opus-5-5'),
             'draft' => env('AI_MODEL_DRAFT', 'claude-opus-5-5'),
@@ -108,6 +118,9 @@ return [
         'poll_minutes' => (int) env('REVIEWPILOT_POLL_MINUTES', 15),
         // Reviews older than this found during the first import are analysed but not drafted.
         'backfill_draft_days' => (int) env('REVIEWPILOT_BACKFILL_DRAFT_DAYS', 30),
+        // First import: only reviews younger than this are analysed by AI (cost control).
+        // Older history is stored without AI processing.
+        'backfill_analysis_days' => (int) env('REVIEWPILOT_BACKFILL_ANALYSIS_DAYS', 90),
         'gbp_requests_per_minute' => (int) env('GBP_REQUESTS_PER_MINUTE', 240),
     ],
 

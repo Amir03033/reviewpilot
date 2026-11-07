@@ -25,11 +25,14 @@ class ReviewAnalyzer
 
     /** Safety backstop: always flag these, even if the model misses them. */
     private const BACKSTOP = [
-        'food_safety' => '/\b(food ?poisoning|voedselvergiftiging|vergiftig\w*|ziek geworden|got sick|allergische reactie|allergic reaction|haar in (mijn|het)|hair in (my|the)|overgeven|vomit\w*)\b/iu',
-        'hygiene' => '/\b(kakkerlak\w*|cockroach\w*|muizen|mice|ratten|rats?)\b/iu',
-        'legal_threat' => '/\b(advocaat|lawyer|rechtszaak|lawsuit|aangifte doen|juridische stappen)\b/iu',
-        'health_authority' => '/\b(nvwa|ggd|health inspector|voedsel- en warenautoriteit)\b/iu',
-        'discrimination' => '/\b(racis\w*|discrimin\w*)\b/iu',
+        // NL / EN / DE / FR / ES keywords. Deliberately broad: a false positive only means
+        // a person approves the reply; a false negative could auto-publish a bad reply.
+        'food_safety' => '/(food ?poisoning|voedselvergiftiging|vergiftig|ziek geworden|ziek van|buikgriep|diarree|overgeven|overgegeven|got sick|was sick|made (me|us) sick|allerg|vomit|threw up|diarrh|haar in (mijn|het|de)|hair in (my|the)|glas in|glass in|plastic in|lebensmittelvergiftung|krank geworden|erbrochen|intoxication alimentaire|malade|vomi|intoxicación|vomit)/iu',
+        'hygiene' => '/(kakkerlak|cockroach|muizen|muis gezien|mice|mouse|ratten|\brats?\b|ongedierte|vermin|kakerlake|cafard|cucaracha|schimmel|mould|mold\b)/iu',
+        'legal_threat' => '/(advocaat|lawyer|attorney|rechtszaak|lawsuit|\bsue\b|aangifte|juridische stappen|legal action|anwalt|klage|avocat|plainte|abogado|denuncia)/iu',
+        'health_authority' => '/(nvwa|\bggd\b|health inspect|food safety authority|voedsel- en warenautoriteit|gesundheitsamt|inspection sanitaire)/iu',
+        'discrimination' => '/(racis|discrimin|homofo|homophob|antisemit|rassis|diskrimin)/iu',
+        'staff_misconduct' => '/(sexual|seksueel|intimidat|harass|geslagen|\bhit me\b|assault|bedreigd|threaten)/iu',
     ];
 
     public function __construct(private LlmClient $llm) {}

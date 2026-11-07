@@ -34,6 +34,8 @@ class ClaudeClient implements LlmClient
         $started = microtime(true);
 
         try {
+            $fallbacks = (bool) config('reviewpilot.ai.refusal_fallbacks', true);
+
             $message = $this->client()->beta->messages->create(
                 model: $model,
                 maxTokens: 16000,
@@ -43,8 +45,8 @@ class ClaudeClient implements LlmClient
                     'effort' => $effort,
                     'format' => ['type' => 'json_schema', 'schema' => $request->schema],
                 ],
-                fallbacks: 'default',
-                betas: [self::FALLBACK_BETA],
+                fallbacks: $fallbacks ? 'default' : null,
+                betas: $fallbacks ? [self::FALLBACK_BETA] : null,
             );
         } catch (APIStatusException $e) {
             $this->recorder->record($request, 'anthropic', $model, 'error', latencyMs: $this->ms($started), error: $e->getMessage());

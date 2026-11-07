@@ -14,6 +14,7 @@ export type Tenant = {
     pendingApprovals: number;
     organizations: { id: string; name: string }[];
     demoMode: { ai: boolean; google: boolean };
+    automationPausedGlobally: boolean;
 };
 
 export type Paginated<T> = {

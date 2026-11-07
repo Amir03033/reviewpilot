@@ -14,7 +14,9 @@ use App\Models\OrganizationMembership;
 use App\Models\Review;
 use App\Models\ReviewReply;
 use App\Notifications\WeeklyDigest;
+use App\Services\Billing\BillingService;
 use App\Services\Insights\DashboardStats;
+use App\Support\PlatformSettings;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +38,7 @@ Artisan::command('reviewpilot:publish-due', function () {
         $org = $review ? Organization::find($review->organization_id) : null;
         $policy = $review ? Location::withoutGlobalScopes()->find($review->location_id)?->automationPolicy : null;
 
-        if (! $review || ! $org || $org->automation_kill_switch || $policy?->isPaused()) {
+        if (! $review || ! $org || $org->automation_kill_switch || $policy?->isPaused() || PlatformSettings::automationPaused()) {
             // Paused: hand back to a person instead of publishing.
             $reply->forceFill(['state' => ReplyState::Cancelled])->save();
             $review?->transitionTo(ReviewState::PendingApproval);
@@ -123,9 +125,26 @@ Artisan::command('reviewpilot:weekly-digest', function () {
     });
 })->purpose('Send the weekly email digest');
 
+Artisan::command('reviewpilot:automation {action : pause|resume|status}', function (string $action) {
+    match ($action) {
+        'pause' => PlatformSettings::set(PlatformSettings::AUTOMATION_PAUSED, '1'),
+        'resume' => PlatformSettings::set(PlatformSettings::AUTOMATION_PAUSED, '0'),
+        default => null,
+    };
+
+    $this->info(PlatformSettings::automationPaused()
+        ? 'Automatic publishing is PAUSED for all organisations.'
+        : 'Automatic publishing is active (organisation and location switches still apply).');
+})->purpose('Platform-wide emergency stop for automatic publishing');
+
+Artisan::command('reviewpilot:billing-reconcile', function (BillingService $billing) {
+    $this->info('Subscriptions ended at Mollie: '.$billing->reconcileSubscriptions());
+})->purpose('Detect Mollie subscriptions canceled or suspended outside ReviewPilot');
+
 Schedule::command('reviewpilot:publish-due')->everyMinute()->withoutOverlapping();
 Schedule::command('reviewpilot:poll')->cron('*/'.max(5, (int) config('reviewpilot.sync.poll_minutes')).' * * * *')->withoutOverlapping();
 Schedule::command('reviewpilot:poll --mode=reconcile')->dailyAt('03:17');
 Schedule::command('reviewpilot:prune')->dailyAt('04:07');
 Schedule::command('reviewpilot:purge-organizations')->dailyAt('04:27');
 Schedule::command('reviewpilot:weekly-digest')->weeklyOn(1, '07:43')->timezone('Europe/Amsterdam');
+Schedule::command('reviewpilot:billing-reconcile')->dailyAt('05:13');

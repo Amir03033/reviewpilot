@@ -41,7 +41,10 @@ class BillingController extends Controller
             ])->values(),
             'subscription' => Subscription::query()->whereIn('status', ['active', 'past_due', 'pending'])->latest()->first()
                 ?->only(['id', 'plan', 'status', 'quantity', 'amount_cents', 'current_period_ends_at']),
-            'payments' => Payment::query()->latest()->limit(12)->get()->map->only(['id', 'status', 'amount_cents', 'description', 'paid_at', 'created_at']),
+            // Payment history is only visible to owners and billing contacts.
+            'payments' => Gate::allows('manage-billing')
+                ? Payment::query()->latest()->limit(12)->get()->map->only(['id', 'status', 'amount_cents', 'description', 'paid_at', 'created_at'])
+                : [],
             'usage' => [
                 'ai_reviews' => $this->entitlements->aiReviewsUsedThisMonth($organization),
                 'ai_allowance' => $this->entitlements->aiReviewAllowance($organization),

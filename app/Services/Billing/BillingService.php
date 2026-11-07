@@ -114,12 +114,14 @@ class BillingService
                 if (! $subscription) {
                     return;
                 }
+                // Created as "open"; the status below is applied as a transition, so a
+                // first-seen paid renewal is processed (and not mistaken for a duplicate).
                 $payment = Payment::withoutGlobalScopes()->create([
                     'organization_id' => $subscription->organization_id,
                     'subscription_id' => $subscription->id,
                     'mollie_payment_id' => $data['id'],
                     'sequence_type' => 'recurring',
-                    'status' => $data['status'],
+                    'status' => 'open',
                     'amount_cents' => $data['amount_cents'],
                 ]);
             } else {
@@ -132,7 +134,8 @@ class BillingService
                 'paid_at' => $data['status'] === 'paid' ? ($data['paid_at'] ?? now()) : $payment->paid_at,
             ])->save();
 
-            if (! $subscription || $wasPaid && $data['status'] === 'paid') {
+            // Idempotent: a status we already processed is not applied twice.
+            if (! $subscription || ($wasPaid && $data['status'] === 'paid')) {
                 return;
             }
 
@@ -141,8 +144,8 @@ class BillingService
             match (true) {
                 $payment->sequence_type === 'first' && $data['status'] === 'paid' => $this->activate($organization, $subscription, $data),
                 $payment->sequence_type === 'first' && in_array($data['status'], ['failed', 'canceled', 'expired'], true) => $subscription->forceFill(['status' => 'canceled', 'canceled_at' => now()])->save(),
-                $payment->sequence_type === 'recurring' && $data['status'] === 'paid' => $subscription->forceFill(['status' => 'active', 'current_period_ends_at' => now()->addMonth()])->save(),
-                $payment->sequence_type === 'recurring' && in_array($data['status'], ['failed', 'charged_back'], true) => $subscription->forceFill(['status' => 'past_due'])->save(),
+                $payment->sequence_type === 'recurring' && $data['status'] === 'paid' && $subscription->status !== 'canceled' => $subscription->forceFill(['status' => 'active', 'past_due_at' => null, 'current_period_ends_at' => now()->addMonth()])->save(),
+                $payment->sequence_type === 'recurring' && in_array($data['status'], ['failed', 'charged_back'], true) && $subscription->status !== 'canceled' => $subscription->forceFill(['status' => 'past_due', 'past_due_at' => $subscription->past_due_at ?? now()])->save(),
                 default => null,
             };
         });
@@ -218,8 +221,39 @@ class BillingService
             rescue(fn () => $this->gateway->cancelSubscription($organization->mollie_customer_id, $subscription->mollie_subscription_id));
         }
 
+        // Access continues until the end of the period that was already paid for.
         $subscription->forceFill(['status' => 'canceled', 'canceled_at' => now()])->save();
         $this->audit->log('billing.subscription_canceled', $subscription, [], organizationId: $organization->id);
+    }
+
+    /**
+     * Mollie does not call a webhook when a subscription is canceled or suspended from
+     * its side (e.g. the customer revoked the mandate). Run daily to catch that.
+     */
+    public function reconcileSubscriptions(): int
+    {
+        $changed = 0;
+
+        Subscription::withoutGlobalScopes()
+            ->whereIn('status', ['active', 'past_due'])
+            ->whereNotNull('mollie_subscription_id')
+            ->get()
+            ->each(function (Subscription $subscription) use (&$changed) {
+                $organization = Organization::find($subscription->organization_id);
+                if (! $organization?->mollie_customer_id) {
+                    return;
+                }
+
+                $remote = rescue(fn () => $this->gateway->getSubscription($organization->mollie_customer_id, $subscription->mollie_subscription_id));
+
+                if ($remote && in_array($remote['status'], ['canceled', 'suspended', 'completed'], true)) {
+                    $subscription->forceFill(['status' => 'canceled', 'canceled_at' => now()])->save();
+                    $this->audit->log('billing.subscription_ended_remotely', $subscription, ['mollie_status' => $remote['status']], actorType: 'system', organizationId: $organization->id);
+                    $changed++;
+                }
+            });
+
+        return $changed;
     }
 
     private function description(string $plan, int $quantity): string

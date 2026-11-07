@@ -14,15 +14,31 @@ class Entitlements
     {
         $subscription = Subscription::withoutGlobalScopes()
             ->where('organization_id', $organization->id)
-            ->whereIn('status', ['active', 'past_due'])
+            ->whereIn('status', ['active', 'past_due', 'canceled'])
             ->latest()
-            ->first();
+            ->get()
+            ->first(fn (Subscription $s) => $this->grantsAccess($s));
 
         if ($subscription) {
             return $subscription->plan;
         }
 
         return $organization->onTrial() ? config('reviewpilot.trial_plan') : null;
+    }
+
+    /**
+     * active: yes. past_due: during the grace period only. canceled: until the end of
+     * the period that was already paid for.
+     */
+    public function grantsAccess(Subscription $subscription): bool
+    {
+        return match ($subscription->status) {
+            'active' => true,
+            'past_due' => $subscription->past_due_at === null
+                || $subscription->past_due_at->isAfter(now()->subDays((int) config('reviewpilot.billing.past_due_grace_days', 14))),
+            'canceled' => $subscription->current_period_ends_at !== null && $subscription->current_period_ends_at->isFuture(),
+            default => false,
+        };
     }
 
     public function isActive(Organization $organization): bool

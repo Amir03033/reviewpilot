@@ -37,7 +37,12 @@ class PubSubTokenVerifier
             return false;
         }
 
-        $cert = $this->certificates()[$header['kid'] ?? ''] ?? null;
+        $kid = (string) ($header['kid'] ?? '');
+        $cert = $this->certificates()[$kid] ?? null;
+        if (! $cert) {
+            // Google rotates its signing keys: refresh the cached certificates once.
+            $cert = $this->certificates(refresh: true)[$kid] ?? null;
+        }
         if (! $cert) {
             return false;
         }
@@ -53,13 +58,29 @@ class PubSubTokenVerifier
     }
 
     /** @return array<string, string> kid => PEM certificate */
-    private function certificates(): array
+    private function certificates(bool $refresh = false): array
     {
-        return Cache::remember('google-oidc-certs', now()->addHour(), function () {
-            $response = Http::acceptJson()->get(config('services.google.endpoints.certs'));
+        if ($refresh) {
+            if (! Cache::add('google-oidc-certs-refreshed', true, 60)) {
+                return Cache::get('google-oidc-certs', []); // refreshed less than a minute ago
+            }
+            Cache::forget('google-oidc-certs');
+        }
 
-            return $response->successful() ? (array) $response->json() : [];
-        });
+        $cached = Cache::get('google-oidc-certs');
+        if (is_array($cached) && $cached !== []) {
+            return $cached;
+        }
+
+        $response = rescue(fn () => Http::acceptJson()->timeout(10)->get(config('services.google.endpoints.certs')), report: false);
+        $certs = $response?->successful() ? (array) $response->json() : [];
+
+        if ($certs !== []) {
+            // Never cache a failed fetch, or every push would be rejected for an hour.
+            Cache::put('google-oidc-certs', $certs, now()->addHour());
+        }
+
+        return $certs;
     }
 
     private function b64(string $value): string

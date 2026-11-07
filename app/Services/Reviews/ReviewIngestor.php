@@ -12,6 +12,7 @@ use App\Models\Review;
 use App\Models\ReviewReply;
 use App\Models\ReviewRevision;
 use App\Services\Google\GbpReview;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -23,6 +24,20 @@ class ReviewIngestor
      * @return array{review: Review, created: bool, content_changed: bool}
      */
     public function ingest(Location $location, GbpReview $data, bool $isBackfill = false): array
+    {
+        try {
+            return $this->ingestOnce($location, $data, $isBackfill);
+        } catch (UniqueConstraintViolationException) {
+            // A push notification and a poll raced to create the same review. The other
+            // writer won; process it as an update of the existing row instead.
+            return $this->ingestOnce($location, $data, $isBackfill);
+        }
+    }
+
+    /**
+     * @return array{review: Review, created: bool, content_changed: bool}
+     */
+    private function ingestOnce(Location $location, GbpReview $data, bool $isBackfill): array
     {
         return DB::transaction(function () use ($location, $data, $isBackfill) {
             $review = Review::withoutGlobalScopes()
@@ -99,8 +114,16 @@ class ReviewIngestor
             'workflow_state' => ReviewState::Received,
         ]);
 
-        // Always analyse (for insights); only draft for recent, unanswered reviews.
-        ProcessReview::dispatch($review->id, draft: ! $alreadyReplied && ! $tooOld);
+        // First import: old history is stored without AI processing (cost control).
+        $analysisDays = (int) config('reviewpilot.sync.backfill_analysis_days', 90);
+        if ($isBackfill && $data->createTime->lt(now()->subDays($analysisDays))) {
+            $review->forceFill(['workflow_state' => ReviewState::NoAction])->save();
+
+            return $review;
+        }
+
+        // Analyse (for insights); only draft for recent, unanswered reviews.
+        ProcessReview::dispatch($review->id, draft: ! $alreadyReplied && ! $tooOld, backfill: $isBackfill);
 
         return $review;
     }

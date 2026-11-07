@@ -49,7 +49,9 @@ class Review extends Model
 
     public function analysis(): HasOne
     {
-        return $this->hasOne(ReviewAnalysis::class)->where('is_current', true)->latestOfMany();
+        // Exactly one analysis is current (ReviewAnalyzer flips the flag in a transaction).
+        // Note: latestOfMany() would aggregate MAX(id), which PostgreSQL does not support for UUIDs.
+        return $this->hasOne(ReviewAnalysis::class)->where('is_current', true);
     }
 
     public function drafts(): HasMany

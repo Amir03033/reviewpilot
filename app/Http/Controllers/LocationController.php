@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AutomationMode;
+use App\Enums\ReplyState;
 use App\Jobs\SyncLocationReviews;
 use App\Models\GbpLocationLink;
 use App\Models\Location;
 use App\Models\LocationFact;
+use App\Models\Review;
+use App\Models\ReviewReply;
 use App\Services\Audit\AuditLogger;
 use App\Services\Automation\AutomationEvaluator;
 use App\Services\Billing\BillingService;
@@ -183,6 +186,10 @@ class LocationController extends Controller
         $location = Location::query()->findOrFail($id);
 
         GbpLocationLink::query()->where('location_id', $location->id)->update(['location_id' => null, 'sync_state' => 'pending']);
+        ReviewReply::query()
+            ->where('state', ReplyState::Scheduled->value)
+            ->whereIn('review_id', Review::query()->where('location_id', $location->id)->select('id'))
+            ->update(['state' => ReplyState::Cancelled->value, 'last_error' => 'Location removed']);
         $location->forceFill(['status' => 'disconnected', 'billing_active' => false])->save();
         $location->delete();
 

@@ -21,6 +21,12 @@ enum ReviewState: string
     case NoAction = 'no_action';
     case Stale = 'stale';
 
+    /** States shown in the inbox "Needs attention" tab and counted in the sidebar badge. */
+    public static function inboxAttention(): array
+    {
+        return [...self::needsAttention(), self::Received->value, self::Analyzed->value, self::Drafting->value];
+    }
+
     /** States that represent work waiting for a person. */
     public static function needsAttention(): array
     {

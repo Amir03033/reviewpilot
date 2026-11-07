@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureActivePlan;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ResolveOrganization;
@@ -17,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
-        $middleware->alias(['org' => ResolveOrganization::class]);
+        $middleware->alias(['org' => ResolveOrganization::class, 'plan' => EnsureActivePlan::class]);
         $middleware->validateCsrfTokens(except: ['webhooks/*']);
 
         $middleware->web(append: [

@@ -136,11 +136,12 @@ class ReviewController extends Controller
             ->when($filters['location'] ?? null, fn ($q, $loc) => $q->where('location_id', $loc))
             ->when($filters['rating'] ?? null, fn ($q, $r) => $q->where('star_rating', $r))
             ->when($filters['topic'] ?? null, fn ($q, $key) => $q->whereHas('topicMentions.topic', fn ($t) => $t->where('key', $key)))
+            // LOWER() so search is case-insensitive on PostgreSQL too (LIKE is case-sensitive there).
             ->when($filters['q'] ?? null, fn ($q, $term) => $q->where(fn ($w) => $w
-                ->where('comment', 'like', '%'.addcslashes($term, '%_').'%')
-                ->orWhere('reviewer_display_name', 'like', '%'.addcslashes($term, '%_').'%')))
+                ->whereRaw('LOWER(comment) LIKE ?', ['%'.addcslashes(mb_strtolower($term), '%_\\').'%'])
+                ->orWhereRaw('LOWER(reviewer_display_name) LIKE ?', ['%'.addcslashes(mb_strtolower($term), '%_\\').'%'])))
             ->when($status !== 'all', fn ($q) => match ($status) {
-                'attention' => $q->whereIn('workflow_state', [...ReviewState::needsAttention(), ReviewState::Received->value, ReviewState::Analyzed->value, ReviewState::Drafting->value]),
+                'attention' => $q->whereIn('workflow_state', ReviewState::inboxAttention()),
                 'scheduled' => $q->where('workflow_state', ReviewState::ScheduledAuto->value),
                 'published' => $q->whereIn('workflow_state', [ReviewState::Published->value, ReviewState::Publishing->value]),
                 'no_action' => $q->whereIn('workflow_state', [ReviewState::NoAction->value, ReviewState::Rejected->value]),
