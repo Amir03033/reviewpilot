@@ -36,7 +36,7 @@ class DashboardTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)->post(route('onboarding.store'), ['name' => 'Café Zon', 'country' => 'NL'])
+        $this->actingAs($user)->post(route('onboarding.store'), ['name' => 'Café Zon', 'country' => 'NL', 'accept_terms' => true])
             ->assertRedirect(route('integrations.index'));
 
         $user->refresh();

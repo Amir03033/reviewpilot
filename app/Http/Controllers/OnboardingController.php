@@ -23,9 +23,11 @@ class OnboardingController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'country' => ['required', 'string', 'size:2'],
+            'accept_terms' => ['accepted'],
         ]);
 
-        $create->handle($request->user(), $data['name'], $data['country']);
+        $organization = $create->handle($request->user(), $data['name'], $data['country']);
+        $organization->acceptTerms($request->user());
 
         $this->toast('Organisation created. Connect Google to import your locations.');
 

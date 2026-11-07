@@ -4,7 +4,7 @@ import { Head, router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/rp/PageHeader.vue';
 import Panel from '@/components/rp/Panel.vue';
-import { dateTime, euro } from '@/lib/format';
+import { date, dateTime, euro } from '@/lib/format';
 
 type Quote = {
     quantity: number;
@@ -44,6 +44,13 @@ defineProps<{
         description: string | null;
         paid_at: string | null;
         created_at: string;
+    }[];
+    invoices: {
+        id: string;
+        number: string;
+        issued_on: string;
+        gross_cents: number;
+        vat_cents: number;
     }[];
     usage: {
         ai_reviews: number;
@@ -214,6 +221,38 @@ const modeLabel = (m: string) =>
                 </Button>
             </div>
         </div>
+
+        <Panel v-if="invoices.length" :title="$t('Invoices')" :padded="false">
+            <table class="w-full text-sm">
+                <tbody>
+                    <tr
+                        v-for="inv in invoices"
+                        :key="inv.id"
+                        class="border-b border-border/60 last:border-0"
+                    >
+                        <td class="px-5 py-3 font-mono text-xs">
+                            {{ inv.number }}
+                        </td>
+                        <td class="px-3 py-3 text-xs text-muted-foreground">
+                            {{ date(inv.issued_on) }}
+                        </td>
+                        <td class="tabular px-3 py-3 text-right font-mono">
+                            {{ euro(inv.gross_cents) }}
+                            <span class="text-xs text-muted-foreground">{{
+                                $t('incl. VAT')
+                            }}</span>
+                        </td>
+                        <td class="px-5 py-3 text-right">
+                            <a
+                                :href="`/billing/invoices/${inv.id}`"
+                                class="text-xs font-medium text-brass hover:underline"
+                                >{{ $t('Download PDF') }}</a
+                            >
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </Panel>
 
         <Panel v-if="payments.length" :title="$t('Payments')" :padded="false">
             <table class="w-full text-sm">

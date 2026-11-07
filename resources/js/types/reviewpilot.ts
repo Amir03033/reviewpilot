@@ -10,6 +10,7 @@ export type Tenant = {
     canBill: boolean;
     plan: string | null;
     onTrial: boolean;
+    termsAccepted: boolean;
     trialEndsAt: string | null;
     pendingApprovals: number;
     organizations: { id: string; name: string }[];

@@ -4,7 +4,10 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BrandVoiceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoogleIntegrationController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\OnboardingController;
@@ -16,7 +19,14 @@ use App\Http\Controllers\Webhooks\GooglePubSubController;
 use App\Http\Controllers\Webhooks\MollieWebhookController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'Welcome')->name('home');
+Route::get('/', HomeController::class)->name('home');
+
+Route::get('legal/{document}', [LegalController::class, 'show'])->whereIn('document', ['privacy', 'terms', 'dpa'])->name('legal.show');
+// Short URLs used in emails, the Google consent screen and the footer.
+Route::redirect('privacy', '/legal/privacy');
+Route::redirect('terms', '/legal/terms');
+Route::redirect('voorwaarden', '/legal/terms');
+Route::redirect('privacybeleid', '/legal/privacy');
 
 Route::post('locale', LocaleController::class)->middleware('throttle:30,1')->name('locale.update');
 
@@ -80,11 +90,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('billing', [BillingController::class, 'index'])->name('billing.index');
         Route::post('billing/checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
         Route::get('billing/return/{subscription}', [BillingController::class, 'return'])->name('billing.return');
+        Route::get('billing/invoices/{invoice}', [InvoiceController::class, 'download'])->name('billing.invoices.download');
         Route::post('billing/cancel', [BillingController::class, 'cancel'])->name('billing.cancel');
 
         // Organisation
         Route::get('organization', [OrganizationSettingsController::class, 'edit'])->name('organization.edit');
         Route::put('organization', [OrganizationSettingsController::class, 'update'])->name('organization.update');
+        Route::post('organization/accept-terms', [OrganizationSettingsController::class, 'acceptTerms'])->name('organization.accept-terms');
         Route::put('organization/kill-switch', [OrganizationSettingsController::class, 'killSwitch'])->name('organization.kill-switch');
         Route::delete('organization', [OrganizationSettingsController::class, 'destroy'])->name('organization.destroy');
         Route::get('organization/audit', [OrganizationSettingsController::class, 'audit'])->name('organization.audit');

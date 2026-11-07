@@ -24,6 +24,14 @@ declare module '@inertiajs/core' {
             tenant: Tenant | null;
             locale: string;
             translations: Record<string, string>;
+            company: {
+                name: string;
+                legal_name: string;
+                kvk: string | null;
+                vat_number: string | null;
+                email: string;
+                city: string | null;
+            };
             [key: string]: unknown;
         };
     }

@@ -4,6 +4,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { initializeTheme } from '@/composables/useAppearance';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
+import PublicLayout from '@/layouts/PublicLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 import { t } from '@/lib/i18n';
@@ -14,8 +15,9 @@ void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            case name === 'Welcome' ||
-                name.startsWith('onboarding/') ||
+            case name === 'Welcome' || name.startsWith('legal/'):
+                return PublicLayout;
+            case name.startsWith('onboarding/') ||
                 name.startsWith('invitations/'):
                 return null;
             case name.startsWith('auth/'):

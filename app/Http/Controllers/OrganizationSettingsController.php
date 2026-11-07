@@ -19,7 +19,7 @@ class OrganizationSettingsController extends Controller
         $org = $this->organization();
 
         return Inertia::render('organization/Settings', [
-            'organization' => $org->only(['id', 'name', 'country', 'vat_number', 'default_locale', 'timezone', 'automation_kill_switch', 'billing_email', 'data_retention_days']),
+            'organization' => $org->only(['id', 'name', 'country', 'vat_number', 'default_locale', 'timezone', 'automation_kill_switch', 'billing_email', 'data_retention_days', 'billing_name', 'billing_address', 'billing_postal_code', 'billing_city']),
             'canManage' => $this->membership()->role->canManageOrganization(),
             'isOwner' => $this->membership()->role->value === 'owner',
         ]);
@@ -36,6 +36,10 @@ class OrganizationSettingsController extends Controller
             'default_locale' => ['required', 'in:nl,en,de,fr'],
             'timezone' => ['required', 'timezone'],
             'billing_email' => ['nullable', 'email'],
+            'billing_name' => ['nullable', 'string', 'max:160'],
+            'billing_address' => ['nullable', 'string', 'max:200'],
+            'billing_postal_code' => ['nullable', 'string', 'max:20'],
+            'billing_city' => ['nullable', 'string', 'max:120'],
             'data_retention_days' => ['nullable', 'integer', 'between:30,3650'],
         ]);
 
@@ -44,6 +48,19 @@ class OrganizationSettingsController extends Controller
         $this->audit->log('organization.updated', $org, $data);
 
         return $this->backWith('Organisation saved.');
+    }
+
+    /** Accept the current terms of service + data processing agreement. */
+    public function acceptTerms(Request $request): RedirectResponse
+    {
+        $this->authorizeManage();
+        $request->validate(['accept_terms' => ['accepted']]);
+
+        $org = $this->organization();
+        $org->acceptTerms($request->user());
+        $this->audit->log('organization.terms_accepted', $org, ['version' => $org->terms_version]);
+
+        return $this->backWith('Thank you. The terms have been accepted.');
     }
 
     public function killSwitch(Request $request): RedirectResponse

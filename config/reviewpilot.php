@@ -13,6 +13,40 @@
 
 return [
 
+    /*
+    | The company behind ReviewPilot: shown on legal pages, invoices and the homepage.
+    */
+    'company' => [
+        'name' => env('COMPANY_NAME', 'ReviewPilot'),
+        'legal_name' => env('COMPANY_LEGAL_NAME', 'ReviewPilot'),
+        'address' => env('COMPANY_ADDRESS'),
+        'postal_code' => env('COMPANY_POSTAL_CODE'),
+        'city' => env('COMPANY_CITY'),
+        'country' => env('COMPANY_COUNTRY', 'Nederland'),
+        'kvk' => env('COMPANY_KVK'),
+        'vat_number' => env('COMPANY_VAT_NUMBER'),
+        'iban' => env('COMPANY_IBAN'),
+        'email' => env('COMPANY_EMAIL', 'info@reviewspilot.nl'),
+        'privacy_email' => env('COMPANY_PRIVACY_EMAIL', env('COMPANY_EMAIL', 'privacy@reviewspilot.nl')),
+        'phone' => env('COMPANY_PHONE'),
+    ],
+
+    /*
+    | Version of the terms of service + DPA. Bump it when the documents change materially;
+    | organisations that accepted an older version are asked to accept again.
+    */
+    'legal' => [
+        'terms_version' => '2026-11',
+        'last_updated' => '2026-11-09',
+        // Sub-processors listed in the privacy policy and the DPA.
+        'subprocessors' => [
+            ['name' => env('HOSTING_PROVIDER', 'Hosting provider'), 'purpose' => 'Hosting of the application and database', 'location' => 'EU'],
+            ['name' => 'Anthropic PBC (Claude)', 'purpose' => 'AI analysis of reviews and drafting replies', 'location' => 'USA (EU-US Data Privacy Framework / SCCs)'],
+            ['name' => 'Mollie B.V.', 'purpose' => 'Payment processing', 'location' => 'Netherlands'],
+            ['name' => 'Google LLC (Business Profile API)', 'purpose' => 'Reading reviews and publishing replies on your behalf', 'location' => 'USA / EU'],
+        ],
+    ],
+
     'trial_days' => (int) env('REVIEWPILOT_TRIAL_DAYS', 14),
 
     /*

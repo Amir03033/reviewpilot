@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\UsageRecord;
@@ -44,6 +45,9 @@ class BillingController extends Controller
             // Payment history is only visible to owners and billing contacts.
             'payments' => Gate::allows('manage-billing')
                 ? Payment::query()->latest()->limit(12)->get()->map->only(['id', 'status', 'amount_cents', 'description', 'paid_at', 'created_at'])
+                : [],
+            'invoices' => Gate::allows('manage-billing')
+                ? Invoice::query()->latest('issued_on')->latest('number')->limit(24)->get()->map->only(['id', 'number', 'issued_on', 'gross_cents', 'vat_cents'])
                 : [],
             'usage' => [
                 'ai_reviews' => $this->entitlements->aiReviewsUsedThisMonth($organization),

@@ -17,6 +17,10 @@ const props = defineProps<{
         timezone: string;
         automation_kill_switch: boolean;
         billing_email: string | null;
+        billing_name: string | null;
+        billing_address: string | null;
+        billing_postal_code: string | null;
+        billing_city: string | null;
         data_retention_days: number | null;
     };
     canManage: boolean;
@@ -34,6 +38,10 @@ const form = useForm({
     default_locale: props.organization.default_locale,
     timezone: props.organization.timezone,
     billing_email: props.organization.billing_email ?? '',
+    billing_name: props.organization.billing_name ?? '',
+    billing_address: props.organization.billing_address ?? '',
+    billing_postal_code: props.organization.billing_postal_code ?? '',
+    billing_city: props.organization.billing_city ?? '',
     data_retention_days: props.organization.data_retention_days ?? undefined,
 });
 const confirmName = ref('');
@@ -137,6 +145,28 @@ const destroy = () =>
                             v-model="form.billing_email"
                             type="email"
                         /><InputError :message="form.errors.billing_email" />
+                    </div>
+                    <div class="grid gap-2">
+                        <Label>{{ $t('Company name on invoices') }}</Label
+                        ><Input
+                            v-model="form.billing_name"
+                            :placeholder="organization.name"
+                        />
+                    </div>
+                    <div class="grid gap-2">
+                        <Label>{{ $t('Invoice address') }}</Label
+                        ><Input
+                            v-model="form.billing_address"
+                            :placeholder="$t('Street and number')"
+                        />
+                    </div>
+                    <div class="grid gap-2">
+                        <Label>{{ $t('Postal code') }}</Label
+                        ><Input v-model="form.billing_postal_code" />
+                    </div>
+                    <div class="grid gap-2">
+                        <Label>{{ $t('City') }}</Label
+                        ><Input v-model="form.billing_city" />
                     </div>
                     <div class="grid gap-2">
                         <Label>{{ $t('Default language') }}</Label>

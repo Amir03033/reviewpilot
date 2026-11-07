@@ -18,7 +18,29 @@ class OrganizationMembership extends Model
 
     protected function casts(): array
     {
-        return ['role' => OrganizationRole::class];
+        return ['role' => OrganizationRole::class, 'notification_preferences' => 'array'];
+    }
+
+    /** Email types a member can switch on or off, with their defaults. */
+    public const NOTIFICATION_DEFAULTS = [
+        'negative_review' => true,
+        'google_reconnect' => true,
+        'weekly_digest' => true,
+    ];
+
+    /** @return array<string, bool> */
+    public function notificationSettings(): array
+    {
+        $saved = $this->notification_preferences ?? [];
+
+        return collect(self::NOTIFICATION_DEFAULTS)
+            ->map(fn (bool $default, string $key) => (bool) ($saved[$key] ?? $default))
+            ->all();
+    }
+
+    public function wantsEmail(string $type): bool
+    {
+        return $this->notificationSettings()[$type] ?? true;
     }
 
     public function user(): BelongsTo

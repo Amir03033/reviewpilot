@@ -55,6 +55,7 @@ class HandleInertiaRequests extends Middleware
             'tenant' => fn () => $this->tenant($request),
             'locale' => app()->getLocale(),
             'translations' => fn () => Translations::for(app()->getLocale()),
+            'company' => fn () => collect(config('reviewpilot.company'))->only(['name', 'legal_name', 'kvk', 'vat_number', 'email', 'city'])->all(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }
@@ -73,6 +74,7 @@ class HandleInertiaRequests extends Middleware
             'canBill' => (bool) $membership?->role->canManageBilling(),
             'plan' => app(Entitlements::class)->plan($organization),
             'onTrial' => $organization->onTrial(),
+            'termsAccepted' => $organization->hasAcceptedCurrentTerms(),
             'trialEndsAt' => $organization->trial_ends_at?->toIso8601String(),
             'pendingApprovals' => Review::query()->accessibleBy($membership)->visible()
                 ->whereIn('workflow_state', ReviewState::inboxAttention())->count(),

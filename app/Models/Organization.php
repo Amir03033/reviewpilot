@@ -22,6 +22,7 @@ class Organization extends Model
             'automation_kill_switch' => 'boolean',
             'settings' => 'array',
             'trial_ends_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
         ];
     }
 
@@ -54,6 +55,26 @@ class Organization extends Model
     {
         // No latestOfMany(): it aggregates MAX(uuid), which PostgreSQL does not support.
         return $this->hasOne(Subscription::class)->whereIn('status', ['active', 'past_due'])->latest();
+    }
+
+    public function hasAcceptedCurrentTerms(): bool
+    {
+        return $this->terms_accepted_at !== null
+            && $this->terms_version === config('reviewpilot.legal.terms_version');
+    }
+
+    public function acceptTerms(User $user): void
+    {
+        $this->forceFill([
+            'terms_accepted_at' => now(),
+            'terms_version' => config('reviewpilot.legal.terms_version'),
+            'terms_accepted_by' => $user->id,
+        ])->save();
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 
     public function onTrial(): bool

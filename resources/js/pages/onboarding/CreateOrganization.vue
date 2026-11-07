@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const form = useForm({ name: '', country: 'NL' });
+const form = useForm({ name: '', country: 'NL', accept_terms: false });
 </script>
 
 <template>
@@ -53,6 +53,33 @@ const form = useForm({ name: '', country: 'NL' });
                         <option value="FR">{{ $t('France') }}</option>
                     </select>
                     <InputError :message="form.errors.country" />
+                </div>
+                <div class="grid gap-2">
+                    <label class="flex items-start gap-2 text-sm">
+                        <input
+                            v-model="form.accept_terms"
+                            type="checkbox"
+                            class="mt-0.5 size-4 accent-[var(--brass)]"
+                            required
+                        />
+                        <span class="text-muted-foreground">
+                            {{ $t('I agree to the') }}
+                            <a
+                                href="/legal/terms"
+                                target="_blank"
+                                class="text-foreground underline"
+                                >{{ $t('terms of service') }}</a
+                            >
+                            {{ $t('and the') }}
+                            <a
+                                href="/legal/dpa"
+                                target="_blank"
+                                class="text-foreground underline"
+                                >{{ $t('data processing agreement') }}</a
+                            >, {{ $t('on behalf of this organisation.') }}
+                        </span>
+                    </label>
+                    <InputError :message="form.errors.accept_terms" />
                 </div>
                 <Button
                     type="submit"

@@ -5,8 +5,10 @@ namespace App\Services\Billing;
 use App\Models\Organization;
 use App\Models\Payment;
 use App\Models\Subscription;
+use App\Notifications\InvoiceIssued;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use InvalidArgumentException;
 
 /**
@@ -14,7 +16,7 @@ use InvalidArgumentException;
  */
 class BillingService
 {
-    public function __construct(private BillingGateway $gateway, private AuditLogger $audit) {}
+    public function __construct(private BillingGateway $gateway, private AuditLogger $audit, private InvoiceService $invoices) {}
 
     public function isConfigured(): bool
     {
@@ -134,6 +136,10 @@ class BillingService
                 'paid_at' => $data['status'] === 'paid' ? ($data['paid_at'] ?? now()) : $payment->paid_at,
             ])->save();
 
+            if (! $wasPaid && $data['status'] === 'paid') {
+                $this->issueInvoice($payment);
+            }
+
             // Idempotent: a status we already processed is not applied twice.
             if (! $subscription || ($wasPaid && $data['status'] === 'paid')) {
                 return;
@@ -149,6 +155,17 @@ class BillingService
                 default => null,
             };
         });
+    }
+
+    private function issueInvoice(Payment $payment): void
+    {
+        $invoice = $this->invoices->issueForPayment($payment);
+        $organization = Organization::withTrashed()->find($payment->organization_id);
+
+        if ($invoice && $organization?->billing_email) {
+            Notification::route('mail', $organization->billing_email)
+                ->notify(new InvoiceIssued($invoice, $organization->default_locale === 'en' ? 'en' : 'nl'));
+        }
     }
 
     private function activate(Organization $organization, Subscription $subscription, array $payment): void

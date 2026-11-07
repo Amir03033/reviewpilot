@@ -39,6 +39,16 @@ export function dateTime(iso: string | null | undefined): string {
     });
 }
 
+export function date(iso: string | null | undefined): string {
+    if (!iso) {
+        return '—';
+    }
+
+    return new Date(iso).toLocaleDateString(intlLocale(), {
+        dateStyle: 'medium',
+    });
+}
+
 export function euro(cents: number): string {
     return new Intl.NumberFormat('nl-NL', {
         style: 'currency',
