@@ -161,7 +161,7 @@ const quickHints = [
                 class="rounded-md border px-2.5 py-1 text-xs capitalize transition-colors"
                 :class="
                     d.id === activeId && !writingManually
-                        ? 'border-brass/50 bg-brass/10 text-brass'
+                        ? 'border-foreground/15 bg-foreground/[0.06] text-foreground'
                         : 'border-border text-muted-foreground hover:bg-accent'
                 "
                 @click="
@@ -178,7 +178,7 @@ const quickHints = [
                 class="rounded-md border px-2.5 py-1 text-xs transition-colors"
                 :class="
                     writingManually
-                        ? 'border-brass/50 bg-brass/10 text-brass'
+                        ? 'border-foreground/15 bg-foreground/[0.06] text-foreground'
                         : 'border-border text-muted-foreground hover:bg-accent'
                 "
                 @click="

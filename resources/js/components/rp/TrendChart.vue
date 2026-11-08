@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { useElementSize } from '@vueuse/core';
+import { computed, useTemplateRef } from 'vue';
 
 type Point = { date: string; count: number; average: number | null };
 
 const props = defineProps<{ points: Point[]; height?: number }>();
 
-const W = 720;
+// Draw at the real pixel width, so labels stay readable on phones.
+const box = useTemplateRef<HTMLElement>('box');
+const { width } = useElementSize(box);
+const W = computed(() => Math.max(280, Math.round(width.value || 720)));
 const H = computed(() => props.height ?? 180);
 const PAD = 24;
 
@@ -25,7 +29,7 @@ const maxCount = computed(() =>
 );
 
 const x = (i: number) =>
-    PAD + (i * (W - PAD * 2)) / Math.max(1, props.points.length - 1);
+    PAD + (i * (W.value - PAD * 2)) / Math.max(1, props.points.length - 1);
 const y = (rating: number) =>
     PAD + ((5 - rating) / 4) * (H.value - PAD * 2 - 28);
 
@@ -42,13 +46,28 @@ const line = computed(() => {
     return d;
 });
 
+/** Same line, closed to the bottom: a faint area under the trend. */
+const area = computed(() => {
+    const pts = rolling.value
+        .map((v, i) => (v === null ? null : [x(i), y(v)]))
+        .filter((p): p is number[] => p !== null);
+
+    if (pts.length < 2) {
+        return '';
+    }
+
+    const base = y(1);
+
+    return `M${pts[0][0]},${base} ${pts.map(([a, b]) => `L${a.toFixed(1)},${b.toFixed(1)}`).join(' ')} L${pts[pts.length - 1][0]},${base} Z`;
+});
+
 const last = computed(() =>
     [...rolling.value].reverse().find((v) => v !== null),
 );
 </script>
 
 <template>
-    <div class="relative">
+    <div ref="box" class="relative">
         <svg
             :viewBox="`0 0 ${W} ${H}`"
             class="w-full"
@@ -91,18 +110,21 @@ const last = computed(() =>
                     }}
                 </title>
             </rect>
+            <path :d="area" class="fill-foreground/[0.04]" />
             <path
+                :key="line"
                 :d="line"
                 fill="none"
-                class="stroke-brass"
-                stroke-width="2"
+                class="rp-draw stroke-foreground"
+                pathLength="1"
+                stroke-width="1.75"
                 stroke-linejoin="round"
                 stroke-linecap="round"
             />
         </svg>
         <p
             v-if="last"
-            class="tabular absolute top-0 right-2 font-mono text-xs text-brass"
+            class="tabular absolute top-0 right-2 font-mono text-xs text-foreground"
         >
             {{ $t(':rating★ (30-day)', { rating: last.toFixed(2) }) }}
         </p>

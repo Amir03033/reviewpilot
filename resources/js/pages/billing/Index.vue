@@ -89,7 +89,7 @@ const modeLabel = (m: string) =>
 
         <div
             v-if="!configured"
-            class="rounded-xl border border-brass/30 bg-brass/5 p-4 text-sm text-muted-foreground"
+            class="rounded-xl border border-border bg-muted/50 p-4 text-sm text-muted-foreground"
         >
             {{ $t('Payments are not configured yet: add') }}
             <code>{{ $t('MOLLIE_KEY') }}</code> {{ $t('to') }}
@@ -156,7 +156,7 @@ const modeLabel = (m: string) =>
                 class="flex flex-col rounded-xl border bg-card p-5"
                 :class="
                     plan === p.key && !onTrial
-                        ? 'border-brass/60'
+                        ? 'border-foreground/30'
                         : 'border-border'
                 "
             >
@@ -195,10 +195,14 @@ const modeLabel = (m: string) =>
                     </li>
                 </ul>
                 <p class="mt-4 text-xs text-muted-foreground">
-                    For you: {{ p.quote.quantity }} ×
-                    {{ euro(p.quote.unit_cents) }} =
-                    {{ euro(p.quote.net_cents) }} +
-                    {{ Math.round(vatRate * 100) }}% VAT =
+                    {{
+                        $t('For you: :quantity × :unit = :net + :vat% VAT =', {
+                            quantity: p.quote.quantity,
+                            unit: euro(p.quote.unit_cents),
+                            net: euro(p.quote.net_cents),
+                            vat: Math.round(vatRate * 100),
+                        })
+                    }}
                     <span class="text-foreground">{{
                         euro(p.quote.gross_cents)
                     }}</span
@@ -215,8 +219,8 @@ const modeLabel = (m: string) =>
                 >
                     {{
                         plan === p.key && !onTrial
-                            ? 'Current plan'
-                            : 'Choose ' + p.name
+                            ? $t('Current plan')
+                            : $t('Choose :plan', { plan: p.name })
                     }}
                 </Button>
             </div>

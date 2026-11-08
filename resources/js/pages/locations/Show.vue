@@ -175,7 +175,7 @@ const remove = () => {
             {{ location.google.last_error }}
         </p>
 
-        <div class="grid gap-3 sm:grid-cols-3">
+        <div class="rp-stagger grid grid-cols-3 gap-2 sm:gap-3">
             <KpiCard
                 :label="$t('Average rating (30d)')"
                 :value="
@@ -305,7 +305,7 @@ const remove = () => {
                                     class="flex cursor-pointer gap-3 rounded-lg border p-3 text-sm"
                                     :class="[
                                         general.mode === m.value
-                                            ? 'border-brass/50 bg-brass/5'
+                                            ? 'border-foreground/25 bg-foreground/[0.03]'
                                             : 'border-border',
                                         !m.allowed &&
                                             'cursor-not-allowed opacity-50',
@@ -457,17 +457,18 @@ const remove = () => {
                     <div
                         v-for="(f, i) in facts.facts"
                         :key="i"
-                        class="flex gap-2"
+                        class="grid grid-cols-[1fr_auto] gap-2 rounded-lg border border-border p-2 sm:grid-cols-[10rem_1fr_auto] sm:border-0 sm:p-0"
                     >
                         <Input
                             v-model="f.key"
                             :placeholder="$t('opening_hours')"
-                            class="w-40"
+                            class="font-mono text-xs sm:text-sm"
                             :disabled="!canManage"
                         />
                         <Input
                             v-model="f.value"
                             :placeholder="$t('Mon–Sun 11:00–22:00')"
+                            class="col-span-2 row-start-2 sm:col-span-1 sm:row-start-1"
                             :disabled="!canManage"
                         />
                         <Button

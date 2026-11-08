@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Pencil, Trash2 } from '@lucide/vue';
 import { t } from '@/lib/i18n';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -100,51 +101,72 @@ const locationName = (id: string) =>
         <Panel :title="$t('Members')" :padded="false">
             <ul class="divide-y divide-border">
                 <li v-for="m in members" :key="m.id" class="px-5 py-4">
-                    <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-start gap-3">
+                        <span
+                            class="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium"
+                            >{{
+                                (m.name ?? m.email ?? '?')
+                                    .split(' ')
+                                    .map((w) => w[0])
+                                    .slice(0, 2)
+                                    .join('')
+                                    .toUpperCase()
+                            }}</span
+                        >
                         <div class="min-w-0 flex-1">
-                            <p class="text-sm font-medium">
-                                {{ m.name }}
+                            <div class="flex flex-wrap items-center gap-2">
+                                <p class="text-sm font-medium">
+                                    {{ m.name }}
+                                    <span
+                                        v-if="m.is_self"
+                                        class="text-xs font-normal text-muted-foreground"
+                                        >{{ $t('(you)') }}</span
+                                    >
+                                </p>
                                 <span
-                                    v-if="m.is_self"
-                                    class="text-xs text-muted-foreground"
-                                    >{{ $t('(you)') }}</span
+                                    class="rounded-full border border-border px-2 py-0.5 text-[11px] capitalize"
+                                    >{{ $t(m.role) }}</span
                                 >
-                            </p>
-                            <p class="text-xs text-muted-foreground">
+                            </div>
+                            <p class="truncate text-xs text-muted-foreground">
                                 {{ m.email }}
                                 <span v-if="!m.two_factor">{{
                                     $t('· no 2FA')
                                 }}</span>
                             </p>
+                            <p
+                                v-if="m.role === 'member'"
+                                class="mt-0.5 text-xs text-muted-foreground"
+                            >
+                                {{
+                                    m.locations
+                                        .map((l) => locationName(l.id))
+                                        .join(', ') || $t('No locations')
+                                }}
+                            </p>
                         </div>
-                        <span
-                            class="rounded-full border border-border px-2 py-0.5 text-xs capitalize"
-                            >{{ $t(m.role) }}</span
-                        >
-                        <span
-                            v-if="m.role === 'member'"
-                            class="text-xs text-muted-foreground"
-                            >{{
-                                m.locations
-                                    .map((l) => locationName(l.id))
-                                    .join(', ') || 'No locations'
-                            }}</span
-                        >
-                        <template v-if="canManage">
+                        <div v-if="canManage" class="flex shrink-0 gap-1">
                             <Button
                                 size="sm"
                                 variant="ghost"
+                                :aria-label="$t('Edit')"
                                 @click="startEdit(m)"
-                                >{{ $t('Edit') }}</Button
+                                ><Pencil /><span class="hidden sm:inline">{{
+                                    $t('Edit')
+                                }}</span></Button
                             >
                             <Button
                                 v-if="!m.is_self"
                                 size="sm"
                                 variant="ghost"
+                                class="text-critical hover:text-critical"
+                                :aria-label="$t('Remove')"
                                 @click="remove(m)"
-                                >{{ $t('Remove') }}</Button
+                                ><Trash2 /><span class="hidden sm:inline">{{
+                                    $t('Remove')
+                                }}</span></Button
                             >
-                        </template>
+                        </div>
                     </div>
                     <div
                         v-if="editing === m.id"

@@ -16,7 +16,12 @@ export function t(key: string, replacements: Replacements = {}): string {
     >;
     let text = translations[key] ?? key;
 
-    for (const [name, value] of Object.entries(replacements)) {
+    // Longest names first, so ":to" never eats the start of ":total" (like Laravel).
+    const entries = Object.entries(replacements).sort(
+        ([a], [b]) => b.length - a.length,
+    );
+
+    for (const [name, value] of entries) {
         text = text.replaceAll(`:${name}`, String(value ?? ''));
     }
 

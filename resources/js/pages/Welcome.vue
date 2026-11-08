@@ -117,7 +117,9 @@ const popular = computed(
     <Head :title="$t('AI review replies for local businesses')" />
 
     <!-- Hero -->
-    <section class="mx-auto max-w-6xl px-4 pt-16 pb-20 sm:px-6 sm:pt-24">
+    <section
+        class="rp-stagger mx-auto max-w-6xl px-4 pt-16 pb-20 sm:px-6 sm:pt-24"
+    >
         <p class="text-sm font-medium text-brass">
             {{ $t('For restaurants, salons, garages, shops and more') }}
         </p>
@@ -158,12 +160,8 @@ const popular = computed(
             <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">
                 {{ $t('How it works') }}
             </h2>
-            <ol class="mt-10 grid gap-6 md:grid-cols-3">
-                <li
-                    v-for="(s, i) in steps"
-                    :key="s[0]"
-                    class="rounded-xl border border-border bg-background p-6"
-                >
+            <ol class="rp-stagger mt-10 grid gap-6 md:grid-cols-3">
+                <li v-for="(s, i) in steps" :key="s[0]" class="rp-card p-6">
                     <span
                         class="flex size-8 items-center justify-center rounded-full bg-brass/15 font-mono text-sm text-brass"
                         >{{ i + 1 }}</span
@@ -205,11 +203,7 @@ const popular = computed(
             }}
         </p>
         <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div
-                v-for="s in sectors"
-                :key="s.key"
-                class="rounded-xl border border-border bg-card p-4"
-            >
+            <div v-for="s in sectors" :key="s.key" class="rp-card rp-lift p-4">
                 <p class="text-sm font-medium">{{ s.label }}</p>
                 <p class="mt-1 text-xs text-muted-foreground">
                     {{ s.examples }}
@@ -232,14 +226,14 @@ const popular = computed(
                     )
                 }}
             </p>
-            <div class="mt-10 grid gap-6 md:grid-cols-3">
+            <div class="rp-stagger mt-10 grid gap-6 md:grid-cols-3">
                 <div
                     v-for="p in plans"
                     :key="p.key"
-                    class="flex flex-col rounded-xl border bg-background p-6"
+                    class="rp-lift flex flex-col rounded-[calc(var(--radius)+4px)] border bg-card p-6 shadow-[var(--shadow-card)]"
                     :class="
                         p.key === popular
-                            ? 'border-brass/50 ring-1 ring-brass/30'
+                            ? 'border-foreground/30 ring-1 ring-foreground/10'
                             : 'border-border'
                     "
                 >

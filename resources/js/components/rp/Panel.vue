@@ -6,7 +6,7 @@ withDefaults(
 </script>
 
 <template>
-    <section class="rounded-xl border border-border bg-card">
+    <section class="rp-card overflow-hidden">
         <header
             v-if="title || $slots.actions"
             class="flex items-start justify-between gap-3 border-b border-border px-5 py-4"

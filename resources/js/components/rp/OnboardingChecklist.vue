@@ -20,7 +20,7 @@ const dismiss = () =>
 </script>
 
 <template>
-    <section class="rounded-xl border border-brass/30 bg-card">
+    <section class="rp-card overflow-hidden">
         <div
             class="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-4"
         >

@@ -17,7 +17,7 @@ const tone = {
 </script>
 
 <template>
-    <section class="rounded-xl border border-border bg-card p-5">
+    <section class="rp-card p-5">
         <div class="flex flex-wrap items-baseline justify-between gap-2">
             <p class="text-xs text-brass">
                 {{ $t('AI advice') }}

@@ -27,7 +27,7 @@ function choose(code: string) {
             class="rounded px-2 py-1 font-medium transition-colors"
             :class="
                 currentLocale() === l.code
-                    ? 'bg-brass/15 text-brass'
+                    ? 'bg-foreground/[0.07] text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
             "
             :aria-pressed="currentLocale() === l.code"

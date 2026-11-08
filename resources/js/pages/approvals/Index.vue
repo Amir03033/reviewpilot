@@ -54,6 +54,34 @@ function onKey(e: KeyboardEvent) {
     }
 }
 
+const next = () =>
+    (index.value = Math.min(index.value + 1, props.items.length - 1));
+const prev = () => (index.value = Math.max(index.value - 1, 0));
+
+// Swipe left/right between reviews on phones (ignored while typing).
+let touchX = 0;
+let touchY = 0;
+function onTouchStart(e: TouchEvent) {
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+}
+function onTouchEnd(e: TouchEvent) {
+    if ((e.target as HTMLElement).closest('textarea, input')) {
+        return;
+    }
+
+    const dx = e.changedTouches[0].clientX - touchX;
+    const dy = e.changedTouches[0].clientY - touchY;
+
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0) {
+            next();
+        } else {
+            prev();
+        }
+    }
+}
+
 onMounted(() => window.addEventListener('keydown', onKey));
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 </script>
@@ -95,14 +123,42 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
         />
 
         <div v-else class="grid gap-4 lg:grid-cols-[280px_1fr]">
-            <ol class="max-h-56 space-y-1 overflow-y-auto pr-1 lg:max-h-[70vh]">
+            <!-- Phones: one review at a time, with a pager and swipe. -->
+            <div class="flex items-center justify-between gap-3 lg:hidden">
+                <button
+                    type="button"
+                    class="inline-flex h-9 items-center rounded-md border border-input px-3 text-sm disabled:opacity-40"
+                    :disabled="index === 0"
+                    @click="prev"
+                >
+                    ← {{ $t('Previous') }}
+                </button>
+                <span class="tabular text-sm text-muted-foreground">{{
+                    $t(':current of :total', {
+                        current: index + 1,
+                        total: items.length,
+                    })
+                }}</span>
+                <button
+                    type="button"
+                    class="inline-flex h-9 items-center rounded-md border border-input px-3 text-sm disabled:opacity-40"
+                    :disabled="index >= items.length - 1"
+                    @click="next"
+                >
+                    {{ $t('Next') }} →
+                </button>
+            </div>
+
+            <ol
+                class="hidden max-h-[70vh] space-y-1 overflow-y-auto pr-1 lg:block"
+            >
                 <li v-for="(item, i) in items" :key="item.id">
                     <button
                         type="button"
                         class="w-full rounded-lg border px-3 py-2.5 text-left transition-colors"
                         :class="
                             i === index
-                                ? 'border-brass/50 bg-brass/5'
+                                ? 'border-foreground/25 bg-foreground/[0.03]'
                                 : 'border-transparent hover:bg-accent/50'
                         "
                         @click="index = i"
@@ -114,7 +170,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                             }}</span>
                         </div>
                         <p class="mt-1 truncate text-sm">
-                            {{ item.excerpt || 'Rating only' }}
+                            {{ item.excerpt || $t('Rating only') }}
                         </p>
                         <p class="truncate text-xs text-muted-foreground">
                             {{ item.location.name }}
@@ -125,7 +181,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 
             <section
                 v-if="current"
-                class="space-y-4 rounded-xl border border-border bg-card p-5"
+                :key="current.id"
+                class="rp-card rp-pop space-y-4 p-4 sm:p-5"
+                @touchstart.passive="onTouchStart"
+                @touchend="onTouchEnd"
             >
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>

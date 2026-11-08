@@ -69,7 +69,7 @@ defineOptions({
                 v-for="l in locations"
                 :key="l.id"
                 :href="`/locations/${l.id}`"
-                class="rounded-xl border border-border bg-card p-5 transition-colors hover:border-brass/40"
+                class="rounded-xl border border-border bg-card p-5 transition-colors hover:border-foreground/20"
             >
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">

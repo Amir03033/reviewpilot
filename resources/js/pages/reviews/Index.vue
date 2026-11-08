@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { reactive } from 'vue';
+import { SlidersHorizontal } from '@lucide/vue';
+import { computed, reactive, ref } from 'vue';
 import { Input } from '@/components/ui/input';
 import EmptyState from '@/components/rp/EmptyState.vue';
 import PageHeader from '@/components/rp/PageHeader.vue';
@@ -47,6 +48,19 @@ function apply() {
     );
 }
 
+const showFilters = ref(false);
+const activeFilters = computed(
+    () => [f.location, f.rating, f.topic].filter((v) => v !== '').length,
+);
+
+/** The AI summary is only useful when it adds something to the text itself. */
+const norm = (t: string | null) =>
+    (t ?? '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+const showSummary = (r: ReviewListItem) =>
+    !!r.summary &&
+    !!r.excerpt &&
+    !norm(r.excerpt).startsWith(norm(r.summary).slice(0, 40));
+
 function setStatus(status: string) {
     f.status = status;
     apply();
@@ -62,62 +76,85 @@ function setStatus(status: string) {
             :description="$t('Every Google review across your locations.')"
         />
 
-        <div class="flex flex-wrap items-center gap-1 border-b border-border">
-            <button
-                v-for="(label, key) in statusOptions"
-                :key="key"
-                type="button"
-                class="-mb-px border-b-2 px-3 py-2 text-sm transition-colors"
-                :class="
-                    f.status === key
-                        ? 'border-brass text-foreground'
-                        : 'border-transparent text-muted-foreground hover:text-foreground'
-                "
-                @click="setStatus(String(key))"
-            >
-                {{ $t(label) }}
-            </button>
+        <div
+            class="rp-scroll-x -mx-4 border-b border-border px-4 md:mx-0 md:px-0"
+        >
+            <div class="flex w-max items-center gap-1">
+                <button
+                    v-for="(label, key) in statusOptions"
+                    :key="key"
+                    type="button"
+                    class="-mb-px border-b-2 px-3 py-2.5 text-sm whitespace-nowrap transition-colors"
+                    :class="
+                        f.status === key
+                            ? 'border-foreground font-medium text-foreground'
+                            : 'border-transparent text-muted-foreground hover:text-foreground'
+                    "
+                    @click="setStatus(String(key))"
+                >
+                    {{ $t(label) }}
+                </button>
+            </div>
         </div>
 
-        <form
-            class="grid gap-2 sm:grid-cols-2 lg:grid-cols-5"
-            @submit.prevent="apply"
-        >
-            <Input
-                v-model="f.q"
-                :placeholder="$t('Search text or name…')"
-                class="lg:col-span-2"
-            />
-            <select
-                v-model="f.location"
-                class="h-9 rounded-md border border-input bg-transparent px-2 text-sm dark:bg-input/30"
-                @change="apply"
+        <form class="space-y-2" @submit.prevent="apply">
+            <div class="flex gap-2">
+                <Input
+                    v-model="f.q"
+                    type="search"
+                    :placeholder="$t('Search text or name…')"
+                    class="flex-1"
+                />
+                <button
+                    type="button"
+                    class="relative inline-flex h-9 items-center gap-1.5 rounded-md border border-input px-3 text-sm md:hidden"
+                    :aria-expanded="showFilters"
+                    @click="showFilters = !showFilters"
+                >
+                    <SlidersHorizontal class="size-4" />
+                    {{ $t('Filters') }}
+                    <span
+                        v-if="activeFilters"
+                        class="tabular rounded-full bg-foreground px-1.5 text-[10px] leading-4 text-background"
+                        >{{ activeFilters }}</span
+                    >
+                </button>
+            </div>
+            <div
+                class="grid gap-2 md:grid-cols-3"
+                :class="showFilters ? 'rp-pop grid' : 'hidden md:grid'"
             >
-                <option value="">{{ $t('All locations') }}</option>
-                <option v-for="l in locations" :key="l.id" :value="l.id">
-                    {{ l.name }}
-                </option>
-            </select>
-            <select
-                v-model="f.rating"
-                class="h-9 rounded-md border border-input bg-transparent px-2 text-sm dark:bg-input/30"
-                @change="apply"
-            >
-                <option value="">{{ $t('Any rating') }}</option>
-                <option v-for="r in [5, 4, 3, 2, 1]" :key="r" :value="r">
-                    {{ $t(':count stars', { count: r }) }}
-                </option>
-            </select>
-            <select
-                v-model="f.topic"
-                class="h-9 rounded-md border border-input bg-transparent px-2 text-sm dark:bg-input/30"
-                @change="apply"
-            >
-                <option value="">{{ $t('Any topic') }}</option>
-                <option v-for="t in topics" :key="t.key" :value="t.key">
-                    {{ t.label }}
-                </option>
-            </select>
+                <select
+                    v-model="f.location"
+                    class="h-9 rounded-md border border-input bg-card px-2 text-sm dark:bg-input/30"
+                    @change="apply"
+                >
+                    <option value="">{{ $t('All locations') }}</option>
+                    <option v-for="l in locations" :key="l.id" :value="l.id">
+                        {{ l.name }}
+                    </option>
+                </select>
+                <select
+                    v-model="f.rating"
+                    class="h-9 rounded-md border border-input bg-card px-2 text-sm dark:bg-input/30"
+                    @change="apply"
+                >
+                    <option value="">{{ $t('Any rating') }}</option>
+                    <option v-for="r in [5, 4, 3, 2, 1]" :key="r" :value="r">
+                        {{ $t(':count stars', { count: r }) }}
+                    </option>
+                </select>
+                <select
+                    v-model="f.topic"
+                    class="h-9 rounded-md border border-input bg-card px-2 text-sm dark:bg-input/30"
+                    @change="apply"
+                >
+                    <option value="">{{ $t('Any topic') }}</option>
+                    <option v-for="t in topics" :key="t.key" :value="t.key">
+                        {{ t.label }}
+                    </option>
+                </select>
+            </div>
         </form>
 
         <EmptyState
@@ -125,45 +162,58 @@ function setStatus(status: string) {
             :title="$t('Nothing here')"
             :description="
                 f.status === 'attention'
-                    ? 'No reviews are waiting for you. Nice work.'
-                    : 'No reviews match these filters.'
+                    ? $t('No reviews are waiting for you. Nice work.')
+                    : $t('No reviews match these filters.')
             "
         />
 
         <ul
             v-else
-            class="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card"
+            class="rp-card rp-stagger divide-y divide-border overflow-hidden"
         >
             <li v-for="r in reviews.data" :key="r.id">
                 <Link
                     :href="`/reviews/${r.id}`"
-                    class="flex flex-col gap-2 px-5 py-4 transition-colors hover:bg-accent/40 sm:flex-row sm:items-start sm:gap-5"
+                    class="group block px-4 py-4 transition-colors hover:bg-muted/50 sm:px-5"
                 >
-                    <div class="flex w-44 shrink-0 flex-col gap-1">
-                        <StarRating :rating="r.rating" />
-                        <span class="truncate text-sm font-medium">{{
-                            r.reviewer
-                        }}</span>
-                        <span class="truncate text-xs text-muted-foreground"
-                            >{{ r.location.name }} ·
-                            {{ timeAgo(r.created_at) }}</span
-                        >
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <p class="truncate text-sm font-medium">
+                                    {{ r.reviewer }}
+                                </p>
+                                <StarRating
+                                    class="shrink-0"
+                                    :rating="r.rating"
+                                />
+                            </div>
+                            <p
+                                class="mt-0.5 truncate text-xs text-muted-foreground"
+                            >
+                                {{ r.location.name }} ·
+                                {{ timeAgo(r.created_at) }}
+                            </p>
+                        </div>
+                        <StatePill
+                            class="shrink-0"
+                            :state="r.state"
+                            :label="r.state_label"
+                        />
                     </div>
-                    <div class="min-w-0 flex-1 space-y-1.5">
-                        <p class="line-clamp-2 text-sm">
-                            {{ r.excerpt || 'Rating only, no text.' }}
-                        </p>
-                        <p
-                            v-if="r.summary && r.excerpt"
-                            class="truncate text-xs text-muted-foreground"
-                        >
-                            {{ r.summary }}
-                        </p>
-                        <RiskFlags :flags="r.risk_flags" />
-                    </div>
-                    <div class="shrink-0">
-                        <StatePill :state="r.state" :label="r.state_label" />
-                    </div>
+                    <p class="mt-2 line-clamp-2 text-sm text-foreground/90">
+                        {{ r.excerpt || $t('Rating only, no text.') }}
+                    </p>
+                    <p
+                        v-if="showSummary(r)"
+                        class="mt-1 truncate text-xs text-muted-foreground"
+                    >
+                        {{ r.summary }}
+                    </p>
+                    <RiskFlags
+                        v-if="r.risk_flags?.length"
+                        class="mt-2"
+                        :flags="r.risk_flags"
+                    />
                 </Link>
             </li>
         </ul>
@@ -171,10 +221,13 @@ function setStatus(status: string) {
         <div
             class="flex items-center justify-between text-xs text-muted-foreground"
         >
-            <span v-if="reviews.total" class="tabular"
-                >{{ reviews.from }}–{{ reviews.to }} of
-                {{ reviews.total }}</span
-            >
+            <span v-if="reviews.total" class="tabular">{{
+                $t(':from–:to of :total', {
+                    from: reviews.from ?? 0,
+                    to: reviews.to ?? 0,
+                    total: reviews.total,
+                })
+            }}</span>
             <Pagination :links="reviews.links" />
         </div>
     </div>

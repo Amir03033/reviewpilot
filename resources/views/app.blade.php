@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"  @class(['dark' => ($appearance ?? 'dark') == 'dark'])>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"  @class(['dark' => ($appearance ?? 'system') == 'dark'])>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,11 +22,11 @@
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
-                background-color: #f7f6f3;
+                background-color: #fafaf9;
             }
 
             html.dark {
-                background-color: #0f1012;
+                background-color: #0c0c0d;
             }
         </style>
 
@@ -34,7 +34,8 @@
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
         <link rel="manifest" href="/manifest.webmanifest">
-        <meta name="theme-color" content="#0f1012">
+        <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)">
+        <meta name="theme-color" content="#0c0c0d" media="(prefers-color-scheme: dark)">
         <meta name="apple-mobile-web-app-capable" content="yes">
 
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])

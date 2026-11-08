@@ -110,8 +110,10 @@ function filterLocation(event: Event) {
             </template>
         </PageHeader>
 
+        <!-- New accounts: the checklist is the first thing to see. -->
         <OnboardingChecklist
             v-if="
+                !setup.has_locations &&
                 checklist &&
                 !checklist.dismissed &&
                 checklist.steps.some((s) => !s.done)
@@ -136,6 +138,73 @@ function filterLocation(event: Event) {
         </EmptyState>
 
         <template v-else>
+            <!-- Today strip -->
+            <div class="rp-stagger grid grid-cols-2 gap-3 md:grid-cols-4">
+                <Link
+                    href="/approvals"
+                    class="rp-lift col-span-2 rounded-[calc(var(--radius)+4px)] bg-foreground p-4 text-background shadow-sm md:col-span-1"
+                >
+                    <p class="text-xs opacity-70">
+                        {{ $t('Waiting for you') }}
+                    </p>
+                    <p class="tabular mt-1.5 font-mono text-3xl font-medium">
+                        {{ today.awaiting_approval }}
+                    </p>
+                    <p class="mt-1 text-xs opacity-70">
+                        <template v-if="today.oldest_waiting_at">{{
+                            $t('oldest :time', {
+                                time: timeAgo(today.oldest_waiting_at),
+                            })
+                        }}</template>
+                        <template v-else>{{ $t('All caught up') }}</template>
+                        <span class="float-right">→</span>
+                    </p>
+                </Link>
+                <div class="rp-card p-4">
+                    <p class="truncate text-xs text-muted-foreground">
+                        {{ $t('High risk, unanswered') }}
+                    </p>
+                    <p
+                        class="tabular mt-1.5 font-mono text-2xl font-medium sm:text-3xl"
+                        :class="today.high_risk_open ? 'text-critical' : ''"
+                    >
+                        {{ today.high_risk_open }}
+                    </p>
+                </div>
+                <Link
+                    href="/reviews?status=scheduled"
+                    class="rp-card rp-lift p-4"
+                >
+                    <p class="truncate text-xs text-muted-foreground">
+                        {{ $t('Scheduled auto-replies') }}
+                    </p>
+                    <p
+                        class="tabular mt-1.5 font-mono text-2xl font-medium sm:text-3xl"
+                    >
+                        {{ today.scheduled }}
+                    </p>
+                </Link>
+                <div class="rp-card col-span-2 p-4 md:col-span-1">
+                    <p class="truncate text-xs text-muted-foreground">
+                        {{ $t('Published last 24h') }}
+                    </p>
+                    <p
+                        class="tabular mt-1.5 font-mono text-2xl font-medium sm:text-3xl"
+                    >
+                        {{ today.published_24h }}
+                    </p>
+                </div>
+            </div>
+
+            <OnboardingChecklist
+                v-if="
+                    checklist &&
+                    !checklist.dismissed &&
+                    checklist.steps.some((s) => !s.done)
+                "
+                :steps="checklist.steps"
+            />
+
             <div
                 v-if="advice.length"
                 class="grid gap-3"
@@ -150,63 +219,8 @@ function filterLocation(event: Event) {
                 />
             </div>
 
-            <!-- Today strip -->
-            <div class="grid gap-3 md:grid-cols-4">
-                <Link
-                    href="/approvals"
-                    class="group rounded-xl border border-brass/30 bg-brass/5 p-4 transition-colors hover:bg-brass/10"
-                >
-                    <p class="text-xs text-brass">
-                        {{ $t('Waiting for you') }}
-                    </p>
-                    <p class="tabular mt-2 font-mono text-3xl font-medium">
-                        {{ today.awaiting_approval }}
-                    </p>
-                    <p class="mt-1 text-xs text-muted-foreground">
-                        <template v-if="today.oldest_waiting_at">{{
-                            $t('oldest :time', {
-                                time: timeAgo(today.oldest_waiting_at),
-                            })
-                        }}</template>
-                        <template v-else>{{ $t('All caught up') }}</template>
-                    </p>
-                </Link>
-                <div class="rounded-xl border border-border bg-card p-4">
-                    <p class="text-xs text-muted-foreground">
-                        {{ $t('High risk, unanswered') }}
-                    </p>
-                    <p
-                        class="tabular mt-2 font-mono text-3xl font-medium"
-                        :class="today.high_risk_open ? 'text-critical' : ''"
-                    >
-                        {{ today.high_risk_open }}
-                    </p>
-                </div>
-                <div class="rounded-xl border border-border bg-card p-4">
-                    <p class="text-xs text-muted-foreground">
-                        {{ $t('Scheduled auto-replies') }}
-                    </p>
-                    <p class="tabular mt-2 font-mono text-3xl font-medium">
-                        {{ today.scheduled }}
-                    </p>
-                    <Link
-                        href="/reviews?status=scheduled"
-                        class="mt-1 block text-xs text-muted-foreground hover:text-foreground"
-                        >{{ $t('Review before they go out →') }}</Link
-                    >
-                </div>
-                <div class="rounded-xl border border-border bg-card p-4">
-                    <p class="text-xs text-muted-foreground">
-                        {{ $t('Published last 24h') }}
-                    </p>
-                    <p class="tabular mt-2 font-mono text-3xl font-medium">
-                        {{ today.published_24h }}
-                    </p>
-                </div>
-            </div>
-
             <!-- KPIs -->
-            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="rp-stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <KpiCard
                     :label="$t('Average rating')"
                     :value="
@@ -269,7 +283,7 @@ function filterLocation(event: Event) {
                         <li v-for="t in topics" :key="t.key">
                             <Link
                                 :href="`/reviews?status=all&topic=${t.key}`"
-                                class="flex items-center justify-between text-sm hover:text-brass"
+                                class="flex items-center justify-between text-sm underline-offset-4 hover:underline"
                             >
                                 <span>{{ t.label }}</span>
                                 <span
@@ -345,7 +359,7 @@ function filterLocation(event: Event) {
                                 <td class="px-5 py-3">
                                     <Link
                                         :href="`/locations/${l.id}`"
-                                        class="font-medium hover:text-brass"
+                                        class="font-medium underline-offset-4 hover:underline"
                                         >{{ l.name }}</Link
                                     >
                                     <span

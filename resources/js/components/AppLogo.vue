@@ -1,6 +1,6 @@
 <template>
     <div
-        class="flex aspect-square size-8 items-center justify-center rounded-md bg-brass/15 text-brass ring-1 ring-brass/30"
+        class="flex aspect-square size-8 items-center justify-center rounded-lg bg-foreground text-background shadow-sm"
     >
         <svg
             viewBox="0 0 24 24"

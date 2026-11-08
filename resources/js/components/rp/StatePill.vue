@@ -3,30 +3,35 @@ import { computed } from 'vue';
 
 const props = defineProps<{ state: string; label: string }>();
 
-const tone = computed(() => {
+/** Neutral pill, colour only in the dot: calm lists, still scannable. */
+const dot = computed(() => {
     switch (props.state) {
         case 'pending_approval':
         case 'needs_human_writing':
         case 'stale':
-            return 'border-brass/40 bg-brass/10 text-brass';
+            return 'bg-brass';
         case 'publish_failed':
         case 'analysis_failed':
-            return 'border-critical/40 bg-critical/10 text-critical';
+            return 'bg-critical';
         case 'scheduled_auto':
         case 'publishing':
-            return 'border-info/40 bg-info/10 text-info';
+            return 'bg-info';
         case 'published':
-            return 'border-positive/40 bg-positive/10 text-positive';
+            return 'bg-positive';
         default:
-            return 'border-border bg-muted text-muted-foreground';
+            return 'bg-muted-foreground/50';
     }
 });
 </script>
 
 <template>
     <span
-        class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap"
-        :class="tone"
-        >{{ $t(label) }}</span
+        class="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2 py-0.5 text-[11px] font-medium whitespace-nowrap text-foreground/80"
     >
+        <span
+            class="size-1.5 rounded-full"
+            :class="[dot, state === 'publishing' ? 'animate-pulse' : '']"
+        />
+        {{ $t(label) }}
+    </span>
 </template>

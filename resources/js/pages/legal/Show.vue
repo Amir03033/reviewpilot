@@ -21,7 +21,7 @@ defineProps<{
                 class="rounded-full border px-3 py-1 transition-colors"
                 :class="
                     d.key === document
-                        ? 'border-brass/40 bg-brass/10 text-brass'
+                        ? 'border-foreground/15 bg-foreground/[0.06] text-foreground'
                         : 'border-border text-muted-foreground hover:text-foreground'
                 "
                 >{{ d.title }}</Link

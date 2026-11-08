@@ -98,101 +98,115 @@
 }
 
 /*
-  ReviewPilot "Night service" design tokens.
-  Warm graphite surfaces, one brass accent, desaturated semantic colours.
-  See docs/blueprint/08-ux-ui-sitemap.md §1.
+  ReviewPilot design tokens.
+  Neutral ink-on-paper surfaces, ONE restrained accent (brass) used only for small
+  highlights, and desaturated status colours. Primary buttons are ink, not colour.
 */
 :root {
-    --background: #f7f6f3;
-    --foreground: #1a1a1c;
+    --background: #fafaf9;
+    --foreground: #18181b;
     --card: #ffffff;
-    --card-foreground: #1a1a1c;
+    --card-foreground: #18181b;
     --popover: #ffffff;
-    --popover-foreground: #1a1a1c;
-    --primary: #1d2024;
-    --primary-foreground: #f4f2ee;
-    --secondary: #eceae5;
-    --secondary-foreground: #1d2024;
-    --muted: #efede8;
-    --muted-foreground: #6b6964;
-    --accent: #ebe8e1;
-    --accent-foreground: #1d2024;
-    --destructive: #c4483c;
+    --popover-foreground: #18181b;
+    --primary: #18181b;
+    --primary-foreground: #fafaf9;
+    --secondary: #f4f4f3;
+    --secondary-foreground: #18181b;
+    --muted: #f4f4f3;
+    --muted-foreground: #6b6b70;
+    --accent: #f1f1ef;
+    --accent-foreground: #18181b;
+    --destructive: #b4372b;
     --destructive-foreground: #ffffff;
-    --border: #e2dfd8;
-    --input: #dcd9d1;
-    --ring: #b07f22;
-    --brass: #a87718;
-    --positive: #2f8a5c;
-    --warning: #b4791f;
-    --critical: #c4483c;
-    --info: #3f74ad;
-    --surface-2: #efede8;
-    --chart-1: #a87718;
-    --chart-2: #8a8780;
-    --chart-3: #2f8a5c;
-    --chart-4: #c4483c;
-    --chart-5: #3f74ad;
+    --border: #e8e7e4;
+    --input: #dedcd8;
+    --ring: #a1a1aa;
+    --brass: #8f6a26;
+    --positive: #3b7a57;
+    --warning: #9a6a1c;
+    --critical: #b4372b;
+    --info: #3d6a99;
+    --surface-2: #f4f4f3;
+    --chart-1: #18181b;
+    --chart-2: #a1a1aa;
+    --chart-3: #3b7a57;
+    --chart-4: #b4372b;
+    --chart-5: #8f6a26;
     --radius: 0.625rem;
-    --sidebar-background: #f1efea;
-    --sidebar-foreground: #2a2a2c;
-    --sidebar-primary: #1d2024;
-    --sidebar-primary-foreground: #f4f2ee;
-    --sidebar-accent: #e6e3dc;
-    --sidebar-accent-foreground: #1d2024;
-    --sidebar-border: #e2dfd8;
-    --sidebar-ring: #b07f22;
-    --sidebar: #f1efea;
+    --shadow-card:
+        0 1px 2px rgb(24 24 27 / 0.04), 0 1px 1px rgb(24 24 27 / 0.02);
+    --shadow-lift:
+        0 6px 16px -6px rgb(24 24 27 / 0.12), 0 2px 4px rgb(24 24 27 / 0.04);
+    --sidebar-background: #f6f6f5;
+    --sidebar-foreground: #27272a;
+    --sidebar-primary: #18181b;
+    --sidebar-primary-foreground: #fafaf9;
+    --sidebar-accent: #ececea;
+    --sidebar-accent-foreground: #18181b;
+    --sidebar-border: #e8e7e4;
+    --sidebar-ring: #a1a1aa;
+    --sidebar: #f6f6f5;
 }
 
 .dark {
-    --background: #0f1012;
-    --foreground: #eceae6;
-    --card: #16181b;
-    --card-foreground: #eceae6;
-    --popover: #1a1c20;
-    --popover-foreground: #eceae6;
-    --primary: #d9a441;
-    --primary-foreground: #141210;
-    --secondary: #1d2024;
-    --secondary-foreground: #eceae6;
-    --muted: #1d2024;
-    --muted-foreground: #9a9893;
-    --accent: #23262b;
-    --accent-foreground: #eceae6;
-    --destructive: #e2675b;
-    --destructive-foreground: #141210;
-    --border: #2a2e33;
-    --input: #2f333a;
-    --ring: #d9a441;
-    --brass: #d9a441;
-    --positive: #5fb98a;
-    --warning: #e0a243;
-    --critical: #e2675b;
-    --info: #6fa3d8;
-    --surface-2: #1d2024;
-    --chart-1: #d9a441;
-    --chart-2: #6b6964;
-    --chart-3: #5fb98a;
-    --chart-4: #e2675b;
-    --chart-5: #6fa3d8;
-    --sidebar-background: #121316;
-    --sidebar-foreground: #d6d4cf;
-    --sidebar-primary: #d9a441;
-    --sidebar-primary-foreground: #141210;
-    --sidebar-accent: #1d2024;
-    --sidebar-accent-foreground: #eceae6;
-    --sidebar-border: #24272c;
-    --sidebar-ring: #d9a441;
-    --sidebar: #121316;
+    --background: #0c0c0d;
+    --foreground: #ededec;
+    --card: #141415;
+    --card-foreground: #ededec;
+    --popover: #18181a;
+    --popover-foreground: #ededec;
+    --primary: #ededec;
+    --primary-foreground: #111112;
+    --secondary: #1c1c1e;
+    --secondary-foreground: #ededec;
+    --muted: #1c1c1e;
+    --muted-foreground: #98989d;
+    --accent: #202023;
+    --accent-foreground: #ededec;
+    --destructive: #d9675c;
+    --destructive-foreground: #111112;
+    --border: #252528;
+    --input: #2c2c30;
+    --ring: #71717a;
+    --brass: #c9a35e;
+    --positive: #6aa884;
+    --warning: #c99a4f;
+    --critical: #d9675c;
+    --info: #7ea4cc;
+    --surface-2: #1c1c1e;
+    --chart-1: #ededec;
+    --chart-2: #5b5b60;
+    --chart-3: #6aa884;
+    --chart-4: #d9675c;
+    --chart-5: #c9a35e;
+    --shadow-card: 0 1px 0 rgb(255 255 255 / 0.02) inset;
+    --shadow-lift: 0 8px 24px -8px rgb(0 0 0 / 0.6);
+    --sidebar-background: #0f0f10;
+    --sidebar-foreground: #d4d4d6;
+    --sidebar-primary: #ededec;
+    --sidebar-primary-foreground: #111112;
+    --sidebar-accent: #1c1c1e;
+    --sidebar-accent-foreground: #ededec;
+    --sidebar-border: #202023;
+    --sidebar-ring: #71717a;
+    --sidebar: #0f0f10;
 }
 
 @layer base {
     * {
         @apply border-border outline-ring/50;
     }
+    html {
+        -webkit-tap-highlight-color: transparent;
+        text-rendering: optimizeLegibility;
+    }
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground antialiased;
+        font-feature-settings: 'ss01', 'cv11';
+    }
+    ::selection {
+        background: color-mix(in oklab, var(--brass) 25%, transparent);
     }
 }
 
@@ -200,4 +214,143 @@
     .tabular {
         font-variant-numeric: tabular-nums;
     }
+}
+
+/*
+  Motion: short, soft and purposeful. Everything is disabled for people who
+  prefer reduced motion.
+*/
+@keyframes rp-enter {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes rp-fade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes rp-pop {
+    0% {
+        transform: scale(0.96);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@layer components {
+    .rp-page {
+        animation: rp-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Children appear one after another (lists, card grids). */
+    .rp-stagger > * {
+        animation: rp-enter 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .rp-stagger > *:nth-child(2) {
+        animation-delay: 30ms;
+    }
+    .rp-stagger > *:nth-child(3) {
+        animation-delay: 60ms;
+    }
+    .rp-stagger > *:nth-child(4) {
+        animation-delay: 90ms;
+    }
+    .rp-stagger > *:nth-child(5) {
+        animation-delay: 120ms;
+    }
+    .rp-stagger > *:nth-child(6) {
+        animation-delay: 150ms;
+    }
+    .rp-stagger > *:nth-child(7) {
+        animation-delay: 180ms;
+    }
+    .rp-stagger > *:nth-child(8) {
+        animation-delay: 210ms;
+    }
+    .rp-stagger > *:nth-child(n + 9) {
+        animation-delay: 240ms;
+    }
+
+    .rp-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: calc(var(--radius) + 4px);
+        box-shadow: var(--shadow-card);
+    }
+
+    /* Clickable cards lift slightly on hover (pointer devices only). */
+    @media (hover: hover) {
+        .rp-lift {
+            transition:
+                transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 200ms ease,
+                border-color 200ms ease;
+        }
+        .rp-lift:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lift);
+            border-color: color-mix(
+                in oklab,
+                var(--foreground) 16%,
+                var(--border)
+            );
+        }
+    }
+
+    .rp-pop {
+        animation: rp-pop 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Horizontal scroll rows on small screens (tabs, filter chips). */
+    .rp-scroll-x {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        mask-image: linear-gradient(
+            to right,
+            black calc(100% - 24px),
+            transparent
+        );
+    }
+    .rp-scroll-x::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 1ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: 1ms !important;
+    }
+}
+
+@keyframes rp-draw {
+    from {
+        stroke-dashoffset: 1;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.rp-draw {
+    stroke-dasharray: 1;
+    animation: rp-draw 1.1s cubic-bezier(0.65, 0, 0.35, 1) both;
 }

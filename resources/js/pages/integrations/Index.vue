@@ -82,7 +82,7 @@ const disconnect = (id: string) => {
 
         <div
             v-if="!configured"
-            class="rounded-xl border border-brass/30 bg-brass/5 p-5 text-sm"
+            class="rounded-xl border border-border bg-muted/50 p-5 text-sm"
         >
             <p class="font-medium text-brass">
                 {{ $t('Google is not configured yet') }}
@@ -219,7 +219,7 @@ const disconnect = (id: string) => {
 
         <div
             v-if="selected.length"
-            class="sticky bottom-4 flex items-center justify-between rounded-xl border border-brass/40 bg-card p-4 shadow-lg"
+            class="sticky bottom-4 flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-lg"
         >
             <span class="text-sm">{{
                 $t(':count location(s) selected', { count: selected.length })

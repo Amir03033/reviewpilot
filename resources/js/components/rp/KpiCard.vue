@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, toRef } from 'vue';
+import { useCountUp } from '@/composables/useCountUp';
 
 const props = withDefaults(
     defineProps<{
@@ -12,6 +13,8 @@ const props = withDefaults(
     }>(),
     { higherIsBetter: true, current: null, previous: null, suffix: '' },
 );
+
+const shown = useCountUp(toRef(props, 'value'));
 
 const delta = computed(() => {
     if (
@@ -36,10 +39,12 @@ const good = computed(() =>
 </script>
 
 <template>
-    <div class="rounded-xl border border-border bg-card p-4">
-        <p class="text-xs text-muted-foreground">{{ $t(label) }}</p>
-        <p class="tabular mt-2 font-mono text-2xl font-medium tracking-tight">
-            {{ value }}
+    <div class="rp-card p-4">
+        <p class="truncate text-xs text-muted-foreground">{{ $t(label) }}</p>
+        <p
+            class="tabular mt-1.5 font-mono text-xl font-medium tracking-tight sm:mt-2 sm:text-2xl"
+        >
+            {{ shown }}
         </p>
         <p
             v-if="delta !== null && delta !== 0"
