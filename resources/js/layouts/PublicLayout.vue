@@ -66,7 +66,7 @@ const year = new Date().getFullYear();
                 <div class="space-y-2">
                     <AppLogo />
                     <p class="text-muted-foreground">
-                        {{ $t('AI review replies for hospitality.') }}
+                        {{ $t('AI review replies for local businesses.') }}
                     </p>
                 </div>
                 <div class="space-y-2">

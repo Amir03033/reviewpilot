@@ -13,6 +13,7 @@ use App\Models\ReviewReply;
 use App\Models\ReviewRevision;
 use App\Services\Billing\Entitlements;
 use App\Support\PlatformSettings;
+use App\Support\Sectors;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 
@@ -52,6 +53,9 @@ class AutomationEvaluator
         }
         if ($policy->isPaused()) {
             $reasons[] = 'Automation is paused for this location.';
+        }
+        if (! Sectors::get($organization->sector)['automation']) {
+            $reasons[] = 'In this sector every reply is checked by a person.';
         }
         if ($review->star_rating <= $cfg['hard_gate_max_rating']) {
             $reasons[] = "Rating of {$review->star_rating} stars always needs a person.";

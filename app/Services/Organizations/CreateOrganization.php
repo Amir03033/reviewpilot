@@ -9,6 +9,7 @@ use App\Models\OrganizationMembership;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Reviews\BrandVoiceService;
+use App\Support\Sectors;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -16,13 +17,14 @@ class CreateOrganization
 {
     public function __construct(private AuditLogger $audit, private BrandVoiceService $voices) {}
 
-    public function handle(User $owner, string $name, string $country = 'NL'): Organization
+    public function handle(User $owner, string $name, string $country = 'NL', string $sector = Sectors::DEFAULT): Organization
     {
-        return DB::transaction(function () use ($owner, $name, $country) {
+        return DB::transaction(function () use ($owner, $name, $country, $sector) {
             $organization = Organization::create([
                 'name' => $name,
                 'slug' => $this->uniqueSlug($name),
                 'country' => strtoupper($country),
+                'sector' => in_array($sector, Sectors::keys(), true) ? $sector : Sectors::DEFAULT,
                 'trial_ends_at' => now()->addDays(config('reviewpilot.trial_days')),
                 'billing_email' => $owner->email,
             ]);

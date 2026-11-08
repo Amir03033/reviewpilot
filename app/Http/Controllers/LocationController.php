@@ -22,6 +22,7 @@ use App\Services\Billing\Entitlements;
 use App\Services\Insights\DashboardStats;
 use App\Services\Insights\LocationAdvisor;
 use App\Services\Reviews\BrandVoiceService;
+use App\Support\Sectors;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -81,7 +82,8 @@ class LocationController extends Controller
             'stats' => (new DashboardStats($this->membership(), $location->id))->kpis(30),
             'allowedModes' => collect(AutomationMode::cases())->map(fn ($m) => [
                 'value' => $m->value,
-                'allowed' => $m === AutomationMode::Manual || $entitlements->allowsMode($this->organization(), $m->value),
+                'allowed' => $m === AutomationMode::Manual
+                    || ($entitlements->allowsMode($this->organization(), $m->value) && Sectors::get($this->organization()->sector)['automation']),
             ]),
             'canManage' => $this->membership()->canApproveFor($location->id),
             'insight' => $this->insightData(LocationInsight::query()->where('location_id', $location->id)->latest('period_end')->first()),

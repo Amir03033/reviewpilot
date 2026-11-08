@@ -2,7 +2,7 @@
 
 _Last updated: {{last_updated}}_
 
-{{company_legal_name}} ("ReviewPilot", "we") provides an online service that helps hospitality businesses manage and answer their Google reviews. This policy explains which personal data we process, why, and what your rights are.
+{{company_legal_name}} ("ReviewPilot", "we") provides an online service that helps local businesses manage and answer their Google reviews. This policy explains which personal data we process, why, and what your rights are.
 
 ## 1. Who we are
 

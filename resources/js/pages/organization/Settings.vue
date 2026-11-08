@@ -22,10 +22,12 @@ const props = defineProps<{
         billing_address: string | null;
         billing_postal_code: string | null;
         billing_city: string | null;
+        sector: string;
         data_retention_days: number | null;
     };
     canManage: boolean;
     isOwner: boolean;
+    sectors: { key: string; label: string; examples: string }[];
     exports: {
         id: string;
         status: string;
@@ -54,6 +56,7 @@ const form = useForm({
     billing_address: props.organization.billing_address ?? '',
     billing_postal_code: props.organization.billing_postal_code ?? '',
     billing_city: props.organization.billing_city ?? '',
+    sector: props.organization.sector,
     data_retention_days: props.organization.data_retention_days ?? undefined,
 });
 const confirmName = ref('');
@@ -143,6 +146,22 @@ const destroy = () =>
                             v-model="form.country"
                             maxlength="2"
                         /><InputError :message="form.errors.country" />
+                    </div>
+                    <div class="grid gap-2">
+                        <Label>{{ $t('Type of business') }}</Label>
+                        <select
+                            v-model="form.sector"
+                            class="h-9 rounded-md border border-input bg-transparent px-2 text-sm dark:bg-input/30"
+                        >
+                            <option
+                                v-for="s in sectors"
+                                :key="s.key"
+                                :value="s.key"
+                            >
+                                {{ s.label }}
+                            </option>
+                        </select>
+                        <InputError :message="form.errors.sector" />
                     </div>
                     <div class="grid gap-2">
                         <Label>{{ $t('VAT number') }}</Label

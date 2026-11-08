@@ -10,13 +10,13 @@ The processor processes personal data only to provide the ReviewPilot service, o
 
 ## 2. Data and data subjects
 
-|                        |                                                                                                                                     |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| **Data subjects**      | Reviewers on Google; the customer's users and team members                                                                          |
-| **Data**               | Reviewer display name as shown on Google, review text and rating, date, replies; names and email addresses of users                 |
-| **Special categories** | Not intended. Reviews may incidentally contain health information; it is not processed separately and is flagged for human handling |
-| **Operations**         | Fetching, storing, AI analysis, drafting, publishing, reporting                                                                     |
-| **Duration**           | Term of the agreement plus the deletion period in section 8                                                                         |
+|                        |                                                                                                                                                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Data subjects**      | Reviewers on Google; the customer's users and team members                                                                                                                                                                        |
+| **Data**               | Reviewer display name as shown on Google, review text and rating, date, replies; names and email addresses of users                                                                                                               |
+| **Special categories** | Not intended. Reviews may contain health information, especially for healthcare practices. It is not processed separately, sensitive reviews are flagged for human handling, and healthcare practices never get automatic replies |
+| **Operations**         | Fetching, storing, AI analysis, drafting, publishing, reporting                                                                                                                                                                   |
+| **Duration**           | Term of the agreement plus the deletion period in section 8                                                                                                                                                                       |
 
 ## 3. Processor obligations
 

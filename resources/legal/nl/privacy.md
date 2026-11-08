@@ -2,7 +2,7 @@
 
 _Laatst bijgewerkt: {{last_updated}}_
 
-{{company_legal_name}} ("ReviewPilot", "wij") biedt een online dienst waarmee horecabedrijven reviews op Google beheren en beantwoorden. In deze verklaring leggen we uit welke persoonsgegevens we verwerken, waarom, en welke rechten je hebt.
+{{company_legal_name}} ("ReviewPilot", "wij") biedt een online dienst waarmee lokale bedrijven reviews op Google beheren en beantwoorden. In deze verklaring leggen we uit welke persoonsgegevens we verwerken, waarom, en welke rechten je hebt.
 
 ## 1. Wie zijn wij
 
@@ -13,7 +13,7 @@ Vragen over privacy: [{{privacy_email}}](mailto:{{privacy_email}}).
 ## 2. Twee rollen
 
 - **Verwerkingsverantwoordelijke** voor de gegevens van onze eigen klanten en gebruikers (accountgegevens, facturatie, gebruik van de website).
-- **Verwerker** voor de reviews en reviewergegevens die wij namens onze klanten (de horecabedrijven) uit hun Google Bedrijfsprofiel ophalen. Voor die verwerking geldt onze [verwerkersovereenkomst](/legal/dpa).
+- **Verwerker** voor de reviews en reviewergegevens die wij namens onze klanten (de bedrijven) uit hun Google Bedrijfsprofiel ophalen. Voor die verwerking geldt onze [verwerkersovereenkomst](/legal/dpa).
 
 ## 3. Welke gegevens verwerken we
 

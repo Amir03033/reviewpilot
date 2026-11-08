@@ -6,9 +6,11 @@ use App\Models\AuditLog;
 use App\Models\DataExport;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
+use App\Support\Sectors;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,7 +23,8 @@ class OrganizationSettingsController extends Controller
         $org = $this->organization();
 
         return Inertia::render('organization/Settings', [
-            'organization' => $org->only(['id', 'name', 'country', 'vat_number', 'default_locale', 'timezone', 'automation_kill_switch', 'billing_email', 'data_retention_days', 'billing_name', 'billing_address', 'billing_postal_code', 'billing_city']),
+            'organization' => $org->only(['id', 'name', 'country', 'vat_number', 'default_locale', 'timezone', 'automation_kill_switch', 'billing_email', 'data_retention_days', 'billing_name', 'billing_address', 'billing_postal_code', 'billing_city', 'sector']),
+            'sectors' => Sectors::options(app()->getLocale()),
             'canManage' => $this->membership()->role->canManageOrganization(),
             'isOwner' => $this->membership()->role->value === 'owner',
             'exports' => $this->membership()->role->canManageOrganization()
@@ -50,6 +53,7 @@ class OrganizationSettingsController extends Controller
             'default_locale' => ['required', 'in:nl,en,de,fr'],
             'timezone' => ['required', 'timezone'],
             'billing_email' => ['nullable', 'email'],
+            'sector' => ['sometimes', Rule::in(Sectors::keys())],
             'billing_name' => ['nullable', 'string', 'max:160'],
             'billing_address' => ['nullable', 'string', 'max:200'],
             'billing_postal_code' => ['nullable', 'string', 'max:20'],

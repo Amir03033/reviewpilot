@@ -10,6 +10,7 @@ use App\Models\ReviewTopicMention;
 use App\Models\Topic;
 use App\Services\Ai\LlmClient;
 use App\Services\Ai\LlmRequest;
+use App\Support\Sectors;
 use Carbon\CarbonImmutable;
 
 /**
@@ -43,9 +44,9 @@ class LocationAdvisor
 
         $result = $this->llm->structured(new LlmRequest(
             purpose: 'insights',
-            system: $this->systemPrompt(),
+            system: $this->systemPrompt(Organization::query()->whereKey($location->organization_id)->value('sector')),
             user: json_encode([
-                'business' => ['name' => $location->name, 'type' => $location->primary_category ?? 'restaurant', 'city' => $location->city],
+                'business' => ['name' => $location->name, 'type' => $location->primary_category ?? Sectors::get(Organization::query()->whereKey($location->organization_id)->value('sector'))['business'], 'city' => $location->city],
                 'write_in_language' => $locale,
                 'period_days' => self::WINDOW_DAYS,
                 'data' => $stats,
@@ -131,14 +132,16 @@ class LocationAdvisor
         };
     }
 
-    private function systemPrompt(): string
+    private function systemPrompt(?string $sector): string
     {
-        return <<<'PROMPT'
-        You are an experienced hospitality consultant. You get aggregated review data for one
-        restaurant or café from the last 30 days. Turn it into practical advice for the owner.
+        $business = Sectors::get($sector)['business'];
+
+        return <<<PROMPT
+        You are an experienced consultant for small businesses. You get aggregated review data
+        for {$business} from the last 30 days. Turn it into practical advice for the owner.
 
         Rules:
-        - Use ONLY the numbers and quotes in the data. Never invent causes, staff, dishes or events.
+        - Use ONLY the numbers and quotes in the data. Never invent causes, staff, products or events.
         - Every recommendation must say how many reviews it is based on (based_on) and point to a topic in the data.
         - Mention a weekday or time-of-day pattern only when at least 3 complaints share it; posting time only approximates the visit.
         - Prefer concrete, doable actions (staffing, a process check, a menu or communication change) over generic advice.

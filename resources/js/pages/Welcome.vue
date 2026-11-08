@@ -6,6 +6,7 @@ import { euro } from '@/lib/format';
 
 const props = defineProps<{
     trialDays: number;
+    sectors: { key: string; label: string; examples: string }[];
     plans: {
         key: string;
         name: string;
@@ -43,7 +44,7 @@ const features = [
     ],
     [
         'Safety first',
-        'Food safety, hygiene, refunds, legal threats and low ratings are never published without a person.',
+        'Complaints about health, safety, hygiene, refunds or legal threats, and low ratings, are never published without a person.',
     ],
     [
         'All locations in one place',
@@ -64,6 +65,10 @@ const features = [
 ];
 
 const faqs = [
+    [
+        'Which businesses is ReviewPilot for?',
+        'For every business with a Google Business Profile: restaurants and cafés, hotels, salons, garages, shops, healthcare practices and other local service providers. You choose your type of business when you sign up, so topics and replies fit your sector.',
+    ],
     [
         'Will guests notice the replies are written with AI?',
         'Replies follow your tone, use the guest’s first name and vary their wording, so they read like a person from your team wrote them. You can edit every reply before it goes live.',
@@ -109,12 +114,12 @@ const popular = computed(
 </script>
 
 <template>
-    <Head :title="$t('AI review replies for restaurants and cafés')" />
+    <Head :title="$t('AI review replies for local businesses')" />
 
     <!-- Hero -->
     <section class="mx-auto max-w-6xl px-4 pt-16 pb-20 sm:px-6 sm:pt-24">
         <p class="text-sm font-medium text-brass">
-            {{ $t('For restaurants, cafés and hotels') }}
+            {{ $t('For restaurants, salons, garages, shops and more') }}
         </p>
         <h1
             class="mt-4 max-w-3xl text-4xl leading-[1.05] font-semibold tracking-[-0.03em] sm:text-6xl"
@@ -175,13 +180,39 @@ const popular = computed(
     <!-- Features -->
     <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
         <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {{ $t('Built for hospitality') }}
+            {{ $t('Built for local businesses') }}
         </h2>
         <div class="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             <div v-for="f in features" :key="f[0]">
                 <p class="font-medium">{{ $t(f[0]) }}</p>
                 <p class="mt-2 text-sm text-muted-foreground">
                     {{ $t(f[1]) }}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sectors -->
+    <section class="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+        <h2 class="text-xl font-semibold tracking-tight">
+            {{ $t('Made for your type of business') }}
+        </h2>
+        <p class="mt-2 max-w-2xl text-sm text-muted-foreground">
+            {{
+                $t(
+                    'ReviewPilot knows what matters in your sector: it tracks the right topics and writes replies that fit.',
+                )
+            }}
+        </p>
+        <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+                v-for="s in sectors"
+                :key="s.key"
+                class="rounded-xl border border-border bg-card p-4"
+            >
+                <p class="text-sm font-medium">{{ s.label }}</p>
+                <p class="mt-1 text-xs text-muted-foreground">
+                    {{ s.examples }}
                 </p>
             </div>
         </div>

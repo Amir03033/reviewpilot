@@ -298,7 +298,7 @@ const polarityClass = (p: number) =>
                         class="text-xs"
                     >
                         <span class="text-muted-foreground">{{
-                            $t('Dishes:')
+                            $t('Mentioned:')
                         }}</span>
                         {{ analysis.entities.dishes.join(', ') }}
                     </div>

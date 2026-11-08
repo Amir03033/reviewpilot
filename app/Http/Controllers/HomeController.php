@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Sectors;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -11,6 +12,7 @@ class HomeController extends Controller
     {
         return Inertia::render('Welcome', [
             'trialDays' => (int) config('reviewpilot.trial_days'),
+            'sectors' => Sectors::options(app()->getLocale()),
             'plans' => collect(config('reviewpilot.plans'))->map(fn (array $p, string $key) => [
                 'key' => $key,
                 'name' => $p['name'],

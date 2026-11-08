@@ -6,7 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const form = useForm({ name: '', country: 'NL', accept_terms: false });
+defineProps<{
+    hasOrganization: boolean;
+    sectors: { key: string; label: string; examples: string }[];
+}>();
+
+const form = useForm({
+    name: '',
+    country: 'NL',
+    sector: 'hospitality',
+    accept_terms: false,
+});
 </script>
 
 <template>
@@ -22,7 +32,7 @@ const form = useForm({ name: '', country: 'NL', accept_terms: false });
                 <p class="mt-2 text-sm text-muted-foreground">
                     {{
                         $t(
-                            'Your restaurant, café or group. You can add locations and invite your team next.',
+                            'Your business or group of businesses. You can add locations and invite your team next.',
                         )
                     }}
                 </p>
@@ -33,11 +43,39 @@ const form = useForm({ name: '', country: 'NL', accept_terms: false });
                     <Input
                         id="name"
                         v-model="form.name"
-                        :placeholder="$t('e.g. Burgerbar Groep')"
+                        :placeholder="$t('e.g. Burgerbar Groep or Salon Lisa')"
                         required
                         autofocus
                     />
                     <InputError :message="form.errors.name" />
+                </div>
+                <div class="grid gap-2">
+                    <Label for="sector">{{ $t('Type of business') }}</Label>
+                    <select
+                        id="sector"
+                        v-model="form.sector"
+                        class="h-9 rounded-md border border-input bg-transparent px-3 text-sm dark:bg-input/30"
+                    >
+                        <option
+                            v-for="s in sectors"
+                            :key="s.key"
+                            :value="s.key"
+                        >
+                            {{ s.label }}
+                        </option>
+                    </select>
+                    <p class="text-xs text-muted-foreground">
+                        {{
+                            sectors.find((s) => s.key === form.sector)
+                                ?.examples
+                        }}.
+                        {{
+                            $t(
+                                'This decides which topics we track and how replies are written.',
+                            )
+                        }}
+                    </p>
+                    <InputError :message="form.errors.sector" />
                 </div>
                 <div class="grid gap-2">
                     <Label for="country">{{ $t('Country') }}</Label>

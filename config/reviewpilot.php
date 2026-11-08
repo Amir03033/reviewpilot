@@ -118,6 +118,8 @@ return [
             'legal_threat',
             'health_authority',
             'staff_misconduct',
+            'medical',
+            'safety_hazard',
         ],
         // Ratings at or below this always require a human.
         'hard_gate_max_rating' => 2,

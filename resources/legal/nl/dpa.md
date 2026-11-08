@@ -10,13 +10,13 @@ De verwerker verwerkt persoonsgegevens uitsluitend om de dienst ReviewPilot te l
 
 ## 2. Gegevens en betrokkenen
 
-|                         |                                                                                                                                                      |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Betrokkenen**         | Reviewers op Google; gebruikers en teamleden van de klant                                                                                            |
-| **Gegevens**            | Weergavenaam van de reviewer zoals op Google, reviewtekst en -score, datum, antwoorden; namen en e-mailadressen van gebruikers                       |
-| **Bijzondere gegevens** | Niet beoogd. Reviews kunnen toevallig gezondheidsinformatie bevatten; deze wordt niet apart verwerkt en wordt gemarkeerd voor handmatige behandeling |
-| **Verwerkingen**        | Ophalen, opslaan, analyseren met AI, antwoorden opstellen, publiceren, rapporteren                                                                   |
-| **Duur**                | Looptijd van de overeenkomst plus de verwijdertermijn in artikel 8                                                                                   |
+|                         |                                                                                                                                                                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Betrokkenen**         | Reviewers op Google; gebruikers en teamleden van de klant                                                                                                                                                                                        |
+| **Gegevens**            | Weergavenaam van de reviewer zoals op Google, reviewtekst en -score, datum, antwoorden; namen en e-mailadressen van gebruikers                                                                                                                   |
+| **Bijzondere gegevens** | Niet beoogd. Reviews kunnen gezondheidsinformatie bevatten, vooral bij zorgpraktijken. Deze wordt niet apart verwerkt, gevoelige reviews worden gemarkeerd voor handmatige behandeling, en bij zorgpraktijken wordt nooit automatisch gereageerd |
+| **Verwerkingen**        | Ophalen, opslaan, analyseren met AI, antwoorden opstellen, publiceren, rapporteren                                                                                                                                                               |
+| **Duur**                | Looptijd van de overeenkomst plus de verwijdertermijn in artikel 8                                                                                                                                                                               |
 
 ## 3. Verplichtingen van de verwerker
 

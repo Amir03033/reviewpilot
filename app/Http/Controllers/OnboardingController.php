@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Organization;
 use App\Services\Organizations\CreateOrganization;
+use App\Support\Sectors;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,6 +17,7 @@ class OnboardingController extends Controller
     {
         return Inertia::render('onboarding/CreateOrganization', [
             'hasOrganization' => $request->user()->memberships()->exists(),
+            'sectors' => Sectors::options(app()->getLocale()),
         ]);
     }
 
@@ -23,10 +26,11 @@ class OnboardingController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'country' => ['required', 'string', 'size:2'],
+            'sector' => ['nullable', Rule::in(Sectors::keys())],
             'accept_terms' => ['accepted'],
         ]);
 
-        $organization = $create->handle($request->user(), $data['name'], $data['country']);
+        $organization = $create->handle($request->user(), $data['name'], $data['country'], $data['sector'] ?? Sectors::DEFAULT);
         $organization->acceptTerms($request->user());
 
         $this->toast('Organisation created. Connect Google to import your locations.');
